@@ -19,24 +19,24 @@ const MatchItem: React.FC<{
     userTeamName?: string;
     onViewResult: (result: MatchResult) => void;
 }> = ({ match, resolved, result, isUserMatch, isNextMatch, userTeamName, onViewResult }) => (
-    <div className={`p-3 rounded-lg shadow-md transition-all ${result ? 'bg-white dark:bg-gray-800/50' : 'bg-gray-200 dark:bg-gray-700/40'} ${isNextMatch ? 'ring-2 ring-teal-500' : ''}`}>
-        <div className="flex justify-between items-center text-xs mb-1 text-gray-500 dark:text-gray-400">
-            <span className="font-medium">Match {match.matchNumber}</span>
+    <div className={`p-4 border-2 transition-all ${result ? 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-100 dark:border-white/5'} ${isNextMatch ? 'border-green-600 ring-2 ring-green-600/20' : ''} rounded-xl`}>
+        <div className="flex justify-between items-center text-[10px] font-mono font-bold mb-2 text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+            <span>MATCH {match.matchNumber}</span>
             <span>{match.date}</span>
         </div>
-        <div className="text-center font-semibold text-lg py-1">
-            <span className={isUserMatch && resolved.teamA === userTeamName ? 'text-teal-500 dark:text-teal-400' : ''}>{resolved.teamA}</span>
-            <span className="mx-3 text-gray-400 text-sm font-normal">vs</span>
-            <span className={isUserMatch && resolved.teamB === userTeamName ? 'text-teal-500 dark:text-teal-400' : ''}>{resolved.teamB}</span>
+        <div className="flex items-center justify-between py-2">
+            <div className={`flex-1 text-center font-black text-lg uppercase tracking-tighter ${isUserMatch && resolved.teamA === userTeamName ? 'text-green-600' : ''}`}>{resolved.teamA}</div>
+            <div className="px-4 text-[10px] font-mono font-black opacity-20 italic">VS</div>
+            <div className={`flex-1 text-center font-black text-lg uppercase tracking-tighter ${isUserMatch && resolved.teamB === userTeamName ? 'text-green-600' : ''}`}>{resolved.teamB}</div>
         </div>
         {result && (
-            <div className="text-center text-sm mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                <p className="font-medium text-blue-600 dark:text-blue-400 mb-2">{result.summary}</p>
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
+                <p className="text-xs font-bold text-center text-green-600 mb-3 italic">{result.summary}</p>
                 <button 
                     onClick={() => onViewResult(result)}
-                    className="bg-teal-500/10 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 px-4 py-1.5 text-xs font-bold rounded-full hover:bg-teal-500 hover:text-white transition-all uppercase tracking-wider"
+                    className="w-full bg-green-600 text-white py-2 text-[10px] font-black uppercase tracking-widest hover:bg-green-700 transition-all rounded-lg shadow-lg shadow-green-600/20"
                 >
-                    View Scorecard
+                    View Full Scorecard
                 </button>
             </div>
         )}
@@ -57,8 +57,8 @@ const Schedule: React.FC<ScheduleProps> = ({ gameData, userTeam, viewMatchResult
     const schedule = gameData.schedule[selectedFormat] || [];
 
     return (
-        <div className="p-4 flex flex-col h-full">
-            <h2 className="text-2xl font-bold text-center mb-6 tracking-tight">Schedule</h2>
+        <div className="p-4 flex flex-col h-full bg-white dark:bg-[#0A0F0F] text-gray-900 dark:text-[#E4E3E0]">
+            <h2 className="text-3xl font-black text-center mb-6 tracking-tighter uppercase italic text-green-600">Fixtures</h2>
             
             <CategoryTabs category={category} setCategory={setCategory} />
             <FormatDropdown category={category} selectedFormat={selectedFormat} setSelectedFormat={setSelectedFormat} />

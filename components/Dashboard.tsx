@@ -179,11 +179,12 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
                     { screen: 'LINEUPS', icon: <Icons.Lineups />, label: 'Lineups' },
                     { screen: 'TRANSFERS', icon: <Icons.Transfers />, label: 'Transfers' },
                     { screen: 'PLAYER_DATABASE', icon: <Icons.Database />, label: 'Database' },
+                    { screen: 'SCHEDULE', icon: <Icons.Schedule />, label: 'Fixtures' },
                     { screen: 'RATING_BOARD', icon: <Icons.Podium />, label: 'Rating Board', highlight: true },
                 ].map((item) => (
                     <button 

@@ -320,29 +320,29 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     };
 
     return (
-        <div className="h-full flex flex-col bg-[#0A0F0F] text-[#E4E3E0] font-sans overflow-hidden relative">
+        <div className="h-full flex flex-col bg-white dark:bg-[#0A0F0F] text-gray-900 dark:text-[#E4E3E0] font-sans overflow-hidden relative">
             {activeOverlay === 'franchises' && (
-                <div className="absolute inset-0 z-50 bg-[#0A0F0F] flex flex-col p-6 animate-in slide-in-from-bottom duration-300">
-                    <div className="flex justify-between items-center mb-6 border-b-2 border-[#E4E3E0] pb-4">
-                        <h2 className="text-3xl font-black italic tracking-tighter uppercase">FRANCHISE ROSTERS</h2>
-                        <button onClick={() => setActiveOverlay('none')} className="bg-[#E4E3E0] text-[#0A0F0F] p-2 rounded-full hover:invert transition-all"><Icons.X /></button>
+                <div className="absolute inset-0 z-50 bg-white dark:bg-[#0A0F0F] flex flex-col p-6 animate-in slide-in-from-bottom duration-300">
+                    <div className="flex justify-between items-center mb-6 border-b-2 border-green-600 pb-4">
+                        <h2 className="text-3xl font-black italic tracking-tighter uppercase text-green-600">FRANCHISE ROSTERS</h2>
+                        <button onClick={() => setActiveOverlay('none')} className="bg-green-600 text-white p-2 rounded-full hover:bg-green-500 transition-all shadow-lg shadow-green-500/20"><Icons.X /></button>
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-6">
                         {teams.map(team => {
                             const td = gameData.allTeamsData.find(d => d.id === team.id);
                             const isDev = td?.isYouthTeam;
                             return (
-                                <div key={team.id} className={`p-6 border-2 ${team.id === gameData.userTeamId ? 'bg-[#E4E3E0]/5 border-teal-500 shadow-[0_0_20px_rgba(20,184,166,0.1)]' : 'bg-transparent border-[#E4E3E0]/10'}`}>
-                                    <div className="flex justify-between mb-4 border-b border-[#E4E3E0]/10 pb-2 items-end">
+                                <div key={team.id} className={`p-6 border-2 rounded-2xl ${team.id === gameData.userTeamId ? 'bg-green-50 dark:bg-green-900/10 border-green-600 shadow-[0_0_20px_rgba(22,163,74,0.1)]' : 'bg-transparent border-gray-200 dark:border-[#E4E3E0]/10'}`}>
+                                    <div className="flex justify-between mb-4 border-b border-gray-200 dark:border-[#E4E3E0]/10 pb-2 items-end">
                                         <div>
-                                            <h4 className="font-black uppercase tracking-tighter text-xl leading-none">{team.name} {isDev ? '(DEV)' : ''}</h4>
+                                            <h4 className="font-black uppercase tracking-tighter text-xl leading-none text-green-600">{team.name} {isDev ? '(DEV)' : ''}</h4>
                                             <p className="text-[10px] font-mono font-bold opacity-50 mt-1 uppercase tracking-widest">{team.squad.length} / {isDev ? 14 : 22} SIGNED</p>
                                         </div>
-                                        <span className="text-lg font-black font-mono text-teal-400">{team.purse.toFixed(2)} Cr</span>
+                                        <span className="text-lg font-black font-mono text-green-600">{team.purse.toFixed(2)} Cr</span>
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
                                         {team.squad.map(p => (
-                                            <div key={p.id} className="flex justify-between text-[11px] font-bold border-b border-[#E4E3E0]/5 pb-1">
+                                            <div key={p.id} className="flex justify-between text-[11px] font-bold border-b border-gray-100 dark:border-[#E4E3E0]/5 pb-1">
                                                 <span className="truncate uppercase tracking-tight">{p.name}</span>
                                                 <span className={`${getRoleColor(p.role)} opacity-80`}>{p.role}</span>
                                             </div>
@@ -356,18 +356,18 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 </div>
             )}
 
-            <div className="bg-[#0A0F0F] p-6 pt-12 border-b-2 border-[#E4E3E0] flex flex-col gap-2 z-10">
+            <div className="bg-white dark:bg-[#0A0F0F] p-6 pt-12 border-b-2 border-green-600 flex flex-col gap-2 z-10 shadow-sm">
                 <div className="flex justify-between items-end">
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2 mb-1">
-                            <div className="bg-teal-500 text-[#0A0F0F] px-2 py-0.5 font-black text-[10px] uppercase tracking-widest">LIVE AUCTION</div>
+                            <div className="bg-green-600 text-white px-2 py-0.5 font-black text-[10px] uppercase tracking-widest rounded">LIVE AUCTION</div>
                             <span className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest">SESSION 01 // LOT {currentPlayerIdx + 1}</span>
                         </div>
-                        <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none">MARKET BOARD</h1>
+                        <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none text-green-600">MARKET BOARD</h1>
                     </div>
                     <div className="text-right">
                         <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest leading-none mb-1">YOUR PURSE</p>
-                        <span className="text-3xl font-black font-mono text-teal-400">{userTeam?.purse?.toFixed(2) || '0.00'} <span className="text-sm">Cr</span></span>
+                        <span className="text-3xl font-black font-mono text-green-600">{userTeam?.purse?.toFixed(2) || '0.00'} <span className="text-sm">Cr</span></span>
                     </div>
                 </div>
             </div>
@@ -378,32 +378,37 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                         {currentPlayer ? (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
                                 {/* Player Details Card */}
-                                <div className="lg:col-span-2 border-2 border-[#E4E3E0] p-8 flex flex-col relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 bg-[#E4E3E0] text-[#0A0F0F] px-4 py-1 text-[10px] font-mono font-bold uppercase tracking-widest">
+                                <div className="lg:col-span-2 border-2 border-gray-200 dark:border-[#E4E3E0]/20 p-8 flex flex-col relative overflow-hidden bg-gray-50 dark:bg-gray-900/50 rounded-3xl">
+                                    <div className="absolute top-0 right-0 bg-green-600 text-white px-4 py-1 text-[10px] font-mono font-bold uppercase tracking-widest rounded-bl-xl">
                                         {getRoleFullName(currentPlayer.role)} {currentPlayer.isForeign ? '// INT' : '// DOM'}
                                     </div>
 
-                                    <div className="mt-4">
-                                        <h2 className="text-6xl font-black italic uppercase tracking-tighter leading-[0.85] mb-6">
-                                            {currentPlayer.name}
-                                        </h2>
-                                        
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Batting</p>
-                                                <p className="text-3xl font-black font-mono text-blue-400">{currentPlayer.battingSkill}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Bowling</p>
-                                                <p className="text-3xl font-black font-mono text-red-400">{currentPlayer.secondarySkill}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Style</p>
-                                                <p className="text-xl font-black uppercase tracking-tight">{currentPlayer.style}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Base Price</p>
-                                                <p className="text-xl font-black font-mono">{getBasePrice(currentPlayer).toFixed(2)} Cr</p>
+                                    <div className="mt-4 flex flex-col md:flex-row gap-8 items-center md:items-start">
+                                        <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-green-600 shadow-2xl shrink-0">
+                                            <img src={currentPlayer.photo} alt={currentPlayer.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                        </div>
+                                        <div className="flex-grow text-center md:text-left">
+                                            <h2 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.85] mb-6 text-green-600">
+                                                {currentPlayer.name}
+                                            </h2>
+                                            
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+                                                <div className="border-l-2 border-green-600/20 pl-4">
+                                                    <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Batting</p>
+                                                    <p className="text-3xl font-black font-mono text-blue-500">{currentPlayer.battingSkill}</p>
+                                                </div>
+                                                <div className="border-l-2 border-green-600/20 pl-4">
+                                                    <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Bowling</p>
+                                                    <p className="text-3xl font-black font-mono text-red-500">{currentPlayer.secondarySkill}</p>
+                                                </div>
+                                                <div className="border-l-2 border-green-600/20 pl-4">
+                                                    <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Style</p>
+                                                    <p className="text-xl font-black uppercase tracking-tight">{currentPlayer.style}</p>
+                                                </div>
+                                                <div className="border-l-2 border-green-600/20 pl-4">
+                                                    <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Base Price</p>
+                                                    <p className="text-xl font-black font-mono">{getBasePrice(currentPlayer).toFixed(2)} Cr</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -412,10 +417,10 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                         <button 
                                             onClick={() => handleUserBid(1)}
                                             disabled={!isAuctioning || (highestBidderId === userTeam?.id) || (userTeam?.purse || 0) < (currentBid + getBidIncrement(currentBid))}
-                                            className={`py-6 px-8 font-black text-3xl italic uppercase tracking-tighter transition-all transform active:scale-95 flex items-center justify-center gap-4 ${
+                                            className={`py-6 px-8 font-black text-3xl italic uppercase tracking-tighter transition-all transform active:scale-95 flex items-center justify-center gap-4 rounded-2xl shadow-lg ${
                                                 highestBidderId === userTeam?.id 
-                                                ? 'bg-teal-500 text-[#0A0F0F]' 
-                                                : 'border-2 border-[#E4E3E0] text-[#E4E3E0] hover:bg-[#E4E3E0] hover:text-[#0A0F0F]'
+                                                ? 'bg-green-600 text-white shadow-green-500/40' 
+                                                : 'border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white'
                                             } disabled:opacity-20`}
                                         >
                                             {highestBidderId === userTeam?.id ? 'LEADING' : 'PLACE BID'}
@@ -423,16 +428,16 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                         </button>
                                         
                                         <div className="grid grid-cols-2 gap-4">
-                                            <button onClick={skipPlayer} className="border border-[#E4E3E0]/20 hover:bg-[#E4E3E0]/5 py-4 text-[10px] font-black uppercase tracking-widest transition-colors">PASS LOT</button>
-                                            <button onClick={autoAuctionRemaining} className="border border-red-500/30 text-red-400 hover:bg-red-500/5 py-4 text-[10px] font-black uppercase tracking-widest transition-colors">AUTO DRAFT</button>
+                                            <button onClick={skipPlayer} className="border border-gray-300 dark:border-[#E4E3E0]/20 hover:bg-gray-100 dark:hover:bg-[#E4E3E0]/5 py-4 text-[10px] font-black uppercase tracking-widest transition-colors rounded-xl">PASS LOT</button>
+                                            <button onClick={autoAuctionRemaining} className="border border-red-500/30 text-red-500 hover:bg-red-500/5 py-4 text-[10px] font-black uppercase tracking-widest transition-colors rounded-xl">AUTO DRAFT</button>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Bidding & Log Card */}
                                 <div className="flex flex-col gap-6">
-                                    <div className="border-2 border-[#E4E3E0] p-6 bg-[#E4E3E0] text-[#0A0F0F] flex flex-col items-center justify-center text-center">
-                                        <span className="text-[10px] font-mono font-bold uppercase tracking-widest mb-2 opacity-60">CURRENT HIGHEST BID</span>
+                                    <div className="border-2 border-green-600 p-6 bg-green-600 text-white flex flex-col items-center justify-center text-center rounded-3xl shadow-xl shadow-green-500/20">
+                                        <span className="text-[10px] font-mono font-bold uppercase tracking-widest mb-2 opacity-80">CURRENT HIGHEST BID</span>
                                         <div className="text-7xl font-black font-mono tracking-tighter leading-none">
                                             {currentBid.toFixed(2)}
                                         </div>
@@ -441,11 +446,11 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                         </p>
                                     </div>
 
-                                    <div className="flex-1 border border-[#E4E3E0]/20 p-4 flex flex-col overflow-hidden">
-                                        <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-4 border-b border-[#E4E3E0]/10 pb-2">BIDDING LOG</p>
+                                    <div className="flex-1 border border-gray-200 dark:border-[#E4E3E0]/20 p-4 flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900/30 rounded-3xl">
+                                        <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-4 border-b border-gray-200 dark:border-[#E4E3E0]/10 pb-2">BIDDING LOG</p>
                                         <div className="flex-1 overflow-y-auto space-y-2 font-mono text-[11px]">
                                             {currentLotBids.map((bid, idx) => (
-                                                <div key={idx} className={`flex justify-between items-center pb-1 border-b border-[#E4E3E0]/5 ${idx === 0 ? 'text-teal-400 font-bold' : 'opacity-40'}`}>
+                                                <div key={idx} className={`flex justify-between items-center pb-1 border-b border-gray-100 dark:border-[#E4E3E0]/5 ${idx === 0 ? 'text-green-600 font-bold' : 'opacity-40'}`}>
                                                     <span className="uppercase">{bid.teamName}</span>
                                                     <span>{bid.bid.toFixed(2)} Cr</span>
                                                 </div>
@@ -454,7 +459,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                         </div>
                                     </div>
 
-                                    <button onClick={() => setActiveOverlay('franchises')} className="border-2 border-[#E4E3E0] py-4 font-black uppercase tracking-widest text-xs hover:bg-[#E4E3E0] hover:text-[#0A0F0F] transition-all flex items-center justify-center gap-3">
+                                    <button onClick={() => setActiveOverlay('franchises')} className="border-2 border-green-600 py-4 font-black uppercase tracking-widest text-xs hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-3 rounded-2xl text-green-600">
                                         <Icons.Podium /> VIEW ALL ROSTERS
                                     </button>
                                 </div>
@@ -463,9 +468,9 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     </>
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto">
-                        <h2 className="text-8xl font-black italic tracking-tighter leading-none mb-8 uppercase">AUCTION<br/>CLOSED</h2>
+                        <h2 className="text-8xl font-black italic tracking-tighter leading-none mb-8 uppercase text-green-600">AUCTION<br/>CLOSED</h2>
                         <p className="text-xl font-bold uppercase tracking-tight mb-12 opacity-60">All squads have reached the minimum requirement. The tournament board is now active.</p>
-                        <button onClick={finishAuction} className="w-full bg-teal-500 text-[#0A0F0F] py-8 font-black italic tracking-tighter text-4xl uppercase hover:invert transition-all shadow-[0_0_50px_rgba(20,184,166,0.2)]">
+                        <button onClick={finishAuction} className="w-full bg-green-600 text-white py-8 font-black italic tracking-tighter text-4xl uppercase hover:bg-green-500 transition-all shadow-[0_0_50px_rgba(22,163,74,0.3)] rounded-3xl">
                             ENTER CAREER HUB
                         </button>
                     </div>
