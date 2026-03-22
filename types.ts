@@ -35,6 +35,7 @@ export interface PlayerPerformanceSummary {
 export interface Player {
     id: string; name: string; nationality: string; role: PlayerRole; battingSkill: number; secondarySkill: number;
     style: BattingStyle; isOpener: boolean; isForeign: boolean; teamName?: string;
+    potential?: number; form?: number; fitness?: number;
     customProfiles?: { [key in Format]?: { avg: number; sr: number } };
     stats: Record<Format, PlayerStats>;
     recentPerformances: PlayerPerformanceSummary[];

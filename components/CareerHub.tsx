@@ -524,7 +524,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             case 'SETTINGS': return <Settings onResetGame={onResetGame} theme={theme} setTheme={setTheme} saveGame={saveGame} loadGame={loadGame} />;
             case 'PLAYER_PROFILE': return <PlayerProfile player={selectedPlayer} onBack={() => setScreen('STATS')} initialFormat={playerProfileFormat} />;
             case 'MATCH_RESULT': return <MatchResultScreen result={selectedMatchResult} onBack={() => setScreen('DASHBOARD')} userTeamId={gameData.userTeamId} />;
-            case 'FORWARD_RESULTS': return <ForwardResultsScreen results={forwardSimResults} onBack={() => setScreen('DASHBOARD')} userTeamId={gameData.userTeamId} />;
+            case 'FORWARD_RESULTS': return <ForwardResultsScreen results={forwardSimResults} onBack={() => setScreen('DASHBOARD')} userTeamId={gameData.userTeamId} onViewResult={result => { setSelectedMatchResult(result); setScreen('MATCH_RESULT'); }} />;
             case 'AWARDS_RECORDS': return <AwardsAndRecordsScreen gameData={gameData} />;
             case 'END_OF_FORMAT': return <EndOfFormatScreen gameData={gameData} handleFormatChange={handleFormatChange} handleEndSeason={handleEndOfSeason} />;
             case 'TRANSFERS': return <Transfers {...commonProps} />;
@@ -535,7 +535,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 setScreen('DASHBOARD');
             }} />;
             case 'SEASON_SUMMARY': return <SeasonSummary gameData={gameData} onContinue={handleSeasonSummaryComplete} />;
-            case 'RATING_BOARD': return <ModernRatingBoard players={gameData.allPlayers} />;
+            case 'RATING_BOARD': return <ModernRatingBoard players={gameData.allPlayers} currentFormat={gameData.currentFormat} />;
             case 'LIVE_MATCH': {
                 const schedule = gameData.schedule[gameData.currentFormat];
                 const currentMatchIndex = gameData.currentMatchIndex[gameData.currentFormat];

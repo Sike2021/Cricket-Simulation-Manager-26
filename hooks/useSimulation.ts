@@ -124,26 +124,26 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 // First innings aggression - Boosted for higher scores
                 const progress = balls / maxBalls;
                 if (isT20) {
-                    if (progress > 0.8) aggressionFactor = 2.1; // Death overs
-                    else if (progress > 0.5) aggressionFactor = 1.75;
-                    else if (progress < 0.3) aggressionFactor = 1.6; // Powerplay
-                    else aggressionFactor = 1.65; // Middle overs
+                    if (progress > 0.8) aggressionFactor = 2.4; // Death overs - Boosted from 2.1
+                    else if (progress > 0.5) aggressionFactor = 1.9; // Boosted from 1.75
+                    else if (progress < 0.3) aggressionFactor = 1.8; // Powerplay - Boosted from 1.6
+                    else aggressionFactor = 1.85; // Middle overs - Boosted from 1.65
                 } else if (isODI) {
-                    if (progress > 0.9) aggressionFactor = 1.9;
-                    else if (progress > 0.7) aggressionFactor = 1.5;
-                    else if (progress < 0.2) aggressionFactor = 1.3;
-                    else aggressionFactor = 1.25;
+                    if (progress > 0.9) aggressionFactor = 2.0;
+                    else if (progress > 0.7) aggressionFactor = 1.6;
+                    else if (progress < 0.2) aggressionFactor = 1.4;
+                    else aggressionFactor = 1.35;
                 } else {
                     // First Class
-                    aggressionFactor = 1.2;
+                    aggressionFactor = 1.25;
                 }
 
-                // Subtle score normalization for T20 to hit 160-280 range
+                // Subtle score normalization for T20 to hit 180-300 range
                 if (isT20 && !target && balls > 0) {
                     const currentRR = (score / balls) * 6;
-                    if (balls > 48) { // After 8 overs
-                        if (currentRR < 9.0) aggressionFactor *= 1.25; // Nudge up if too slow
-                        if (currentRR > 15.0) aggressionFactor *= 0.85; // Nudge down only if extremely fast
+                    if (balls > 36) { // After 6 overs
+                        if (currentRR < 10.0) aggressionFactor *= 1.35; // Nudge up more aggressively
+                        if (currentRR > 18.0) aggressionFactor *= 0.8; // Nudge down only if extremely fast
                     }
                 }
             }
@@ -193,10 +193,10 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
             } else {
                 let runsScored = 0;
                 // Boosted scoring probabilities for high scoring games
-                let p_dot = 0.40, p_1 = 0.38, p_2 = 0.08, p_3 = 0.01, p_4 = 0.09, p_6 = 0.04;
+                let p_dot = 0.35, p_1 = 0.40, p_2 = 0.08, p_3 = 0.01, p_4 = 0.11, p_6 = 0.05;
                 
                 if (format.includes('First-Class')) {
-                    p_dot = 0.65; p_1 = 0.22; p_2 = 0.05; p_3 = 0.01; p_4 = 0.06; p_6 = 0.01;
+                    p_dot = 0.62; p_1 = 0.24; p_2 = 0.05; p_3 = 0.01; p_4 = 0.07; p_6 = 0.01;
                 }
 
                 switch (onStrikeBatterDetails.style) {
@@ -370,7 +370,7 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
         for (const p of firstInning.bowling) { const s = p.wickets * 25 + (p.wickets >= 3 ? 25 : 0) + (p.wickets >= 5 ? 50 : 0) - p.runsConceded * 0.5; if (s > bestScore) { bestScore = s; motm = { playerId: p.playerId, playerName: p.playerName, teamId: teamB.id, summary: `${p.wickets}/${p.runsConceded}` }; } }
         for (const p of secondInning.bowling) { const s = p.wickets * 20 + (p.wickets >= 3 ? 20 : 0) + (p.wickets >= 5 ? 40 : 0) - p.runsConceded * 0.5; if (s > bestScore) { bestScore = s; motm = { playerId: p.playerId, playerName: p.playerName, teamId: teamA.id, summary: `${p.wickets}/${p.runsConceded}` }; } }
 
-        return { matchNumber: match.matchNumber, winnerId, loserId, summary, firstInning, secondInning, manOfTheMatch: motm };
+        return { matchNumber: String(match.matchNumber), winnerId, loserId, summary, firstInning, secondInning, manOfTheMatch: motm };
     }, [simulateInning]);
 
     const runFirstClassMatchSimulation = useCallback((match: Match, teamAPlayers: Player[], teamBPlayers: Player[], gameData: GameData): MatchResult => {
@@ -429,7 +429,7 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
             }
         });
 
-        return { matchNumber: match.matchNumber, winnerId, loserId, isDraw, summary, firstInning, secondInning, thirdInning, fourthInning, manOfTheMatch: motm };
+        return { matchNumber: String(match.matchNumber), winnerId, loserId, isDraw, summary, firstInning, secondInning, thirdInning, fourthInning, manOfTheMatch: motm };
     }, [simulateInning]);
 
     const runSimulationForCurrentFormat = useCallback((match: Match, gameData: GameData) => {

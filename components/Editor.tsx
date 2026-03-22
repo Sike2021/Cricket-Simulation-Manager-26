@@ -104,38 +104,108 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
         const customSR = selectedPlayer.customProfiles?.[editorFormatTab]?.sr;
 
         return (
-            <div className="p-4 space-y-2">
-                 <h2 className="text-xl font-bold text-center mb-2">{isCreating ? 'Create Player' : 'Edit Player'}</h2>
-                 <input type="text" value={selectedPlayer.name} onChange={e => setSelectedPlayer({...selectedPlayer, name: e.target.value})} placeholder="Name" className="w-full p-2 rounded bg-white dark:bg-gray-800" />
-                 <select value={selectedPlayer.role} onChange={e => setSelectedPlayer({...selectedPlayer, role: e.target.value as PlayerRole})} className="w-full p-2 rounded bg-white dark:bg-gray-800">
-                    {Object.values(PlayerRole).map(r => <option key={r} value={r}>{getRoleFullName(r)}</option>)}
-                 </select>
-                <select value={selectedPlayer.style} onChange={e => setSelectedPlayer({...selectedPlayer, style: e.target.value as BattingStyle})} className="w-full p-2 rounded bg-white dark:bg-gray-800">
-                    {BATTING_STYLE_OPTIONS.map(s => <option key={s} value={s}>{getBattingStyleLabel(s)}</option>)}
-                 </select>
-                 <div className="flex items-center space-x-2"><span>Batting</span><input type="range" min="1" max="99" value={selectedPlayer.battingSkill} onChange={e => setSelectedPlayer({...selectedPlayer, battingSkill: +e.target.value})} className="w-full" /><span>{selectedPlayer.battingSkill}</span></div>
-                 <div className="flex items-center space-x-2"><span>Bowling</span><input type="range" min="1" max="99" value={selectedPlayer.secondarySkill} onChange={e => setSelectedPlayer({...selectedPlayer, secondarySkill: +e.target.value})} className="w-full" /><span>{selectedPlayer.secondarySkill}</span></div>
-                 <div className="flex items-center justify-between"><label>Is Opener?</label><input type="checkbox" checked={selectedPlayer.isOpener} onChange={e => setSelectedPlayer({...selectedPlayer, isOpener: e.target.checked})} className="h-5 w-5" /></div>
-                 <div className="flex items-center justify-between"><label>Is Foreign?</label><input type="checkbox" checked={selectedPlayer.isForeign} onChange={e => setSelectedPlayer({...selectedPlayer, isForeign: e.target.checked})} className="h-5 w-5" /></div>
-                 <div className="border-t border-gray-300 dark:border-gray-700 pt-2 mt-3">
-                    <p className="text-center font-semibold text-sm mb-1">Custom Batting Profile</p>
-                    <div className="flex justify-center overflow-x-auto border-b border-gray-300 dark:border-gray-700 mb-2 pb-2">
-                        {Object.values(Format).map(f => (
-                            <button key={f} onClick={() => setEditorFormatTab(f)} className={`px-3 py-1 text-xs font-semibold whitespace-nowrap ${editorFormatTab === f ? 'border-b-2 border-teal-500 text-teal-500' : 'text-gray-500'}`}>{f}</button>
-                        ))}
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm">
-                        <span>Target Avg</span>
-                        <input type="number" value={customAvg || ''} onChange={e => handleProfileChange('avg', e.target.value)} placeholder={`Default: ${defaultProfile.avg}`} className="w-full p-1 rounded bg-white dark:bg-gray-800" />
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm mt-1">
-                        <span>Target SR</span>
-                        <input type="number" value={customSR || ''} onChange={e => handleProfileChange('sr', e.target.value)} placeholder={`Default: ${defaultProfile.sr}`} className="w-full p-1 rounded bg-white dark:bg-gray-800" />
+            <div className="p-4 space-y-4 max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-teal-500/20">
+                 <div className="flex justify-between items-center border-b border-teal-500/30 pb-4">
+                    <h2 className="text-2xl font-black italic tracking-tighter uppercase text-teal-500">{isCreating ? 'CREATE_NEW_ENTITY' : 'EDIT_ENTITY_DATA'}</h2>
+                    <div className="flex gap-2">
+                        <button onClick={savePlayer} className="bg-teal-500 text-[#0A0F0F] px-6 py-2 rounded font-black uppercase italic text-sm hover:bg-teal-400 transition-colors">Save</button>
+                        <button onClick={() => setSelectedPlayer(null)} className="bg-gray-700 text-white px-6 py-2 rounded font-black uppercase italic text-sm hover:bg-gray-600 transition-colors">Cancel</button>
                     </div>
                  </div>
-                 <div className="flex pt-4 space-x-2">
-                     <button onClick={savePlayer} className="flex-grow bg-green-500 text-white p-2 rounded">Save</button>
-                     <button onClick={() => setSelectedPlayer(null)} className="flex-grow bg-gray-500 text-white p-2 rounded">Cancel</button>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Basic Info */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-mono font-bold text-teal-500/70 uppercase tracking-widest">Basic Information</h3>
+                        <div>
+                            <label className="text-[10px] font-mono uppercase opacity-50 mb-1 block">Entity Name</label>
+                            <input type="text" value={selectedPlayer.name} onChange={e => setSelectedPlayer({...selectedPlayer, name: e.target.value})} placeholder="Name" className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-teal-500 transition-all outline-none font-bold" />
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-mono uppercase opacity-50 mb-1 block">Nationality</label>
+                            <input type="text" value={selectedPlayer.nationality} onChange={e => setSelectedPlayer({...selectedPlayer, nationality: e.target.value})} placeholder="Nationality" className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-teal-500 transition-all outline-none font-bold" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] font-mono uppercase opacity-50 mb-1 block">Primary Role</label>
+                                <select value={selectedPlayer.role} onChange={e => setSelectedPlayer({...selectedPlayer, role: e.target.value as PlayerRole})} className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-teal-500 transition-all outline-none font-bold">
+                                    {Object.values(PlayerRole).map(r => <option key={r} value={r}>{getRoleFullName(r)}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-mono uppercase opacity-50 mb-1 block">Batting Style</label>
+                                <select value={selectedPlayer.style} onChange={e => setSelectedPlayer({...selectedPlayer, style: e.target.value as BattingStyle})} className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-teal-500 transition-all outline-none font-bold">
+                                    {BATTING_STYLE_OPTIONS.map(s => <option key={s} value={s}>{getBattingStyleLabel(s)}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 pt-2">
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" checked={selectedPlayer.isOpener} onChange={e => setSelectedPlayer({...selectedPlayer, isOpener: e.target.checked})} className="w-5 h-5 rounded border-gray-300 text-teal-500 focus:ring-teal-500" />
+                                <span className="text-xs font-bold uppercase tracking-tight group-hover:text-teal-500 transition-colors">Opener</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" checked={selectedPlayer.isForeign} onChange={e => setSelectedPlayer({...selectedPlayer, isForeign: e.target.checked})} className="w-5 h-5 rounded border-gray-300 text-teal-500 focus:ring-teal-500" />
+                                <span className="text-xs font-bold uppercase tracking-tight group-hover:text-teal-500 transition-colors">Foreign</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Skills & Performance */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-mono font-bold text-teal-500/70 uppercase tracking-widest">Skill Metrics</h3>
+                        
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-end">
+                                <label className="text-[10px] font-mono uppercase opacity-50">Batting Skill</label>
+                                <span className="text-lg font-black italic text-teal-500">{selectedPlayer.battingSkill}</span>
+                            </div>
+                            <input type="range" min="1" max="99" value={selectedPlayer.battingSkill} onChange={e => setSelectedPlayer({...selectedPlayer, battingSkill: +e.target.value})} className="w-full accent-teal-500" />
+                            
+                            <div className="flex justify-between items-end">
+                                <label className="text-[10px] font-mono uppercase opacity-50">Bowling Skill</label>
+                                <span className="text-lg font-black italic text-teal-500">{selectedPlayer.secondarySkill}</span>
+                            </div>
+                            <input type="range" min="1" max="99" value={selectedPlayer.secondarySkill} onChange={e => setSelectedPlayer({...selectedPlayer, secondarySkill: +e.target.value})} className="w-full accent-teal-500" />
+                            
+                            <div className="grid grid-cols-3 gap-2 pt-2">
+                                <div>
+                                    <label className="text-[8px] font-mono uppercase opacity-50 block mb-1">Potential</label>
+                                    <input type="number" min="1" max="99" value={selectedPlayer.potential || 50} onChange={e => setSelectedPlayer({...selectedPlayer, potential: +e.target.value})} className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800 font-bold text-center" />
+                                </div>
+                                <div>
+                                    <label className="text-[8px] font-mono uppercase opacity-50 block mb-1">Form</label>
+                                    <input type="number" min="1" max="99" value={selectedPlayer.form || 50} onChange={e => setSelectedPlayer({...selectedPlayer, form: +e.target.value})} className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800 font-bold text-center" />
+                                </div>
+                                <div>
+                                    <label className="text-[8px] font-mono uppercase opacity-50 block mb-1">Fitness</label>
+                                    <input type="number" min="1" max="99" value={selectedPlayer.fitness || 50} onChange={e => setSelectedPlayer({...selectedPlayer, fitness: +e.target.value})} className="w-full p-2 rounded bg-gray-100 dark:bg-gray-800 font-bold text-center" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+
+                 <div className="border-t border-teal-500/20 pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xs font-mono font-bold text-teal-500/70 uppercase tracking-widest">Custom Format Profiles</h3>
+                        <div className="flex gap-1">
+                            {Object.values(Format).map(f => (
+                                <button key={f} onClick={() => setEditorFormatTab(f)} className={`px-3 py-1 text-[10px] font-black uppercase italic transition-all ${editorFormatTab === f ? 'bg-teal-500 text-[#0A0F0F]' : 'bg-gray-800 text-gray-500 hover:text-white'}`}>{f.split(' ')[1] || f}</button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 bg-gray-100 dark:bg-gray-800/50 p-4 rounded-xl border border-white/5">
+                        <div>
+                            <label className="text-[10px] font-mono uppercase opacity-50 mb-1 block">Target Average</label>
+                            <input type="number" value={customAvg || ''} onChange={e => handleProfileChange('avg', e.target.value)} placeholder={`Default: ${defaultProfile.avg}`} className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 font-bold outline-none border border-transparent focus:border-teal-500" />
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-mono uppercase opacity-50 mb-1 block">Target Strike Rate</label>
+                            <input type="number" value={customSR || ''} onChange={e => handleProfileChange('sr', e.target.value)} placeholder={`Default: ${defaultProfile.sr}`} className="w-full p-3 rounded-lg bg-white dark:bg-gray-900 font-bold outline-none border border-transparent focus:border-teal-500" />
+                        </div>
+                    </div>
                  </div>
             </div>
         );
