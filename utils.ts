@@ -125,7 +125,6 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const xi: Player[] = [];
     const selectedIds = new Set<string>();
     
-    // Foreign player limit (keeping it as a standard league rule, usually 4 in IPL, but let's stick to a reasonable limit or the one already there)
     const MAX_FOREIGN_IN_XI = 4; 
     let foreignInXI = 0;
 
@@ -146,35 +145,47 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
         return scoreB - scoreA;
     });
 
-    // 1. Must have a Wicket Keeper (Best batting keeper)
+    // 1. Must have exactly 1 Wicket Keeper (Best batting keeper)
     const keepers = sortedSquad.filter(p => p.role === PlayerRole.WICKET_KEEPER);
     if (keepers.length > 0) addPlayer(keepers[0]);
 
-    // 2. Ensure at least 5 bowlers/all-rounders (Best ones)
-    const bowlersAndARs = sortedSquad.filter(p => 
-        [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(p.role)
+    // 2. Must have 1 or 2 All-Rounders
+    const allRounders = sortedSquad.filter(p => p.role === PlayerRole.ALL_ROUNDER);
+    let arCount = 0;
+    for (const p of allRounders) {
+        if (arCount < 2) {
+            if (addPlayer(p)) arCount++;
+        } else break;
+    }
+
+    // 3. Must have 3 or 4 Bowlers (Fast or Spin)
+    const bowlers = sortedSquad.filter(p => 
+        [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER].includes(p.role)
     );
-    
-    // Pick top 5 bowlers/ARs first to satisfy the requirement
     let bowlingCount = 0;
-    for (const p of bowlersAndARs) {
-        if (bowlingCount < 5) {
+    for (const p of bowlers) {
+        if (bowlingCount < 4) {
             if (addPlayer(p)) bowlingCount++;
         } else break;
     }
 
-    // 3. Fill remaining slots with best available players (Batters preferred for top order)
+    // 4. Fill remaining slots with best available Batters (to reach 5 batters total including WK if they are a top batter, but usually 5 pure/top batters)
+    // Actually, user said: "5 batters 1 wk 1 or 2 all-rounders 3 or 4 bowlers"
+    // Total: 5 + 1 + 1 + 4 = 11 or 5 + 1 + 2 + 3 = 11.
+    const pureBatters = sortedSquad.filter(p => p.role === PlayerRole.BATSMAN);
+    let batterCount = 0;
+    for (const p of pureBatters) {
+        if (xi.length < 11 && batterCount < 5) {
+            if (addPlayer(p)) batterCount++;
+        } else break;
+    }
+
+    // 5. Emergency fill if rules were too strict or squad is small
     const remainingBest = sortedSquad.filter(p => !selectedIds.has(p.id));
     for (const p of remainingBest) {
         if (xi.length < 11) {
             addPlayer(p);
         } else break;
-    }
-
-    // 4. Emergency fill if rules were too strict
-    if (xi.length < 11) {
-        const remaining = squad.filter(p => !selectedIds.has(p.id));
-        remaining.forEach(p => { if (xi.length < 11) addPlayer(p); });
     }
 
     // Sort XI for a realistic batting order: Openers -> Batters -> ARs -> Bowlers
@@ -186,9 +197,17 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
             [PlayerRole.SPIN_BOWLER]: 4,
             [PlayerRole.FAST_BOWLER]: 5,
         };
+        // Openers first
         if (a.isOpener && !b.isOpener) return -1;
         if (!a.isOpener && b.isOpener) return 1;
-        return roleOrder[a.role] - roleOrder[b.role];
+        
+        // Then by role order
+        if (roleOrder[a.role] !== roleOrder[b.role]) {
+            return roleOrder[a.role] - roleOrder[b.role];
+        }
+        
+        // Then by batting skill
+        return b.battingSkill - a.battingSkill;
     }).slice(0, 11);
 };
 

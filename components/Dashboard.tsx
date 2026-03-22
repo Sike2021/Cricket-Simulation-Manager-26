@@ -168,6 +168,10 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                     <div className="group-hover:scale-110 transition-transform"><Icons.Compare /></div>
                     <span className="font-semibold text-xs">Compare</span>
                 </button>
+                <button onClick={() => setScreen('RATING_BOARD')} className="bg-white dark:bg-gray-800/50 p-3 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-center group border-2 border-teal-500/20">
+                    <div className="group-hover:scale-110 transition-transform text-teal-500"><Icons.Podium /></div>
+                    <span className="font-bold text-xs text-teal-600 dark:text-teal-400">Rating Board</span>
+                </button>
             </div>
         </div>
     );

@@ -292,7 +292,19 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
             )}
             <div className="flex-grow">
                 <h3 className="font-bold my-2 flex justify-between items-center">
-                    <span>Playing XI ({playingXI.length} / 11)</span>
+                    <div className="flex items-center gap-2">
+                        <span>Playing XI ({playingXI.length} / 11)</span>
+                        <button 
+                            onClick={() => {
+                                const newXI = generateAutoXI(selectedTeam.squad, selectedFormat);
+                                handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
+                                showFeedback("Auto-generated a balanced XI!", "success");
+                            }}
+                            className="text-[10px] bg-teal-500 hover:bg-teal-600 text-white px-2 py-1 rounded-full font-bold uppercase tracking-wider transition-colors"
+                        >
+                            Auto Select
+                        </button>
+                    </div>
                     {playingXI.length < 11 && <span className="text-xs text-red-500">Incomplete Squad</span>}
                 </h3>
                 {renderPlayerList(playingXI, true)}

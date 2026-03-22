@@ -29,6 +29,7 @@ import SponsorRoom from './SponsorRoom';
 import AuctionRoom from './AuctionRoom';
 import PlayerDatabase from './PlayerDatabase';
 import SeasonSummary from './SeasonSummary';
+import ModernRatingBoard from './ModernRatingBoard';
 
 interface CareerHubProps {
     gameData: GameData;
@@ -534,6 +535,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 setScreen('DASHBOARD');
             }} />;
             case 'SEASON_SUMMARY': return <SeasonSummary gameData={gameData} onContinue={handleSeasonSummaryComplete} />;
+            case 'RATING_BOARD': return <ModernRatingBoard players={gameData.allPlayers} />;
             case 'LIVE_MATCH': {
                 const schedule = gameData.schedule[gameData.currentFormat];
                 const currentMatchIndex = gameData.currentMatchIndex[gameData.currentFormat];
