@@ -100,35 +100,41 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 const remainingRuns = target - score;
                 if (remainingBalls > 0) {
                     const requiredRR = (remainingRuns / remainingBalls) * 6;
-                    const currentRR = (score / balls) * 6 || 0;
                     
                     // Batting aggression based on required rate
                     if (isT20) {
-                        if (requiredRR > 10) aggressionFactor = 1.3;
-                        else if (requiredRR > 8) aggressionFactor = 1.15;
-                        else if (requiredRR < 6) aggressionFactor = 0.9;
+                        if (requiredRR > 12) aggressionFactor = 1.6;
+                        else if (requiredRR > 10) aggressionFactor = 1.45;
+                        else if (requiredRR > 8) aggressionFactor = 1.25;
+                        else if (requiredRR < 6) aggressionFactor = 0.95;
                     } else if (isODI) {
-                        if (requiredRR > 8) aggressionFactor = 1.25;
-                        else if (requiredRR > 6) aggressionFactor = 1.1;
-                        else if (requiredRR < 4) aggressionFactor = 0.85;
+                        if (requiredRR > 10) aggressionFactor = 1.5;
+                        else if (requiredRR > 8) aggressionFactor = 1.35;
+                        else if (requiredRR > 6) aggressionFactor = 1.2;
+                        else if (requiredRR < 4) aggressionFactor = 0.9;
                     }
                     
                     // Pressure increases wicket chance if required rate is high
-                    if (requiredRR > 9) {
-                        pressureFactor = 1 + (requiredRR - 9) * 0.08;
+                    if (requiredRR > 10) {
+                        pressureFactor = 1 + (requiredRR - 10) * 0.1;
                     }
                 }
             } else {
-                // First innings aggression
+                // First innings aggression - Boosted for higher scores
                 const progress = balls / maxBalls;
                 if (isT20) {
-                    if (progress > 0.8) aggressionFactor = 1.4; // Death overs
-                    else if (progress > 0.5) aggressionFactor = 1.15;
-                    else if (progress < 0.3) aggressionFactor = 1.05; // Powerplay
+                    if (progress > 0.8) aggressionFactor = 1.8; // Death overs
+                    else if (progress > 0.5) aggressionFactor = 1.45;
+                    else if (progress < 0.3) aggressionFactor = 1.3; // Powerplay
+                    else aggressionFactor = 1.4; // Middle overs
                 } else if (isODI) {
-                    if (progress > 0.9) aggressionFactor = 1.5;
-                    else if (progress > 0.7) aggressionFactor = 1.2;
-                    else if (progress < 0.2) aggressionFactor = 1.1;
+                    if (progress > 0.9) aggressionFactor = 1.9;
+                    else if (progress > 0.7) aggressionFactor = 1.5;
+                    else if (progress < 0.2) aggressionFactor = 1.3;
+                    else aggressionFactor = 1.25;
+                } else {
+                    // First Class
+                    aggressionFactor = 1.2;
                 }
             }
 
@@ -146,8 +152,9 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
             const expectedRunsPerBall = (batterProfile.sr / 100) * aggressionFactor * (target !== null ? pitchMods.chasePenalty : 1);
             const baseWicketProb = batterProfile.avg > 0 ? expectedRunsPerBall / batterProfile.avg : 0.05;
             
+            // Skill impact increased: Higher rated batters perform significantly better
             let wicketProbability = (baseWicketProb * pressureFactor)
-                + (((bowlerDetails.secondarySkill * bowlerFatigue) - (onStrikeBatterDetails.battingSkill * batterFatigue)) / 600) 
+                + (((bowlerDetails.secondarySkill * bowlerFatigue) - (onStrikeBatterDetails.battingSkill * batterFatigue)) / 400) 
                 + (bowlerDetails.role === PlayerRole.FAST_BOWLER ? pitchMods.paceBonus / 2 : 0) 
                 + (bowlerDetails.role === PlayerRole.SPIN_BOWLER ? pitchMods.spinBonus / 2 : 0);
             
@@ -175,10 +182,11 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 onStrikeBatterIndex = Math.max(onStrikeBatterIndex, offStrikeBatterIndex) + 1;
             } else {
                 let runsScored = 0;
-                let p_dot = 0.48, p_1 = 0.35, p_2 = 0.07, p_3 = 0.01, p_4 = 0.07, p_6 = 0.02;
+                // Boosted scoring probabilities for high scoring games
+                let p_dot = 0.40, p_1 = 0.38, p_2 = 0.08, p_3 = 0.01, p_4 = 0.09, p_6 = 0.04;
                 
                 if (format.includes('First-Class')) {
-                    p_dot = 0.75; p_1 = 0.18; p_2 = 0.03; p_3 = 0.01; p_4 = 0.03; p_6 = 0.00;
+                    p_dot = 0.65; p_1 = 0.22; p_2 = 0.05; p_3 = 0.01; p_4 = 0.06; p_6 = 0.01;
                 }
 
                 switch (onStrikeBatterDetails.style) {

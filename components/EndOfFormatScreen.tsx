@@ -14,6 +14,60 @@ const EndOfFormatScreen: React.FC<EndOfFormatScreenProps> = ({ gameData, handleF
     const [retainedIds, setRetainedIds] = useState<Set<string>>(new Set());
     const userTeam = useMemo(() => gameData.teams.find(t => t.id === gameData.userTeamId), [gameData]);
     
+    const RETENTION_BUDGET = 30.0;
+
+    const calculatePlayerAsk = useCallback((player: Player) => {
+        // Base price calculation based on skill
+        const skill = Math.max(player.battingSkill, player.secondarySkill);
+        let baseAsk = 1.0;
+        if (skill > 85) baseAsk = 12.0;
+        else if (skill > 80) baseAsk = 8.0;
+        else if (skill > 75) baseAsk = 5.0;
+        else if (skill > 70) baseAsk = 3.0;
+        else if (skill > 60) baseAsk = 1.5;
+
+        // Performance multiplier based on current season stats
+        let perfMultiplier = 1.0;
+        const formats = [Format.T20, Format.ODI, Format.SHIELD];
+        let totalRuns = 0;
+        let totalWickets = 0;
+        
+        formats.forEach(f => {
+            const s = player.stats[f];
+            if (s) {
+                totalRuns += s.runs;
+                totalWickets += s.wickets;
+            }
+        });
+
+        // Simple performance boost
+        if (totalRuns > 1000) perfMultiplier += 0.5;
+        else if (totalRuns > 600) perfMultiplier += 0.3;
+        else if (totalRuns > 300) perfMultiplier += 0.15;
+
+        if (totalWickets > 30) perfMultiplier += 0.5;
+        else if (totalWickets > 20) perfMultiplier += 0.3;
+        else if (totalWickets > 10) perfMultiplier += 0.15;
+
+        return Number((baseAsk * perfMultiplier).toFixed(2));
+    }, []);
+
+    const playerAsks = useMemo(() => {
+        const asks: Record<string, number> = {};
+        userTeam?.squad.forEach(p => {
+            asks[p.id] = calculatePlayerAsk(p);
+        });
+        return asks;
+    }, [userTeam, calculatePlayerAsk]);
+
+    const currentTotalCost = useMemo(() => {
+        let total = 0;
+        retainedIds.forEach(id => {
+            total += playerAsks[id] || 0;
+        });
+        return total;
+    }, [retainedIds, playerAsks]);
+
     const lastAward = gameData.awardsHistory[gameData.awardsHistory.length-1];
     
     const formatsOrder = [
@@ -27,19 +81,23 @@ const EndOfFormatScreen: React.FC<EndOfFormatScreenProps> = ({ gameData, handleF
         const player = userTeam?.squad.find(p => p.id === id);
         if (!player) return;
 
+        const ask = playerAsks[id] || 0;
+
         setRetainedIds(prev => {
             const next = new Set(prev);
             if (next.has(id)) {
                 next.delete(id);
             } else {
+                if (currentTotalCost + ask > RETENTION_BUDGET) return prev;
+
                 const retainedPlayers = userTeam?.squad.filter(p => next.has(p.id)) || [];
                 const nationalCount = retainedPlayers.filter(p => !p.isForeign).length;
                 const internationalCount = retainedPlayers.filter(p => p.isForeign).length;
 
                 if (player.isForeign) {
-                    if (internationalCount < 1) next.add(id);
+                    if (internationalCount < 2) next.add(id);
                 } else {
-                    if (nationalCount < 3) next.add(id);
+                    if (nationalCount < 5) next.add(id);
                 }
             }
             return next;
@@ -48,6 +106,7 @@ const EndOfFormatScreen: React.FC<EndOfFormatScreenProps> = ({ gameData, handleF
 
     const finalizeSeason = () => {
         const retainedPlayers = userTeam?.squad.filter(p => retainedIds.has(p.id)) || [];
+        // Pass the total cost so CareerHub can adjust the purse
         handleEndSeason(retainedPlayers);
     };
 
@@ -58,13 +117,22 @@ const EndOfFormatScreen: React.FC<EndOfFormatScreenProps> = ({ gameData, handleF
     if (view === 'retention') {
         return (
             <div className="p-6 h-full flex flex-col bg-slate-950 text-white overflow-hidden">
-                <h2 className="text-3xl font-black italic tracking-tighter uppercase mb-2">Retention Room</h2>
-                <p className="text-slate-400 text-xs mb-6 uppercase tracking-widest">Select up to 3 national and 1 international player to keep. Each costs 1.0 Cr.</p>
+                <div className="flex justify-between items-start mb-2">
+                    <div>
+                        <h2 className="text-3xl font-black italic tracking-tighter uppercase">Retention Room</h2>
+                        <p className="text-slate-400 text-[10px] uppercase tracking-widest">Negotiate with players based on performance</p>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-[10px] font-bold text-slate-500 uppercase">Budget</div>
+                        <div className="text-xl font-black text-teal-400">{(RETENTION_BUDGET - currentTotalCost).toFixed(2)} Cr</div>
+                    </div>
+                </div>
                 
                 <div className="flex-1 overflow-y-auto space-y-2 mb-6 pr-1">
                     {userTeam?.squad.map(p => {
                         const isRetained = retainedIds.has(p.id);
-                        const canRetain = isRetained || (p.isForeign ? internationalCount < 1 : nationalCount < 3);
+                        const ask = playerAsks[p.id];
+                        const canRetain = isRetained || (currentTotalCost + ask <= RETENTION_BUDGET);
                         
                         return (
                             <div 
@@ -73,15 +141,20 @@ const EndOfFormatScreen: React.FC<EndOfFormatScreenProps> = ({ gameData, handleF
                                 className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${isRetained ? 'bg-teal-500/20 border-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]' : canRetain ? 'bg-slate-900 border-slate-800' : 'bg-slate-900/50 border-slate-900 opacity-50'}`}
                             >
                                 <div className="flex justify-between items-center">
-                                    <div>
-                                        <p className="font-bold text-lg">{p.name} {p.isForeign ? '✈️' : ''}</p>
-                                        <p className="text-[10px] text-slate-500 uppercase font-black">{getRoleFullName(p.role)} {p.isForeign ? '(International)' : '(National)'}</p>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-bold text-lg">{p.name} {p.isForeign ? '✈️' : ''}</p>
+                                            <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-bold">S:{Math.max(p.battingSkill, p.secondarySkill)}</span>
+                                        </div>
+                                        <p className="text-[10px] text-slate-500 uppercase font-black">{getRoleFullName(p.role)}</p>
                                     </div>
                                     <div className="text-right">
-                                        <div className={`text-xl font-black ${isRetained ? 'text-teal-400' : 'text-slate-500'}`}>
+                                        <div className={`text-sm font-black ${isRetained ? 'text-teal-400' : 'text-slate-400'}`}>
+                                            ASK: {ask.toFixed(2)} Cr
+                                        </div>
+                                        <div className={`text-[10px] font-bold ${isRetained ? 'text-teal-500' : 'text-slate-600'}`}>
                                             {isRetained ? 'RETAINED' : 'RELEASE'}
                                         </div>
-                                        <div className="text-[9px] text-slate-600 font-bold">Cost: 1.0 Cr</div>
                                     </div>
                                 </div>
                             </div>

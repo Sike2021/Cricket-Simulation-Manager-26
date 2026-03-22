@@ -410,14 +410,57 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
         setGameData((prevData: GameData | null) => {
             if (!prevData) return null;
             
-            const retentionCost = retainedPlayers.length * 1.0; 
+            const STARTING_PURSE = 50.0;
+            const RETENTION_BUDGET = 30.0;
+
+            const calculateAsk = (player: Player) => {
+                const skill = Math.max(player.battingSkill, player.secondarySkill);
+                let baseAsk = 1.0;
+                if (skill > 85) baseAsk = 12.0;
+                else if (skill > 80) baseAsk = 8.0;
+                else if (skill > 75) baseAsk = 5.0;
+                else if (skill > 70) baseAsk = 3.0;
+                else if (skill > 60) baseAsk = 1.5;
+
+                let perfMultiplier = 1.0;
+                const formats = [Format.T20, Format.ODI, Format.SHIELD];
+                let totalRuns = 0;
+                let totalWickets = 0;
+                formats.forEach(f => {
+                    const s = player.stats[f];
+                    if (s) { totalRuns += s.runs; totalWickets += s.wickets; }
+                });
+                if (totalRuns > 1000) perfMultiplier += 0.5;
+                else if (totalRuns > 600) perfMultiplier += 0.3;
+                else if (totalRuns > 300) perfMultiplier += 0.15;
+                if (totalWickets > 30) perfMultiplier += 0.5;
+                else if (totalWickets > 20) perfMultiplier += 0.3;
+                else if (totalWickets > 10) perfMultiplier += 0.15;
+
+                return Number((baseAsk * perfMultiplier).toFixed(2));
+            };
+
+            const userRetentionCost = retainedPlayers.reduce((sum, p) => sum + calculateAsk(p), 0);
 
             const newTeams = prevData.teams.map(t => {
-                if (t.id === prevData.userTeamId) return { ...t, squad: retainedPlayers, purse: 50.0 - retentionCost };
-                const aiRetainCount = 2 + Math.floor(Math.random() * 3);
-                const aiRetained = t.squad.sort((a,b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill)).slice(0, aiRetainCount);
-                const aiCost = aiRetained.length * 1.0;
-                return { ...t, squad: aiRetained, purse: 50.0 - aiCost };
+                if (t.id === prevData.userTeamId) {
+                    return { ...t, squad: retainedPlayers, purse: STARTING_PURSE + Math.max(0, RETENTION_BUDGET - userRetentionCost) };
+                }
+                
+                // AI Retention Logic
+                let aiRetentionSpent = 0;
+                const aiRetained: Player[] = [];
+                const sortedSquad = [...t.squad].sort((a,b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill));
+                
+                for (const p of sortedSquad) {
+                    const ask = calculateAsk(p);
+                    if (aiRetentionSpent + ask <= RETENTION_BUDGET && aiRetained.length < 6) {
+                        aiRetained.push(p);
+                        aiRetentionSpent += ask;
+                    }
+                }
+
+                return { ...t, squad: aiRetained, purse: STARTING_PURSE + Math.max(0, RETENTION_BUDGET - aiRetentionSpent) };
             });
 
             const initialStandings = (teams: Team[]) => teams.map(team => ({ teamId: team.id, teamName: team.name, played: 0, won: 0, lost: 0, drawn: 0, points: 0, netRunRate: 0, runsFor: 0, runsAgainst: 0 }));
