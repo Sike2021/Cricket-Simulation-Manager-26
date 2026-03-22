@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { AppState, GameData, Team, Format, MatchResult, Standing, Player } from './types';
 import { PLAYERS, TEAMS, GROUNDS, PRE_BUILT_SQUADS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from './data';
 import { LoadingSpinner, generateLeagueSchedule } from './utils';
@@ -13,10 +14,68 @@ export const MAX_SQUAD_SIZE = 22;
 export const MIN_SQUAD_SIZE = 15;
 export const MAX_FOREIGN_PLAYERS = 3;
 
+const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 3000);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-[100] bg-[#050808] flex flex-col items-center justify-center p-8 text-center"
+    >
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative mb-8"
+      >
+        <div className="w-32 h-32 bg-teal-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-teal-500/40 rotate-12">
+          <span className="text-6xl font-black text-white -rotate-12 tracking-tighter">CM</span>
+        </div>
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute -inset-4 border-2 border-dashed border-teal-500/30 rounded-full"
+        />
+      </motion.div>
+      
+      <motion.h1 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="text-3xl font-black italic uppercase tracking-tighter text-white mb-2"
+      >
+        Cricket Manager
+      </motion.h1>
+      <motion.p 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="text-teal-500 font-black tracking-[0.3em] uppercase text-[10px]"
+      >
+        The Next Generation
+      </motion.p>
+
+      <div className="absolute bottom-12 w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+        <motion.div 
+          initial={{ x: "-100%" }}
+          animate={{ x: "0%" }}
+          transition={{ duration: 2.5, ease: "easeInOut" }}
+          className="h-full bg-teal-500"
+        />
+      </div>
+    </motion.div>
+  );
+};
+
 export const App = () => {
   const [appState, setAppState] = useState<AppState>('MAIN_MENU');
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [hasSaveData, setHasSaveData] = useState(false);
@@ -211,7 +270,12 @@ export const App = () => {
 
   const renderContent = () => {
     if (isLoading) {
-        return <div className="bg-white dark:bg-gray-900 h-full flex items-center justify-center"><LoadingSpinner /></div>;
+        return (
+          <div className="bg-[#050808] h-full flex flex-col items-center justify-center space-y-4">
+            <LoadingSpinner />
+            <p className="text-[10px] font-black tracking-widest text-teal-500 uppercase">Loading Data...</p>
+          </div>
+        );
     }
     switch(appState) {
         case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} hasSaveData={hasSaveData} />;
@@ -224,7 +288,10 @@ export const App = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center font-sans">
-      <div className="w-full max-w-md h-screen max-h-[932px] bg-gray-50 dark:bg-[#2C3531] border-4 border-gray-300 dark:border-gray-700 rounded-[60px] shadow-2xl shadow-black/50 overflow-hidden relative text-gray-900 dark:text-gray-200 flex flex-col">
+      <div className="w-full max-w-md h-screen max-h-[932px] bg-gray-50 dark:bg-[#050808] border-4 border-gray-300 dark:border-gray-700 rounded-[60px] shadow-2xl shadow-black/50 overflow-hidden relative text-gray-900 dark:text-gray-200 flex flex-col">
+        <AnimatePresence>
+          {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+        </AnimatePresence>
         {renderContent()}
         {feedbackMessage && (
             <div className={`absolute bottom-28 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg z-50 shadow-lg text-white font-semibold ${feedbackMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>

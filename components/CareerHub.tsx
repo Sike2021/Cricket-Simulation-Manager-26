@@ -28,6 +28,7 @@ import LiveMatchScreen from './LiveMatchScreen';
 import SponsorRoom from './SponsorRoom';
 import AuctionRoom from './AuctionRoom';
 import PlayerDatabase from './PlayerDatabase';
+import SeasonSummary from './SeasonSummary';
 
 interface CareerHubProps {
     gameData: GameData;
@@ -450,8 +451,20 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 news: [seasonNews, ...prevData.news].slice(0, 50)
             };
         });
-        setScreen('AUCTION_ROOM');
+        setScreen('SEASON_SUMMARY');
     }, [setGameData]);
+
+    const handleSeasonSummaryComplete = (updatedPlayers: Player[]) => {
+        setGameData(prev => {
+            if (!prev) return null;
+            const newTeams = prev.teams.map(team => ({
+                ...team,
+                squad: team.squad.map(p => updatedPlayers.find(up => up.id === p.id) || p)
+            }));
+            return { ...prev, allPlayers: updatedPlayers, teams: newTeams };
+        });
+        setScreen('AUCTION_ROOM');
+    };
 
     const renderScreen = () => {
         const commonProps = { gameData, userTeam, setGameData, setScreen, showFeedback };
@@ -477,6 +490,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 setGameData(prev => prev ? { ...prev, teams } : null);
                 setScreen('DASHBOARD');
             }} />;
+            case 'SEASON_SUMMARY': return <SeasonSummary gameData={gameData} onContinue={handleSeasonSummaryComplete} />;
             case 'LIVE_MATCH': {
                 const schedule = gameData.schedule[gameData.currentFormat];
                 const currentMatchIndex = gameData.currentMatchIndex[gameData.currentFormat];

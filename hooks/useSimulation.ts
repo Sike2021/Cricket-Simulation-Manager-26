@@ -374,7 +374,17 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
         } else if (fourthInning.wickets >= 10) {
             winnerId = teamA.id; loserId = teamB.id; summary = `${teamA.name} won by ${target - 1 - fourthInning.score} runs.`;
         } else {
-            isDraw = true; summary = 'Match Drawn.'; winnerId = null; loserId = null;
+            if (match.group !== 'Round-Robin') {
+                const teamAIndex = gameData.standings[gameData.currentFormat].findIndex(s => s.teamId === teamA.id);
+                const teamBIndex = gameData.standings[gameData.currentFormat].findIndex(s => s.teamId === teamB.id);
+                if (teamAIndex < teamBIndex) {
+                    winnerId = teamA.id; loserId = teamB.id; summary = `Match Drawn (${teamA.name} won on higher league position)`;
+                } else {
+                    winnerId = teamB.id; loserId = teamA.id; summary = `Match Drawn (${teamB.name} won on higher league position)`;
+                }
+            } else {
+                isDraw = true; summary = 'Match Drawn.'; winnerId = null; loserId = null;
+            }
         }
 
         let motm = { playerId: '', playerName: '', teamId: '', summary: '' }, bestScore = -1;
