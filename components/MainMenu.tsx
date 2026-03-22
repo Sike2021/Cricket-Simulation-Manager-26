@@ -8,7 +8,7 @@ interface MainMenuProps {
 }
 
 const MainMenu: React.FC<MainMenuProps> = ({ onStartNewGame, onResumeGame, hasSaveData }) => (
-    <div className="h-full flex flex-col items-center justify-center p-8 bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 1)), url('https://images.unsplash.com/photo-1595435942477-f5439483405a?q=80&w=2070&auto=format&fit=crop')" }}>
+    <div className="h-full flex flex-col items-center justify-center p-8 bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 1)), url('https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2070&auto=format&fit=crop')" }}>
         <div className="h-full w-full absolute top-0 left-0 bg-gradient-to-b dark:from-black/70 dark:to-[#2C3531] from-gray-100/70 to-gray-50"></div>
         <div className="relative z-10 text-center">
             <h2 className="text-xl font-bold text-yellow-600 dark:text-yellow-400">Sike's</h2>

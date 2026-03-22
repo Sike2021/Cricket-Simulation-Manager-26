@@ -75,6 +75,13 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         return 0.25;
     };
 
+    const getBidIncrement = (price: number) => {
+        if (price >= 10.0) return 1.0;
+        if (price >= 5.0) return 0.5;
+        if (price >= 2.0) return 0.2;
+        return 0.1;
+    };
+
     const startNextPlayer = useCallback(() => {
         if (auctionFinished) return;
 
@@ -105,7 +112,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             return;
         }
 
-        const increment = 0.1 * multiplier;
+        const increment = getBidIncrement(currentBid) * multiplier;
         const nextBid = Number((currentBid + increment).toFixed(2));
         if (userTeam.purse < nextBid) return;
         
@@ -153,10 +160,11 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         if (!isAuctioning || !currentPlayer || auctionFinished) return;
 
         const timer = setTimeout(() => {
+            const increment = getBidIncrement(currentBid);
             const eligibleTeams = teams.filter(t => 
                 mainTeamIds.includes(t.id) &&
                 t.id !== highestBidderId && 
-                t.purse >= (currentBid + 0.1) &&
+                t.purse >= (currentBid + increment) &&
                 t.squad.length < 22 &&
                 (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT)
             );
@@ -201,11 +209,11 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     const personalityJitter = 0.7 + (Math.random() * 0.6);
                     const finalValuation = baseValuation * needFactor * personalityJitter;
 
-                    return (currentBid + 0.1) <= finalValuation;
+                    return (currentBid + increment) <= finalValuation;
                 });
 
                 if (biddingTeam) {
-                    const nextBid = Number((currentBid + 0.1).toFixed(2));
+                    const nextBid = Number((currentBid + increment).toFixed(2));
                     setCurrentBid(nextBid);
                     setHighestBidderId(biddingTeam.id);
                     setCurrentLotBids(prev => [{teamName: biddingTeam.name, bid: nextBid}, ...prev]);
@@ -419,14 +427,14 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                 <div className="flex flex-col gap-3">
                                     <button 
                                         onClick={() => handleUserBid(1)}
-                                        disabled={!isAuctioning || (highestBidderId === userTeam?.id) || (userTeam?.purse || 0) < (currentBid + 0.1)}
+                                        disabled={!isAuctioning || (highestBidderId === userTeam?.id) || (userTeam?.purse || 0) < (currentBid + getBidIncrement(currentBid))}
                                         className={`w-full py-5 rounded-2xl font-black text-2xl italic uppercase tracking-tighter shadow-2xl transition-all transform active:scale-95 ${
                                             highestBidderId === userTeam?.id 
                                             ? 'bg-emerald-900/40 border-2 border-emerald-500 text-emerald-400' 
                                             : 'bg-teal-500 hover:bg-teal-400 text-black'
                                         } disabled:opacity-20`}
                                     >
-                                        Place Bid ({(currentBid + 0.1).toFixed(2)})
+                                        Place Bid ({(currentBid + getBidIncrement(currentBid)).toFixed(2)})
                                     </button>
                                     
                                     <div className="grid grid-cols-2 gap-3 mt-1">
