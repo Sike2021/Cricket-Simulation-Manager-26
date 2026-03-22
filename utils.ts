@@ -125,12 +125,13 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const xi: Player[] = [];
     const selectedIds = new Set<string>();
     
-    // Only 1 foreign player allowed in the Playing XI as per new rules
+    // Foreign player limit (keeping it as a standard league rule, usually 4 in IPL, but let's stick to a reasonable limit or the one already there)
+    const MAX_FOREIGN_IN_XI = 4; 
     let foreignInXI = 0;
 
     const addPlayer = (p: Player) => {
         if (selectedIds.has(p.id)) return false;
-        if (p.isForeign && foreignInXI >= 1) return false;
+        if (p.isForeign && foreignInXI >= MAX_FOREIGN_IN_XI) return false;
         
         xi.push(p);
         selectedIds.add(p.id);
@@ -138,29 +139,89 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
         return true;
     };
 
-    // 1. Must have a Wicket Keeper
-    const keeper = [...squad].sort((a,b) => b.battingSkill - a.battingSkill).find(p => p.role === PlayerRole.WICKET_KEEPER);
-    if (keeper) addPlayer(keeper);
+    // Sort squad by overall quality for the format
+    const sortedSquad = [...squad].sort((a, b) => {
+        const scoreA = Math.max(a.battingSkill, a.secondarySkill);
+        const scoreB = Math.max(b.battingSkill, b.secondarySkill);
+        return scoreB - scoreA;
+    });
 
-    // 2. Must have openers
-    const openers = squad.filter(p => p.isOpener).sort((a,b) => b.battingSkill - a.battingSkill);
-    openers.forEach(p => { if (xi.length < 11) addPlayer(p); });
+    // 1. Must have a Wicket Keeper (Best batting keeper)
+    const keepers = sortedSquad.filter(p => p.role === PlayerRole.WICKET_KEEPER);
+    if (keepers.length > 0) addPlayer(keepers[0]);
 
-    // 3. Main Batsmen
-    const batsmen = squad.filter(p => p.role === PlayerRole.BATSMAN).sort((a,b) => b.battingSkill - a.battingSkill);
-    batsmen.forEach(p => { if (xi.length < 11) addPlayer(p); });
+    // 2. Ensure at least 5 bowlers/all-rounders (Best ones)
+    const bowlersAndARs = sortedSquad.filter(p => 
+        [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(p.role)
+    );
+    
+    // Pick top 5 bowlers/ARs first to satisfy the requirement
+    let bowlingCount = 0;
+    for (const p of bowlersAndARs) {
+        if (bowlingCount < 5) {
+            if (addPlayer(p)) bowlingCount++;
+        } else break;
+    }
 
-    // 4. Fill with All-rounders and Bowlers
-    const others = squad.filter(p => !selectedIds.has(p.id)).sort((a,b) => b.secondarySkill - a.secondarySkill);
-    others.forEach(p => { if (xi.length < 11) addPlayer(p); });
+    // 3. Fill remaining slots with best available players (Batters preferred for top order)
+    const remainingBest = sortedSquad.filter(p => !selectedIds.has(p.id));
+    for (const p of remainingBest) {
+        if (xi.length < 11) {
+            addPlayer(p);
+        } else break;
+    }
 
-    // 5. Emergency fill if rules were too strict
+    // 4. Emergency fill if rules were too strict
     if (xi.length < 11) {
         const remaining = squad.filter(p => !selectedIds.has(p.id));
         remaining.forEach(p => { if (xi.length < 11) addPlayer(p); });
     }
 
-    return xi.slice(0, 11);
+    // Sort XI for a realistic batting order: Openers -> Batters -> ARs -> Bowlers
+    return xi.sort((a, b) => {
+        const roleOrder = {
+            [PlayerRole.BATSMAN]: 1,
+            [PlayerRole.WICKET_KEEPER]: 2,
+            [PlayerRole.ALL_ROUNDER]: 3,
+            [PlayerRole.SPIN_BOWLER]: 4,
+            [PlayerRole.FAST_BOWLER]: 5,
+        };
+        if (a.isOpener && !b.isOpener) return -1;
+        if (!a.isOpener && b.isOpener) return 1;
+        return roleOrder[a.role] - roleOrder[b.role];
+    }).slice(0, 11);
+};
+
+export const calculateTeamRatings = (squad: Player[]) => {
+    if (squad.length === 0) return { strength: 0, batting: 0, bowling: 0, starPlayers: 0 };
+    
+    const top11 = [...squad].sort((a, b) => Math.max(b.battingSkill, b.secondarySkill) - Math.max(a.battingSkill, a.secondarySkill)).slice(0, 11);
+    
+    const battingAvg = top11.reduce((sum, p) => sum + p.battingSkill, 0) / 11;
+    const bowlingAvg = top11.reduce((sum, p) => sum + p.secondarySkill, 0) / 11;
+    const strength = (battingAvg * 0.5) + (bowlingAvg * 0.5);
+    const starPlayers = squad.filter(p => Math.max(p.battingSkill, p.secondarySkill) >= 80).length;
+    
+    return {
+        strength: Math.round(strength),
+        batting: Math.round(battingAvg),
+        bowling: Math.round(bowlingAvg),
+        starPlayers
+    };
+};
+
+export const getTeamHighlights = (squad: Player[]) => {
+    if (squad.length === 0) return null;
+    
+    const bestBatter = [...squad].sort((a, b) => b.battingSkill - a.battingSkill)[0];
+    const bestBowler = [...squad].sort((a, b) => b.secondarySkill - a.secondarySkill)[0];
+    const mostComplete = [...squad].sort((a, b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill))[0];
+    
+    return {
+        bestBatter,
+        bestBowler,
+        mostComplete
+    };
 };
 
 export const getBatterTier = (battingSkill: number) => {

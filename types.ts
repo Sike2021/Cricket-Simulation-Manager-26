@@ -26,11 +26,18 @@ export interface PlayerStats {
     manOfTheMatchAwards: number;
 }
 
+export interface PlayerPerformanceSummary {
+    runs: number;
+    wickets: number;
+    matchId: string;
+}
+
 export interface Player {
     id: string; name: string; nationality: string; role: PlayerRole; battingSkill: number; secondarySkill: number;
     style: BattingStyle; isOpener: boolean; isForeign: boolean; teamName?: string;
     customProfiles?: { [key in Format]?: { avg: number; sr: number } };
     stats: Record<Format, PlayerStats>;
+    recentPerformances: PlayerPerformanceSummary[];
 }
 
 export interface Team {

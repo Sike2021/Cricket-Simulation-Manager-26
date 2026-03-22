@@ -123,10 +123,10 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 // First innings aggression - Boosted for higher scores
                 const progress = balls / maxBalls;
                 if (isT20) {
-                    if (progress > 0.8) aggressionFactor = 1.8; // Death overs
-                    else if (progress > 0.5) aggressionFactor = 1.45;
-                    else if (progress < 0.3) aggressionFactor = 1.3; // Powerplay
-                    else aggressionFactor = 1.4; // Middle overs
+                    if (progress > 0.8) aggressionFactor = 1.65; // Death overs
+                    else if (progress > 0.5) aggressionFactor = 1.4;
+                    else if (progress < 0.3) aggressionFactor = 1.25; // Powerplay
+                    else aggressionFactor = 1.35; // Middle overs
                 } else if (isODI) {
                     if (progress > 0.9) aggressionFactor = 1.9;
                     else if (progress > 0.7) aggressionFactor = 1.5;
@@ -135,6 +135,15 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 } else {
                     // First Class
                     aggressionFactor = 1.2;
+                }
+
+                // Subtle score normalization for T20 to hit 140-240 range (95% target)
+                if (isT20 && !target && balls > 0) {
+                    const currentRR = (score / balls) * 6;
+                    if (balls > 60) { // After 10 overs
+                        if (currentRR < 7.5) aggressionFactor *= 1.15; // Nudge up if too slow
+                        if (currentRR > 11) aggressionFactor *= 0.85; // Nudge down if too fast
+                    }
                 }
             }
 
@@ -241,16 +250,26 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
 
             if (balls % 6 === 0) {
                 if (runsThisOver === 0) currentBowler.maidens++;
+                
+                // Dynamic Bowling Change: If over was expensive (>12 runs in T20/ODI), switch bowler
+                const isExpensiveOver = (isT20 || isODI) && runsThisOver > 12;
+                
                 runsThisOver = 0;
                 [onStrikeBatterIndex, offStrikeBatterIndex] = [offStrikeBatterIndex, onStrikeBatterIndex];
                 
                 const maxOversPerBowler = isT20 ? 4 : isODI ? 10 : Infinity;
                 const lastBowlerIndex = bowlerIndex;
+                const currentOverNumber = Math.floor(balls / 6) + 1;
                 
                 // Smarter bowling rotation
                 let bestNextBowlerIndex = -1;
                 let bestScore = -Infinity;
                 
+                // Identify crucial overs
+                const isPowerplay = isT20 && currentOverNumber <= 6;
+                const isDeathOvers = isT20 && currentOverNumber >= 16;
+                const isCrucial = isPowerplay || isDeathOvers;
+
                 for (let i = 0; i < bowlingLineup.length; i++) {
                     if (i === lastBowlerIndex) continue; // Cannot bowl consecutive overs
                     if (bowlingLineup[i].ballsBowled >= maxOversPerBowler * 6) continue; // Max overs reached
@@ -258,6 +277,11 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                     const b = bowlingLineup[i];
                     let bScore = b.skill;
                     
+                    // Crucial Overs Logic: Best bowlers handle PP and Death
+                    if (isCrucial) {
+                        bScore += b.skill * 0.5; // Heavy weight on skill for crucial overs
+                    }
+
                     // Prefer strike bowlers if wickets are needed
                     if (wickets < 5) {
                         if (b.role === PlayerRole.FAST_BOWLER) bScore += 10;
@@ -280,7 +304,6 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 if (bestNextBowlerIndex !== -1) {
                     bowlerIndex = bestNextBowlerIndex;
                 } else {
-                    // Fallback to simple rotation if no "best" found (shouldn't happen with 2+ bowlers)
                     bowlerIndex = (lastBowlerIndex + 1) % bowlingLineup.length;
                 }
             }
@@ -470,6 +493,32 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 } 
                 if (bowlPerf.wickets >= 5) stats.fiveWicketHauls++; 
                 else if (bowlPerf.wickets >= 3) stats.threeWicketHauls++; 
+
+                // Track recent performance
+                if (!player.recentPerformances) player.recentPerformances = [];
+                const existingPerf = player.recentPerformances.find(rp => rp.matchId === result.matchNumber.toString());
+                if (existingPerf) {
+                    existingPerf.wickets = bowlPerf.wickets;
+                } else {
+                    player.recentPerformances.push({ matchId: result.matchNumber.toString(), runs: 0, wickets: bowlPerf.wickets });
+                }
+                if (player.recentPerformances.length > 10) player.recentPerformances.shift();
+            }
+        }
+
+        // Ensure batting perfs are also in recentPerformances
+        for (const inning of allInnings) {
+            for (const batPerf of inning.batting) {
+                const player = newGameData.allPlayers.find(p => p.id === batPerf.playerId);
+                if (!player) continue;
+                if (!player.recentPerformances) player.recentPerformances = [];
+                const existingPerf = player.recentPerformances.find(rp => rp.matchId === result.matchNumber.toString());
+                if (existingPerf) {
+                    existingPerf.runs = batPerf.runs;
+                } else {
+                    player.recentPerformances.push({ matchId: result.matchNumber.toString(), runs: batPerf.runs, wickets: 0 });
+                }
+                if (player.recentPerformances.length > 10) player.recentPerformances.shift();
             }
         }
 
