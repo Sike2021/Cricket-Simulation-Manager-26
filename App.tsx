@@ -191,7 +191,7 @@ export const App = () => {
             }
         }
 
-        return { id: teamData.id, name: teamData.name, squad, captains: {}, purse: 50.0 };
+        return { id: teamData.id, name: teamData.name, squad, captains: {}, purse: 100.0 };
     });
 
     const initialStandings = (teams: Team[]) => teams.map(team => ({ 

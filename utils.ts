@@ -149,34 +149,32 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const keepers = sortedSquad.filter(p => p.role === PlayerRole.WICKET_KEEPER);
     if (keepers.length > 0) addPlayer(keepers[0]);
 
-    // 2. Must have 1 or 2 All-Rounders
+    // 2. Must have 5 Batters (Best available)
+    const batters = sortedSquad.filter(p => p.role === PlayerRole.BATSMAN);
+    let bCount = 0;
+    for (const p of batters) {
+        if (bCount < 5) {
+            if (addPlayer(p)) bCount++;
+        } else break;
+    }
+
+    // 3. Must have 1 or 2 All-Rounders
     const allRounders = sortedSquad.filter(p => p.role === PlayerRole.ALL_ROUNDER);
     let arCount = 0;
     for (const p of allRounders) {
-        if (arCount < 2) {
+        if (xi.length < 11 && arCount < 2) {
             if (addPlayer(p)) arCount++;
         } else break;
     }
 
-    // 3. Must have 3 or 4 Bowlers (Fast or Spin)
+    // 4. Must have 3 or 4 Bowlers (Fast or Spin)
     const bowlers = sortedSquad.filter(p => 
         [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER].includes(p.role)
     );
     let bowlingCount = 0;
     for (const p of bowlers) {
-        if (bowlingCount < 4) {
+        if (xi.length < 11 && bowlingCount < 4) {
             if (addPlayer(p)) bowlingCount++;
-        } else break;
-    }
-
-    // 4. Fill remaining slots with best available Batters (to reach 5 batters total including WK if they are a top batter, but usually 5 pure/top batters)
-    // Actually, user said: "5 batters 1 wk 1 or 2 all-rounders 3 or 4 bowlers"
-    // Total: 5 + 1 + 1 + 4 = 11 or 5 + 1 + 2 + 3 = 11.
-    const pureBatters = sortedSquad.filter(p => p.role === PlayerRole.BATSMAN);
-    let batterCount = 0;
-    for (const p of pureBatters) {
-        if (xi.length < 11 && batterCount < 5) {
-            if (addPlayer(p)) batterCount++;
         } else break;
     }
 

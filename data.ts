@@ -161,7 +161,7 @@ const playersRaw: any[] = [
   { id: 'l-eag-3', name: 'Asad', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 60, secondarySkill: 11, style: 'N', isOpener: true, isForeign: false },
   { id: 'l-eag-4', name: 'Siraj', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 63, secondarySkill: 22, style: 'D', isOpener: true, isForeign: false },
   { id: 'l-eag-5', name: 'Fakhrudin', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 70, secondarySkill: 23, style: 'D', isOpener: false, isForeign: false },
-  { id: 'l-eag-6', name: 'Azhar', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 75, secondarySkill: 45, style: 'A', isOpener: false, isForeign: false },
+  { id: 'l-eag-6', name: 'Azhar', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 75, secondarySkill: 45, style: 'N', isOpener: false, isForeign: false },
   { id: 'l-eag-7', name: 'Aaqib Raza', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 78, secondarySkill: 70, style: 'A', isOpener: false, isForeign: false },
   { id: 'l-eag-8', name: 'Nawaz', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 57, secondarySkill: 67, style: 'A', isOpener: false, isForeign: false },
   { id: 'l-eag-9', name: 'Atif Maqbool', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 15, secondarySkill: 86, style: 'N', isOpener: false, isForeign: false },

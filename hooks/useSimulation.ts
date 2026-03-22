@@ -103,10 +103,11 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                     
                     // Batting aggression based on required rate
                     if (isT20) {
-                        if (requiredRR > 12) aggressionFactor = 1.6;
-                        else if (requiredRR > 10) aggressionFactor = 1.45;
-                        else if (requiredRR > 8) aggressionFactor = 1.25;
-                        else if (requiredRR < 6) aggressionFactor = 0.95;
+                        if (requiredRR > 14) aggressionFactor = 2.2;
+                        else if (requiredRR > 12) aggressionFactor = 1.9;
+                        else if (requiredRR > 10) aggressionFactor = 1.65;
+                        else if (requiredRR > 8) aggressionFactor = 1.4;
+                        else if (requiredRR < 6) aggressionFactor = 0.9;
                     } else if (isODI) {
                         if (requiredRR > 10) aggressionFactor = 1.5;
                         else if (requiredRR > 8) aggressionFactor = 1.35;
@@ -123,10 +124,10 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 // First innings aggression - Boosted for higher scores
                 const progress = balls / maxBalls;
                 if (isT20) {
-                    if (progress > 0.8) aggressionFactor = 1.65; // Death overs
-                    else if (progress > 0.5) aggressionFactor = 1.4;
-                    else if (progress < 0.3) aggressionFactor = 1.25; // Powerplay
-                    else aggressionFactor = 1.35; // Middle overs
+                    if (progress > 0.8) aggressionFactor = 2.1; // Death overs
+                    else if (progress > 0.5) aggressionFactor = 1.75;
+                    else if (progress < 0.3) aggressionFactor = 1.6; // Powerplay
+                    else aggressionFactor = 1.65; // Middle overs
                 } else if (isODI) {
                     if (progress > 0.9) aggressionFactor = 1.9;
                     else if (progress > 0.7) aggressionFactor = 1.5;
@@ -137,12 +138,12 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                     aggressionFactor = 1.2;
                 }
 
-                // Subtle score normalization for T20 to hit 140-240 range (95% target)
+                // Subtle score normalization for T20 to hit 160-280 range
                 if (isT20 && !target && balls > 0) {
                     const currentRR = (score / balls) * 6;
-                    if (balls > 60) { // After 10 overs
-                        if (currentRR < 7.5) aggressionFactor *= 1.15; // Nudge up if too slow
-                        if (currentRR > 11) aggressionFactor *= 0.85; // Nudge down if too fast
+                    if (balls > 48) { // After 8 overs
+                        if (currentRR < 9.0) aggressionFactor *= 1.25; // Nudge up if too slow
+                        if (currentRR > 15.0) aggressionFactor *= 0.85; // Nudge down only if extremely fast
                     }
                 }
             }
