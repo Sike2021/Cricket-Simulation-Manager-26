@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Anton", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-[#E4E3E0] text-[#141414] font-sans selection:bg-teal-500 selection:text-white;
+    overscroll-behavior: none;
+  }
+
+  .dark body {
+    @apply bg-[#050808] text-[#E4E3E0];
+  }
+}
+
+@layer components {
+  .data-grid {
+    @apply border-t border-l border-[#141414] dark:border-[#E4E3E0]/20;
+  }
+
+  .data-cell {
+    @apply border-r border-b border-[#141414] dark:border-[#E4E3E0]/20 p-3 font-mono text-xs;
+  }
+
+  .btn-brutal {
+    @apply border-2 border-[#141414] dark:border-[#E4E3E0] px-6 py-3 font-black uppercase tracking-tighter italic text-xl transition-all active:scale-95 hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-[#E4E3E0] dark:hover:text-[#141414];
+  }
+
+  .card-brutal {
+    @apply border-2 border-[#141414] dark:border-[#E4E3E0] p-6 relative overflow-hidden;
+  }
+
+  .label-micro {
+    @apply text-[10px] font-mono font-bold uppercase tracking-widest opacity-50;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-teal-500/20 hover:bg-teal-500/40 transition-colors;
+}

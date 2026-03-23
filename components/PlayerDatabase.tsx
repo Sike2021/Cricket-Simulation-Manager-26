@@ -47,122 +47,118 @@ const PlayerDatabase: React.FC<PlayerDatabaseProps> = ({ gameData, onAddPlayer, 
     , [groupedPlayers]);
 
     return (
-        <div className="h-full flex flex-col bg-slate-950 text-white">
-            <header className="p-4 bg-slate-900 border-b border-slate-800">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-black italic uppercase tracking-tighter text-teal-400">Player Registry</h2>
+        <div className="h-full flex flex-col bg-white dark:bg-[#0A0F0F] font-sans text-gray-900 dark:text-white overflow-hidden">
+            <header className="p-6 bg-white dark:bg-[#0A0F0F] border-b border-gray-100 dark:border-white/10">
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 className="text-3xl font-black italic uppercase tracking-tighter leading-none">Player <span className="text-teal-600">Registry</span></h2>
+                        <p className="text-[10px] font-black opacity-40 uppercase tracking-widest mt-1">GLOBAL_TALENT_DATABASE</p>
+                    </div>
                     <button 
                         onClick={onAddPlayer}
-                        className="bg-pink-600 hover:bg-pink-500 text-white p-2 rounded-full shadow-lg transition-all active:scale-95"
+                        className="bg-teal-600 hover:bg-teal-700 text-white p-4 rounded-2xl shadow-xl shadow-teal-600/20 transition-all active:scale-95"
                         title="Add New Player"
                     >
-                        <Icons.PlusCircle />
+                        <Icons.PlusCircle className="w-6 h-6" />
                     </button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-6">
                     <div className="relative">
-                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
-                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                             </svg>
-                        </span>
+                        <Icons.Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 opacity-20" />
                         <input 
                             type="text" 
-                            placeholder="Search world talent..." 
+                            placeholder="SEARCH_WORLD_TALENT..." 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                            className="w-full pl-14 pr-6 py-5 bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-teal-600 rounded-3xl text-xs font-black uppercase tracking-widest outline-none transition-all"
                         />
                     </div>
 
-                    <div className="flex gap-2 items-center">
-                        <div className="flex-1 flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
+                    <div className="flex gap-4 items-center">
+                        <div className="flex-1 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                             {(['ALL', ...Object.values(PlayerRole)] as const).map(role => (
                                 <button
                                     key={role}
                                     onClick={() => setRoleFilter(role)}
-                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase whitespace-nowrap border transition-all ${
+                                    className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${
                                         roleFilter === role 
-                                        ? 'bg-teal-500 border-teal-400 text-slate-950' 
-                                        : 'bg-slate-800 border-slate-700 text-slate-400'
+                                        ? 'bg-teal-600 border-teal-600 text-white shadow-lg shadow-teal-600/20' 
+                                        : 'bg-gray-50 dark:bg-white/5 border-transparent opacity-40 hover:opacity-100'
                                     }`}
                                 >
-                                    {role === 'ALL' ? 'World' : getRoleFullName(role as PlayerRole)}
+                                    {role === 'ALL' ? 'WORLD' : getRoleFullName(role as PlayerRole).toUpperCase()}
                                 </button>
                             ))}
                         </div>
                         <button 
                             onClick={() => setShowOnlyForeign(!showOnlyForeign)}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase whitespace-nowrap border transition-all ${
+                            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${
                                 showOnlyForeign 
-                                ? 'bg-pink-600 border-pink-500 text-white' 
-                                : 'bg-slate-800 border-slate-700 text-slate-400'
+                                ? 'bg-teal-600 border-teal-600 text-white' 
+                                : 'bg-gray-50 dark:bg-white/5 border-transparent opacity-40 hover:opacity-100'
                             }`}
                         >
-                            Foreign ✈️
+                            FOREIGN ✈️
                         </button>
                     </div>
 
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500 pt-1">
-                        <span>Sort By:</span>
-                        <div className="flex gap-4">
+                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40 pt-2 border-t border-gray-100 dark:border-white/10">
+                        <span>SORT_BY</span>
+                        <div className="flex gap-6">
                             <button 
                                 onClick={() => setSortBy('skill')}
-                                className={sortBy === 'skill' ? 'text-teal-400' : 'hover:text-slate-300'}
+                                className={sortBy === 'skill' ? 'text-teal-600 opacity-100' : 'hover:opacity-100'}
                             >
-                                Skill
+                                SKILL
                             </button>
                             <button 
                                 onClick={() => setSortBy('name')}
-                                className={sortBy === 'name' ? 'text-teal-400' : 'hover:text-slate-300'}
+                                className={sortBy === 'name' ? 'text-teal-600 opacity-100' : 'hover:opacity-100'}
                             >
-                                Name
+                                NAME
                             </button>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-8">
+            <div className="flex-1 overflow-y-auto p-6 space-y-12 scrollbar-hide">
                 {nationalities.length > 0 ? nationalities.map(nat => (
-                    <div key={nat} className="space-y-3">
-                        <div className="flex items-center gap-3">
-                            <div className="h-px bg-slate-800 flex-1"></div>
-                            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">{nat}</h3>
-                            <div className="h-px bg-slate-800 flex-1"></div>
+                    <div key={nat} className="space-y-6">
+                        <div className="flex items-center gap-4">
+                            <h3 className="text-[10px] font-black uppercase tracking-widest opacity-40">{nat}</h3>
+                            <div className="h-px bg-gray-100 dark:bg-white/10 flex-1"></div>
                         </div>
-                        <div className="grid grid-cols-1 gap-2">
+                        <div className="grid grid-cols-1 gap-3">
                             {groupedPlayers[nat].map(player => (
                                 <div 
                                     key={player.id}
                                     onClick={() => onViewPlayer(player)}
-                                    className="group bg-slate-900 border border-slate-800 p-3 rounded-2xl flex items-center justify-between hover:border-teal-500/50 hover:bg-slate-900/80 transition-all cursor-pointer"
+                                    className="group bg-gray-50 dark:bg-white/5 border-2 border-transparent hover:border-teal-600 p-5 rounded-[32px] flex items-center justify-between transition-all cursor-pointer hover:shadow-2xl hover:shadow-teal-600/10"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-lg shadow-inner">
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/10 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">
                                             {player.role === PlayerRole.WICKET_KEEPER ? '🧤' : player.role === PlayerRole.BATSMAN ? '🏏' : '⚾'}
                                         </div>
                                         <div>
-                                            <p className="font-bold text-slate-100 group-hover:text-teal-400 transition-colors">{player.name}</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-[9px] font-black uppercase ${getRoleColor(player.role)}`}>
-                                                    {getRoleFullName(player.role)}
+                                            <p className="text-lg font-black uppercase tracking-tighter leading-none mb-2 group-hover:text-teal-600 transition-colors">{player.name}</p>
+                                            <div className="flex items-center gap-3">
+                                                <span className={`text-[9px] font-black uppercase tracking-widest ${getRoleColor(player.role)}`}>
+                                                    {getRoleFullName(player.role).toUpperCase()}
                                                 </span>
-                                                <span className="text-[9px] text-slate-600">•</span>
-                                                <span className="text-[9px] text-slate-500 font-bold uppercase">{player.style === 'A' ? 'Aggressive' : player.style === 'D' ? 'Defensive' : 'Balanced'}</span>
+                                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-white/20"></span>
+                                                <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{player.style === 'A' ? 'AGGRESSIVE' : player.style === 'D' ? 'DEFENSIVE' : 'BALANCED'}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-6">
                                         <div className="text-right">
-                                            <p className="text-xs font-black text-teal-400">{Math.max(player.battingSkill, player.secondarySkill)}</p>
-                                            <p className="text-[8px] text-slate-600 uppercase font-black">Rating</p>
+                                            <p className="text-xl font-black text-teal-600 font-mono leading-none mb-1">{Math.max(player.battingSkill, player.secondarySkill)}</p>
+                                            <p className="text-[8px] font-black uppercase tracking-widest opacity-40">RATING</p>
                                         </div>
-                                        <div className="text-slate-700 group-hover:text-teal-500 transition-colors">
-                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
+                                        <div className="w-10 h-10 rounded-full border-2 border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-all">
+                                            <Icons.ChevronRight className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </div>
@@ -170,9 +166,9 @@ const PlayerDatabase: React.FC<PlayerDatabaseProps> = ({ gameData, onAddPlayer, 
                         </div>
                     </div>
                 )) : (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-4 pt-20">
-                        <Icons.Database className="h-12 w-12 opacity-20" />
-                        <p className="text-sm font-bold uppercase tracking-widest">No players found</p>
+                    <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
+                        <Icons.Database className="w-16 h-16 mb-6" />
+                        <p className="text-[10px] font-black uppercase tracking-widest">NO_PLAYERS_FOUND</p>
                     </div>
                 )}
             </div>

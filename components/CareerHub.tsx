@@ -47,6 +47,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
         { name: 'HOME', screen: 'DASHBOARD' as CareerScreen, icon: Home },
         { name: 'STANDINGS', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
         { name: 'STATS', screen: 'STATS' as CareerScreen, icon: BarChart3 },
+        { name: 'EDITOR', screen: 'EDITOR' as CareerScreen, icon: Database },
         { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (
@@ -57,17 +58,17 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
                     <button
                         key={item.name}
                         onClick={() => setScreen(item.screen)}
-                        className={`relative flex flex-col items-center justify-center space-y-1 w-1/4 pt-2 transition-all duration-300 ${isActive ? 'text-teal-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+                        className={`relative flex flex-col items-center justify-center space-y-1 w-1/5 pt-2 transition-all duration-300 ${isActive ? 'text-teal-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
                     >
                         {isActive && (
                             <motion.div 
                                 layoutId="nav-active"
-                                className="absolute -top-2 w-12 h-1 bg-teal-500 rounded-full"
+                                className="absolute -top-2 w-10 h-1 bg-teal-500 rounded-full"
                                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                             />
                         )}
-                        <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                        <span className="text-[9px] font-black tracking-[0.15em] uppercase">{item.name}</span>
+                        <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                        <span className="text-[8px] font-black tracking-[0.1em] uppercase">{item.name}</span>
                     </button>
                 );
             })}
@@ -121,21 +122,26 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 const sortedBatters = [...formatStats.entries()].sort((a, b) => b[1].runs - a[1].runs);
                 const sortedBowlers = [...formatStats.entries()].sort((a, b) => b[1].wickets - a[1].wickets);
 
-                const finalMatchNumber = schedule[schedule.length-1].matchNumber;
-                const lastMatchResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === finalMatchNumber);
-                const winnerTeam = gameData.teams.find(t => t.id === lastMatchResult?.winnerId);
+                if (schedule && schedule.length > 0) {
+                    const finalMatchNumber = schedule[schedule.length-1].matchNumber;
+                    const lastMatchResult = gameData.matchResults[gameData.currentFormat]?.find(r => r.matchNumber === finalMatchNumber);
+                    const winnerTeam = gameData.teams.find(t => t.id === lastMatchResult?.winnerId);
 
-                const newAward = { 
-                    season: gameData.currentSeason, 
-                    format: gameData.currentFormat, 
-                    winnerTeamId: winnerTeam?.id || '', 
-                    winnerTeamName: winnerTeam?.name || 'N/A', 
-                    bestBatter: { playerId: sortedBatters[0]?.[0] || '', playerName: sortedBatters[0]?.[1].playerName || 'N/A', teamName: sortedBatters[0]?.[1].teamName || 'N/A', runs: sortedBatters[0]?.[1].runs || 0 }, 
-                    bestBowler: { playerId: sortedBowlers[0]?.[0] || '', playerName: sortedBowlers[0]?.[1].playerName || 'N/A', teamName: sortedBowlers[0]?.[1].teamName || 'N/A', wickets: sortedBowlers[0]?.[1].wickets || 0 } 
-                };
+                    const newAward = { 
+                        season: gameData.currentSeason, 
+                        format: gameData.currentFormat, 
+                        winnerTeamId: winnerTeam?.id || '', 
+                        winnerTeamName: winnerTeam?.name || 'N/A', 
+                        bestBatter: { playerId: sortedBatters[0]?.[0] || '', playerName: sortedBatters[0]?.[1].playerName || 'N/A', teamName: sortedBatters[0]?.[1].teamName || 'N/A', runs: sortedBatters[0]?.[1].runs || 0 }, 
+                        bestBowler: { playerId: sortedBowlers[0]?.[0] || '', playerName: sortedBowlers[0]?.[1].playerName || 'N/A', teamName: sortedBowlers[0]?.[1].teamName || 'N/A', wickets: sortedBowlers[0]?.[1].wickets || 0 } 
+                    };
 
-                setGameData(prev => prev ? { ...prev, awardsHistory: [...prev.awardsHistory, newAward] } : null);
-                setScreen('END_OF_FORMAT');
+                    setGameData(prev => prev ? { ...prev, awardsHistory: [...prev.awardsHistory, newAward] } : null);
+                    setScreen('END_OF_FORMAT');
+                } else {
+                    // Fallback if schedule is empty
+                    setScreen('END_OF_FORMAT');
+                }
             }
         }
     }, [gameData.currentMatchIndex, gameData.currentFormat, gameData.currentSeason, gameData.awardsHistory, gameData.teams, gameData.allPlayers, gameData.matchResults, gameData.schedule, setGameData]);
@@ -231,7 +237,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                         const resolvePlaceholder = (placeholder: string) => {
                             if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
                             if (placeholder.startsWith('SF')) {
-                                const sfRes = updatedData.matchResults[f].find(r => r.matchNumber === placeholder.split(' ')[0]);
+                                const sfRes = updatedData.matchResults[f]?.find(r => r.matchNumber === placeholder.split(' ')[0]);
                                 return updatedData.teams.find(t => t.id === sfRes?.winnerId)?.name || 'TBD';
                             }
                             return placeholder;
@@ -288,7 +294,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                     }
                     if (placeholder.startsWith('SF')) {
                         const sfMatchNumber = placeholder.split(' ')[0];
-                        const sfResult = currentData.matchResults[currentData.currentFormat].find(r => r.matchNumber === sfMatchNumber);
+                        const sfResult = currentData.matchResults[currentData.currentFormat]?.find(r => r.matchNumber === sfMatchNumber);
                         const winner = currentData.teams.find(t => t.id === sfResult?.winnerId);
                         return winner?.name || null;
                     }
@@ -351,7 +357,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
                 if (placeholder.startsWith('SF')) {
                     const sfMatchNumber = placeholder.split(' ')[0];
-                    const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === sfMatchNumber);
+                    const sfResult = gameData.matchResults[gameData.currentFormat]?.find(r => r.matchNumber === sfMatchNumber);
                     return gameData.teams.find(t => t.id === sfResult?.winnerId)?.name || null;
                 }
                 return placeholder;
@@ -548,7 +554,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                             return gameData.standings[gameData.currentFormat][pos-1]?.teamName || 'TBD';
                         }
                         if (placeholder.startsWith('SF')) {
-                            const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === placeholder.split(' ')[0]);
+                            const sfResult = gameData.matchResults[gameData.currentFormat]?.find(r => r.matchNumber === placeholder.split(' ')[0]);
                             return gameData.teams.find(t => t.id === sfResult?.winnerId)?.name || 'TBD';
                         }
                         return placeholder;

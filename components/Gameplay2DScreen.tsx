@@ -334,7 +334,7 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
     };
 
     useEffect(() => {
-        if (gameOver && !game.current.matchCompleteTriggered) {
+        if (gameOver && !game.current.matchCompleteTriggered && match) {
             game.current.matchCompleteTriggered = true;
             const inn1 = inningsState[0];
             const inn2 = inningsState[1];

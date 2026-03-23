@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GameData, Team, Format, Player, PlayerRole } from '../types';
 import { Icons } from './Icons';
-import { getRoleColor, generateAutoXI, calculateTeamRatings, getTeamHighlights } from '../utils';
+import { getRoleColor, generateAutoXI, calculateTeamRatings, getTeamHighlights, getRoleFullName } from '../utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface LineupsProps {
     gameData: GameData;
@@ -25,7 +26,6 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
     const teamRatings = useMemo(() => selectedTeam ? calculateTeamRatings(selectedTeam.squad) : null, [selectedTeam]);
     const teamHighlights = useMemo(() => selectedTeam ? getTeamHighlights(selectedTeam.squad) : null, [selectedTeam]);
 
-    // Sync selectedTeamId if userTeam changes
     useEffect(() => {
         if (userTeam && !selectedTeamId) {
             setSelectedTeamId(userTeam.id);
@@ -137,179 +137,171 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
 
     const getDropStatus = (player: Player) => {
         if (!player.recentPerformances || player.recentPerformances.length === 0) return null;
-        
         const isHighQuality = Math.max(player.battingSkill, player.secondarySkill) >= 80;
         const matchesToCheck = isHighQuality ? 8 : 3;
-        
         if (player.recentPerformances.length < matchesToCheck) return null;
-        
         const recent = player.recentPerformances.slice(-matchesToCheck);
         const avgRuns = recent.reduce((sum, p) => sum + p.runs, 0) / matchesToCheck;
         const avgWickets = recent.reduce((sum, p) => sum + p.wickets, 0) / matchesToCheck;
-        
         if (avgRuns < 15 && avgWickets < 0.5) {
-            return {
-                type: 'at_risk',
-                message: `Poor form over last ${matchesToCheck} matches. Consider dropping.`
-            };
+            return { type: 'at_risk', message: `Poor form. Consider dropping.` };
         }
         return null;
     };
 
-    const renderPlayerList = (players: Player[], isXI: boolean) => (
-        <ul className="space-y-1">
-            {players.map(player => {
-                const dropStatus = getDropStatus(player);
-                return (
-                    <li key={player.id} className={`flex items-center p-2 rounded-md transition-colors ${playerToSwap?.id === player.id ? 'bg-teal-200 dark:bg-teal-800' : 'bg-gray-100 dark:bg-gray-900/50'} ${dropStatus ? 'border-l-4 border-red-500' : ''}`}>
-                        <span className={`font-bold w-8 text-sm ${getRoleColor(player.role)}`}>{player.role}</span>
-                        <div className="flex-grow flex flex-col">
-                            <span className="text-sm font-medium">{player.name} {player.isForeign ? '(F)' : ''} {player.id === captainId ? '(C)' : ''}</span>
-                            {dropStatus && <span className="text-[10px] text-red-500 font-semibold">{dropStatus.message}</span>}
-                        </div>
-                        <span className="font-semibold mr-2 text-sm">{player.battingSkill}</span>
-                        <span className="font-semibold text-gray-500 mr-4 text-sm">{player.secondarySkill}</span>
-                        {isXI && player.id !== captainId && (
-                            <button onClick={() => setCaptain(player.id)} className="text-[10px] bg-yellow-500 text-white px-1 rounded mr-1">C</button>
-                        )}
-                        {isXI ? (
-                             <button onClick={() => selectPlayerForSwap(player)} className="text-gray-400 hover:text-red-500"><Icons.RemoveCircle /></button>
-                        ) : (
-                            <button onClick={() => completeSwap(player)} disabled={!playerToSwap || (isDomesticOnlyFormat && player.isForeign)} className="disabled:opacity-30 text-teal-500">
-                                <Icons.PlusCircle />
-                            </button>
-                        )}
-                    </li>
-                );
-            })}
-        </ul>
-    );
+    const autoGenerate = () => {
+        const newXI = generateAutoXI(selectedTeam.squad, selectedFormat);
+        handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
+        showFeedback("Auto-generated a balanced XI!", "success");
+    };
 
     return (
-        <div className="p-2 h-[calc(100vh-90px)] flex flex-col overflow-y-auto">
-            <h2 className="text-xl font-bold text-center mb-2">Team Showcase</h2>
-            
-            <div className="mb-4">
-                <select 
-                    value={selectedTeamId} 
-                    onChange={(e) => setSelectedTeamId(e.target.value)}
-                    className="w-full p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 font-bold"
-                >
-                    {gameData.teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
-                </select>
-            </div>
-
-            {/* SigNify Board Ratings */}
-            {teamRatings && (
-                <div className="bg-gradient-to-br from-teal-500 to-blue-600 text-white p-4 rounded-xl shadow-lg mb-4">
-                    <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-bold text-lg">SigNify Board Ratings</h3>
-                        <div className="bg-white/20 px-2 py-1 rounded text-xs font-bold">Season {gameData.currentSeason}</div>
-                    </div>
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Strength</div>
-                            <div className="text-xl font-bold">{teamRatings.strength}</div>
-                        </div>
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Bowling</div>
-                            <div className="text-xl font-bold">{teamRatings.bowling}</div>
-                        </div>
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Batting</div>
-                            <div className="text-xl font-bold">{teamRatings.batting}</div>
-                        </div>
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Stars</div>
-                            <div className="text-xl font-bold">{teamRatings.starPlayers}</div>
-                        </div>
-                    </div>
+        <div className="p-0 h-full flex flex-col bg-white dark:bg-[#050808] overflow-hidden font-sans">
+            {/* SigNify Editorial Header */}
+            <div className="px-8 pt-12 pb-8 border-b-2 border-gray-900 dark:border-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Icons.Strategy className="w-32 h-32" />
                 </div>
-            )}
+                <h2 className="text-[10px] font-mono font-bold text-teal-600 uppercase tracking-[0.4em] mb-2">TACTICAL_DEPLOYMENT // v4.0.1</h2>
+                <h1 className="text-7xl font-black italic uppercase tracking-tighter leading-[0.8] text-gray-900 dark:text-white">
+                    TEAM<br/>
+                    <span className="text-teal-600">LINEUPS</span>
+                </h1>
+                
+                <div className="flex flex-col gap-4 mt-8">
+                    <div className="flex gap-4">
+                        <div className="relative w-64">
+                            <select 
+                                value={selectedTeamId} 
+                                onChange={(e) => setSelectedTeamId(e.target.value)}
+                                className="w-full p-4 rounded-xl bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-teal-600 text-xs font-black uppercase tracking-widest appearance-none outline-none transition-all"
+                            >
+                                {gameData.teams.map(team => <option key={team.id} value={team.id} className="dark:bg-[#0A0F0F]">{team.name}</option>)}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+                        </div>
 
-            {/* Team Highlights */}
-            {teamHighlights && (
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                    <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-center">
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Most Complete</div>
-                        <div className="text-xs font-bold truncate">{teamHighlights.mostComplete.name}</div>
+                        <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl">
+                            {['T20', 'List A', 'First Class'].map((cat) => (
+                                <button 
+                                    key={cat} 
+                                    onClick={() => setCategory(cat as any)} 
+                                    className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${category === cat ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg' : 'text-gray-400 hover:text-teal-600'}`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                    <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-center">
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Best Batter</div>
-                        <div className="text-xs font-bold truncate">{teamHighlights.bestBatter.name}</div>
-                    </div>
-                    <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-center">
-                        <div className="text-[10px] uppercase font-bold text-gray-500">Best Bowler</div>
-                        <div className="text-xs font-bold truncate">{teamHighlights.bestBowler.name}</div>
-                    </div>
-                </div>
-            )}
 
-            {/* Captain Showcase */}
-            {captain && (
-                <div className="bg-white dark:bg-gray-800 border-2 border-yellow-500 p-3 rounded-xl mb-4 flex items-center shadow-md">
-                    <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center text-yellow-600 mr-3">
-                        <Icons.User className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <div className="text-[10px] uppercase font-bold text-yellow-600">Team Captain</div>
-                        <div className="text-lg font-bold">{captain.name}</div>
-                        <div className="text-xs text-gray-500">{captain.nationality} • {captain.role}</div>
-                    </div>
-                </div>
-            )}
-            
-             {/* Category Tabs */}
-             <div className="flex justify-center border-b border-gray-300 dark:border-gray-700 mb-2">
-                {['T20', 'List A', 'First Class'].map((cat) => (
-                    <button 
-                        key={cat} 
-                        onClick={() => setCategory(cat as any)} 
-                        className={`px-4 py-2 text-sm font-semibold ${category === cat ? 'border-b-2 border-teal-500 text-teal-500' : 'text-gray-500'}`}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-            
-            {/* Tournament Dropdown */}
-            <div className="mb-2">
-                <select
-                    value={selectedFormat}
-                    onChange={(e) => setSelectedFormat(e.target.value as Format)}
-                    className="w-full p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
-                >
-                    {getFormatsForCategory(category).map(f => (
-                        <option key={f} value={f}>{f}</option>
-                    ))}
-                </select>
-            </div>
-
-            {isDomesticOnlyFormat && (
-                <div className="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 p-2 rounded-md text-sm text-center my-2">
-                    Only domestic players are allowed in ODI and First-Class formats.
-                </div>
-            )}
-            <div className="flex-grow">
-                <h3 className="font-bold my-2 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <span>Playing XI ({playingXI.length} / 11)</span>
+                    <div className="flex items-center gap-4">
                         <button 
-                            onClick={() => {
-                                const newXI = generateAutoXI(selectedTeam.squad, selectedFormat);
-                                handleUpdatePlayingXI(selectedTeam.id, selectedFormat, newXI.map(p => p.id));
-                                showFeedback("Auto-generated a balanced XI!", "success");
-                            }}
-                            className="text-[10px] bg-teal-500 hover:bg-teal-600 text-white px-2 py-1 rounded-full font-bold uppercase tracking-wider transition-colors"
+                            onClick={autoGenerate}
+                            className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg hover:shadow-teal-500/20"
                         >
-                            Auto Select
+                            <Icons.Strategy className="w-4 h-4" />
+                            AUTO_SELECT_XI
                         </button>
+                        <div className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">
+                            {playingXI.length}/11 PLAYERS SELECTED
+                        </div>
                     </div>
-                    {playingXI.length < 11 && <span className="text-xs text-red-500">Incomplete Squad</span>}
-                </h3>
-                {renderPlayerList(playingXI, true)}
-                <h3 className="font-bold my-2">Bench</h3>
-                {renderPlayerList(bench, false)}
+                </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+                {isDomesticOnlyFormat && (
+                    <div className="bg-red-500/10 text-red-500 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center mb-8 border-2 border-red-500/20">
+                        DOMESTIC_PLAYERS_ONLY_RESTRICTION_ACTIVE
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    {/* Playing XI Section */}
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between border-b-2 border-gray-900 dark:border-white pb-2">
+                            <h3 className="font-black text-xl uppercase italic tracking-tighter">PLAYING_XI</h3>
+                            <span className="text-[10px] font-mono font-bold text-teal-600">ACTIVE_ROSTER</span>
+                        </div>
+                        <div className="space-y-3">
+                            {playingXI.map((player, index) => {
+                                const isCaptain = captainId === player.id;
+                                const isSwapping = playerToSwap?.id === player.id;
+                                const dropStatus = getDropStatus(player);
+
+                                return (
+                                    <motion.div 
+                                        layout
+                                        key={player.id}
+                                        className={`group relative flex items-center p-4 rounded-2xl border-2 transition-all ${isSwapping ? 'bg-teal-500/10 border-teal-600' : isCaptain ? 'bg-teal-600 border-teal-600 text-white' : 'bg-white dark:bg-[#0A0F0F] border-gray-900 dark:border-white hover:border-teal-600'}`}
+                                    >
+                                        <div className="w-8 font-mono font-bold opacity-50">{index + 1}</div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-black text-lg uppercase italic tracking-tighter">{player.name} {player.isForeign ? '(F)' : ''}</span>
+                                                {isCaptain && <span className="bg-white text-teal-600 px-2 py-0.5 rounded text-[8px] font-black uppercase">CPT</span>}
+                                            </div>
+                                            <div className={`text-[9px] font-mono font-bold uppercase tracking-widest ${isCaptain ? 'text-teal-100' : 'text-gray-400'}`}>
+                                                {getRoleFullName(player.role)} • {player.battingSkill}/{player.secondarySkill}
+                                            </div>
+                                            {dropStatus && <div className="text-[8px] text-red-500 font-black uppercase mt-1">{dropStatus.message}</div>}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {!isCaptain && (
+                                                <button 
+                                                    onClick={() => setCaptain(player.id)}
+                                                    className={`p-2 rounded-lg transition-colors ${isCaptain ? 'text-white' : 'text-teal-600 hover:bg-teal-500/10'}`}
+                                                    title="Make Captain"
+                                                >
+                                                    <Icons.Award className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={() => selectPlayerForSwap(player)}
+                                                className={`p-2 rounded-lg transition-colors ${isCaptain ? 'hover:bg-white/10' : isSwapping ? 'bg-teal-600 text-white' : 'hover:bg-red-500/10 text-red-500'}`}
+                                            >
+                                                <Icons.RemoveCircle className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Bench Section */}
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between border-b-2 border-gray-900 dark:border-white pb-2">
+                            <h3 className="font-black text-xl uppercase italic tracking-tighter">BENCH_STRENGTH</h3>
+                            <span className="text-[10px] font-mono font-bold text-gray-400">AVAILABLE_RESERVES</span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                            {bench.map((player) => {
+                                const isDisabled = playerToSwap && isDomesticOnlyFormat && player.isForeign;
+                                return (
+                                    <motion.div 
+                                        layout
+                                        key={player.id}
+                                        className={`group flex items-center p-4 rounded-2xl border-2 transition-all ${isDisabled ? 'opacity-30 grayscale cursor-not-allowed' : 'border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 hover:border-teal-600 cursor-pointer'}`}
+                                        onClick={() => !isDisabled && playerToSwap && completeSwap(player)}
+                                    >
+                                        <div className="flex-1">
+                                            <div className="font-black text-lg uppercase italic tracking-tighter group-hover:text-teal-600 transition-colors">{player.name} {player.isForeign ? '(F)' : ''}</div>
+                                            <div className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-widest">
+                                                {getRoleFullName(player.role)} • {player.battingSkill}/{player.secondarySkill}
+                                            </div>
+                                        </div>
+                                        {playerToSwap && !isDisabled && (
+                                            <div className="bg-teal-600 text-white p-2 rounded-lg">
+                                                <Icons.Plus className="w-4 h-4" />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
