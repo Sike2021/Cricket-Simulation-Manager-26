@@ -51,19 +51,19 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
         { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (
-        <nav className="bg-white/80 dark:bg-[#0A0F0F]/90 border-t border-slate-200 dark:border-slate-800/50 flex justify-around items-center h-[80px] pb-4 backdrop-blur-xl sticky bottom-0 z-50">
+        <nav className="bg-[#041414]/95 border-t border-white/10 flex justify-around items-center h-[80px] pb-4 backdrop-blur-xl sticky bottom-0 z-50">
             {navItems.map(item => {
                 const isActive = activeScreen === item.screen;
                 return (
                     <button
                         key={item.name}
                         onClick={() => setScreen(item.screen)}
-                        className={`relative flex flex-col items-center justify-center space-y-1 w-1/5 pt-2 transition-all duration-300 ${isActive ? 'text-teal-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+                        className={`relative flex flex-col items-center justify-center space-y-1 w-1/5 pt-2 transition-all duration-300 ${isActive ? 'text-teal-400' : 'text-white/40 hover:text-white'}`}
                     >
                         {isActive && (
                             <motion.div 
                                 layoutId="nav-active"
-                                className="absolute -top-2 w-10 h-1 bg-teal-500 rounded-full"
+                                className="absolute -top-2 w-10 h-1 bg-teal-400 rounded-full shadow-[0_0_10px_rgba(45,212,191,0.5)]"
                                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                             />
                         )}

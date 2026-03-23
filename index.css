@@ -13,25 +13,45 @@
   }
 
   .dark body {
-    @apply bg-[#050808] text-[#E4E3E0];
+    @apply bg-[#041414] text-[#E4E3E0];
   }
 }
 
 @layer components {
   .data-grid {
-    @apply border-t border-l border-[#141414] dark:border-[#E4E3E0]/20;
+    @apply border-t border-l border-[#141414] dark:border-teal-500/20;
   }
 
   .data-cell {
-    @apply border-r border-b border-[#141414] dark:border-[#E4E3E0]/20 p-3 font-mono text-xs;
+    @apply border-r border-b border-[#141414] dark:border-teal-500/20 p-3 font-mono text-xs;
   }
 
   .btn-brutal {
-    @apply border-2 border-[#141414] dark:border-[#E4E3E0] px-6 py-3 font-black uppercase tracking-tighter italic text-xl transition-all active:scale-95 hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-[#E4E3E0] dark:hover:text-[#141414];
+    @apply border-2 border-[#141414] dark:border-teal-400 px-6 py-3 font-black uppercase tracking-tighter italic text-xl transition-all active:scale-95 hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-teal-400 dark:hover:text-[#041414];
   }
 
   .card-brutal {
-    @apply border-2 border-[#141414] dark:border-[#E4E3E0] p-6 relative overflow-hidden;
+    @apply border-2 border-[#141414] dark:border-teal-500/30 p-6 relative overflow-hidden bg-white/5 backdrop-blur-md;
+  }
+
+  .card-signify {
+    @apply bg-gradient-to-br from-teal-500 via-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-2xl shadow-teal-500/30 border border-white/20;
+  }
+
+  .card-red {
+    @apply bg-gradient-to-br from-red-500 to-rose-700 rounded-2xl p-6 text-white shadow-2xl shadow-red-500/30 border border-white/20;
+  }
+
+  .card-blue {
+    @apply bg-gradient-to-br from-blue-500 to-indigo-700 rounded-2xl p-6 text-white shadow-2xl shadow-blue-500/30 border border-white/20;
+  }
+
+  .card-green {
+    @apply bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-6 text-white shadow-2xl shadow-emerald-500/30 border border-white/20;
+  }
+
+  .subcard-signify {
+    @apply bg-white/10 backdrop-blur-md rounded-xl p-4 text-center border border-white/10 hover:bg-white/20 transition-all;
   }
 
   .label-micro {

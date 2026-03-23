@@ -56,28 +56,40 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
   const sortedPlayers = [...playersWithPR].sort((a, b) => b.pr - a.pr);
 
   return (
-    <div className="bg-white dark:bg-[#0A0F0F] min-h-full p-4 font-sans text-gray-900 dark:text-[#E4E3E0]">
-      {/* Header */}
-      <div className="border-b-2 border-green-600 pb-4 mb-6 flex justify-between items-end">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 bg-green-600 animate-pulse" />
-            <p className="text-[10px] font-mono font-bold text-green-600 uppercase tracking-[0.2em]">Live Performance Metrics</p>
-          </div>
-          <h2 className="text-4xl font-black tracking-tighter uppercase italic leading-none text-green-600">
-            {title} <span className="text-gray-400 dark:text-green-500/50 not-italic font-light">2026</span>
+    <div className="bg-[#E4E3E0] dark:bg-[#041414] min-h-full p-6 font-sans text-gray-900 dark:text-[#E4E3E0]">
+      {/* SigNify Board Ratings Header (Image Pattern) */}
+      <div className="card-signify mb-8 relative">
+        <div className="flex justify-between items-start mb-6">
+          <h2 className="text-3xl font-black tracking-tight text-white">
+            SigNify Board Ratings
           </h2>
+          <div className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-lg text-sm font-bold text-white">
+            Season 1
+          </div>
         </div>
-        <div className="text-right hidden sm:block">
-          <p className="text-[10px] font-mono font-bold opacity-40">SIG_BOARD_V4.2</p>
-          <div className="flex gap-1 mt-1 justify-end">
-            {[1, 2, 3, 4].map(i => <div key={i} className="w-4 h-1 bg-green-600/20" />)}
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Strength</p>
+            <p className="text-3xl font-black text-white">54</p>
+          </div>
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Bowling</p>
+            <p className="text-3xl font-black text-white">48</p>
+          </div>
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Batting</p>
+            <p className="text-3xl font-black text-white">60</p>
+          </div>
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Stars</p>
+            <p className="text-3xl font-black text-white">5</p>
           </div>
         </div>
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_1fr_80px_70px] gap-4 px-4 py-2 bg-gray-100 dark:bg-white/5 border-y border-gray-200 dark:border-white/10 text-[10px] font-mono font-bold text-green-600 uppercase tracking-widest">
+      <div className="grid grid-cols-[40px_1fr_80px_70px] gap-4 px-4 py-2 bg-white/5 border-y border-white/10 text-[10px] font-mono font-bold text-teal-500 uppercase tracking-widest">
         <span>Rank</span>
         <span>Player Identity</span>
         <span className="text-center">Class</span>
