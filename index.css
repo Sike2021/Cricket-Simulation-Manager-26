@@ -7,55 +7,50 @@
 }
 
 @layer base {
-  body {
-    @apply bg-[#E4E3E0] text-[#141414] font-sans selection:bg-teal-500 selection:text-white;
-    overscroll-behavior: none;
+  :root {
+    --bg: #050808;
+    --ink: #ffffff;
+    --accent: #14b8a6; /* Teal-500 */
+    --line: rgba(255, 255, 255, 0.1);
   }
 
-  .dark body {
-    @apply bg-[#041414] text-[#E4E3E0];
+  body {
+    @apply bg-[#050808] text-white antialiased selection:bg-teal-500 selection:text-black font-sans;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+    overscroll-behavior: none;
   }
 }
 
 @layer components {
   .data-grid {
-    @apply border-t border-l border-[#141414] dark:border-teal-500/20;
+    @apply border-t border-l border-white/10;
   }
 
   .data-cell {
-    @apply border-r border-b border-[#141414] dark:border-teal-500/20 p-3 font-mono text-xs;
+    @apply border-r border-b border-white/10 p-3 font-mono text-xs;
   }
 
   .btn-brutal {
-    @apply border-2 border-[#141414] dark:border-teal-400 px-6 py-3 font-black uppercase tracking-tighter italic text-xl transition-all active:scale-95 hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-teal-400 dark:hover:text-[#041414];
+    @apply relative px-6 py-3 bg-teal-500 text-black font-black uppercase italic tracking-tighter text-lg 
+           hover:invert transition-all duration-300 border-2 border-white shadow-[4px_4px_0px_white]
+           active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
   }
 
   .card-brutal {
-    @apply border-2 border-[#141414] dark:border-teal-500/30 p-6 relative overflow-hidden bg-white/5 backdrop-blur-md;
+    @apply border-2 border-white/10 p-6 relative overflow-hidden bg-white/5 backdrop-blur-md;
   }
-
-  .card-signify {
-    @apply bg-gradient-to-br from-teal-500 via-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-2xl shadow-teal-500/30 border border-white/20;
-  }
-
-  .card-red {
-    @apply bg-gradient-to-br from-red-500 to-rose-700 rounded-2xl p-6 text-white shadow-2xl shadow-red-500/30 border border-white/20;
-  }
-
-  .card-blue {
-    @apply bg-gradient-to-br from-blue-500 to-indigo-700 rounded-2xl p-6 text-white shadow-2xl shadow-blue-500/30 border border-white/20;
-  }
-
-  .card-green {
-    @apply bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-6 text-white shadow-2xl shadow-emerald-500/30 border border-white/20;
-  }
-
-  .subcard-signify {
-    @apply bg-white/10 backdrop-blur-md rounded-xl p-4 text-center border border-white/10 hover:bg-white/20 transition-all;
+  
+  .card-brutal::before {
+    content: '';
+    @apply absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-teal-500 opacity-30;
   }
 
   .label-micro {
-    @apply text-[10px] font-mono font-bold uppercase tracking-widest opacity-50;
+    @apply text-[9px] font-mono font-bold uppercase tracking-[0.2em] opacity-50;
+  }
+
+  .neo-card {
+    @apply bg-white/5 border border-white/10 relative overflow-hidden;
   }
 }
 
@@ -70,4 +65,13 @@
 
 ::-webkit-scrollbar-thumb {
   @apply bg-teal-500/20 hover:bg-teal-500/40 transition-colors;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
 }

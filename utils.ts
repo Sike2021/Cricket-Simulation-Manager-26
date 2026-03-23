@@ -6,9 +6,9 @@ export type Category = 'T20' | 'List A' | 'First Class';
 
 export const getFormatsForCategory = (cat: Category): Format[] => {
     switch(cat) {
-        case 'T20': return [Format.T20];
-        case 'List A': return [Format.ODI];
-        case 'First Class': return [Format.SHIELD];
+        case 'T20': return [Format.T20, Format.DEV_T20, Format.RISE_T20];
+        case 'List A': return [Format.ODI, Format.DEV_LISTA, Format.RISE_LISTA];
+        case 'First Class': return [Format.SHIELD, Format.DEV_FC, Format.RISE_FC];
         default: return [Format.T20];
     }
 };
@@ -40,12 +40,78 @@ export const resolveMatch = (match: Match, gameData: GameData, format: Format) =
 };
 
 export const PITCH_MODIFIERS = {
-  "Balanced Sporting Pitch": { [Format.T20]: { runRate: 3.85, wicketChance: 1.20 }, [Format.ODI]: { runRate: 2.45, wicketChance: 1.15 }, [Format.SHIELD]: { runRate: 1.0, wicketChance: 1.0 }, paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0.02, unpredictability: 0 },
-  "Dusty Spinner’s Haven": { [Format.T20]: { runRate: 3.10, wicketChance: 1.40 }, [Format.ODI]: { runRate: 2.10, wicketChance: 1.25 }, [Format.SHIELD]: { runRate: 0.9, wicketChance: 1.15 }, paceBonus: -0.05, spinBonus: 0.15, chasePenalty: 0.95, deterioration: 0.1, unpredictability: 0.005 },
-  "Green Top": { [Format.T20]: { runRate: 3.30, wicketChance: 1.45 }, [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, [Format.SHIELD]: { runRate: 0.85, wicketChance: 1.2 }, paceBonus: 0.15, spinBonus: -0.05, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 },
-  "Batting Paradise": { [Format.T20]: { runRate: 4.40, wicketChance: 1.0 }, [Format.ODI]: { runRate: 2.85, wicketChance: 1.0 }, [Format.SHIELD]: { runRate: 1.2, wicketChance: 0.85 }, paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0, unpredictability: 0 },
-  "Dead Slow Track": { [Format.T20]: { runRate: 2.75, wicketChance: 1.30 }, [Format.ODI]: { runRate: 2.0, wicketChance: 1.20 }, [Format.SHIELD]: { runRate: 0.8, wicketChance: 1.1 }, paceBonus: -0.05, spinBonus: 0.1, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 },
-  "Cracked Worn Surface": { [Format.T20]: { runRate: 3.30, wicketChance: 1.40 }, [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, [Format.SHIELD]: { runRate: 0.75, wicketChance: 1.25 }, paceBonus: 0.05, spinBonus: 0.1, chasePenalty: 0.98, deterioration: 0.15, unpredictability: 0.015 },
+  "Balanced Sporting Pitch": { 
+    [Format.T20]: { runRate: 3.85, wicketChance: 1.20 }, 
+    [Format.ODI]: { runRate: 2.45, wicketChance: 1.15 }, 
+    [Format.SHIELD]: { runRate: 1.0, wicketChance: 1.0 },
+    [Format.DEV_T20]: { runRate: 3.85, wicketChance: 1.20 },
+    [Format.DEV_LISTA]: { runRate: 2.45, wicketChance: 1.15 },
+    [Format.DEV_FC]: { runRate: 1.0, wicketChance: 1.0 },
+    [Format.RISE_T20]: { runRate: 3.85, wicketChance: 1.20 },
+    [Format.RISE_LISTA]: { runRate: 2.45, wicketChance: 1.15 },
+    [Format.RISE_FC]: { runRate: 1.0, wicketChance: 1.0 },
+    paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0.02, unpredictability: 0 
+  },
+  "Dusty Spinner’s Haven": { 
+    [Format.T20]: { runRate: 3.10, wicketChance: 1.40 }, 
+    [Format.ODI]: { runRate: 2.10, wicketChance: 1.25 }, 
+    [Format.SHIELD]: { runRate: 0.9, wicketChance: 1.15 },
+    [Format.DEV_T20]: { runRate: 3.10, wicketChance: 1.40 },
+    [Format.DEV_LISTA]: { runRate: 2.10, wicketChance: 1.25 },
+    [Format.DEV_FC]: { runRate: 0.9, wicketChance: 1.15 },
+    [Format.RISE_T20]: { runRate: 3.10, wicketChance: 1.40 },
+    [Format.RISE_LISTA]: { runRate: 2.10, wicketChance: 1.25 },
+    [Format.RISE_FC]: { runRate: 0.9, wicketChance: 1.15 },
+    paceBonus: -0.05, spinBonus: 0.15, chasePenalty: 0.95, deterioration: 0.1, unpredictability: 0.005 
+  },
+  "Green Top": { 
+    [Format.T20]: { runRate: 3.30, wicketChance: 1.45 }, 
+    [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, 
+    [Format.SHIELD]: { runRate: 0.85, wicketChance: 1.2 },
+    [Format.DEV_T20]: { runRate: 3.30, wicketChance: 1.45 },
+    [Format.DEV_LISTA]: { runRate: 2.20, wicketChance: 1.30 },
+    [Format.DEV_FC]: { runRate: 0.85, wicketChance: 1.2 },
+    [Format.RISE_T20]: { runRate: 3.30, wicketChance: 1.45 },
+    [Format.RISE_LISTA]: { runRate: 2.20, wicketChance: 1.30 },
+    [Format.RISE_FC]: { runRate: 0.85, wicketChance: 1.2 },
+    paceBonus: 0.15, spinBonus: -0.05, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 
+  },
+  "Batting Paradise": { 
+    [Format.T20]: { runRate: 4.40, wicketChance: 1.0 }, 
+    [Format.ODI]: { runRate: 2.85, wicketChance: 1.0 }, 
+    [Format.SHIELD]: { runRate: 1.2, wicketChance: 0.85 },
+    [Format.DEV_T20]: { runRate: 4.40, wicketChance: 1.0 },
+    [Format.DEV_LISTA]: { runRate: 2.85, wicketChance: 1.0 },
+    [Format.DEV_FC]: { runRate: 1.2, wicketChance: 0.85 },
+    [Format.RISE_T20]: { runRate: 4.40, wicketChance: 1.0 },
+    [Format.RISE_LISTA]: { runRate: 2.85, wicketChance: 1.0 },
+    [Format.RISE_FC]: { runRate: 1.2, wicketChance: 0.85 },
+    paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0, unpredictability: 0 
+  },
+  "Dead Slow Track": { 
+    [Format.T20]: { runRate: 2.75, wicketChance: 1.30 }, 
+    [Format.ODI]: { runRate: 2.0, wicketChance: 1.20 }, 
+    [Format.SHIELD]: { runRate: 0.8, wicketChance: 1.1 },
+    [Format.DEV_T20]: { runRate: 2.75, wicketChance: 1.30 },
+    [Format.DEV_LISTA]: { runRate: 2.0, wicketChance: 1.20 },
+    [Format.DEV_FC]: { runRate: 0.8, wicketChance: 1.1 },
+    [Format.RISE_T20]: { runRate: 2.75, wicketChance: 1.30 },
+    [Format.RISE_LISTA]: { runRate: 2.0, wicketChance: 1.20 },
+    [Format.RISE_FC]: { runRate: 0.8, wicketChance: 1.1 },
+    paceBonus: -0.05, spinBonus: 0.1, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 
+  },
+  "Cracked Worn Surface": { 
+    [Format.T20]: { runRate: 3.30, wicketChance: 1.40 }, 
+    [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, 
+    [Format.SHIELD]: { runRate: 0.75, wicketChance: 1.25 },
+    [Format.DEV_T20]: { runRate: 3.30, wicketChance: 1.40 },
+    [Format.DEV_LISTA]: { runRate: 2.20, wicketChance: 1.30 },
+    [Format.DEV_FC]: { runRate: 0.75, wicketChance: 1.25 },
+    [Format.RISE_T20]: { runRate: 3.30, wicketChance: 1.40 },
+    [Format.RISE_LISTA]: { runRate: 2.20, wicketChance: 1.30 },
+    [Format.RISE_FC]: { runRate: 0.75, wicketChance: 1.25 },
+    paceBonus: 0.05, spinBonus: 0.1, chasePenalty: 0.98, deterioration: 0.15, unpredictability: 0.015 
+  },
 };
 
 export const COMMENTARY_TEMPLATES = {

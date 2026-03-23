@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameData, Team, Format, MatchResult, Standing, Player } from './types';
+import { GameData, Team, Format, MatchResult, Standing, Player, Match } from './types';
 import { PLAYERS, TEAMS, GROUNDS, PRE_BUILT_SQUADS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from './data';
 import { LoadingSpinner, generateLeagueSchedule } from './utils';
 
@@ -171,10 +171,10 @@ export const App = () => {
         grounds: [...GROUNDS],
         allTeamsData: [...TEAMS],
         allPlayers: [...PLAYERS],
-        schedule: { [Format.T20]: [], [Format.ODI]: [], [Format.SHIELD]: [] },
-        currentMatchIndex: { [Format.T20]: 0, [Format.ODI]: 0, [Format.SHIELD]: 0 },
-        standings: { [Format.T20]: [], [Format.ODI]: [], [Format.SHIELD]: [] },
-        matchResults: { [Format.T20]: [], [Format.ODI]: [], [Format.SHIELD]: [] },
+        schedule: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, Match[]>),
+        currentMatchIndex: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: 0 }), {} as Record<Format, number>),
+        standings: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, Standing[]>),
+        matchResults: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, MatchResult[]>),
         playingXIs: {},
         currentSeason: 1,
         currentFormat: Format.T20,
@@ -232,11 +232,10 @@ export const App = () => {
         teamId: team.id, teamName: team.name, played: 0, won: 0, lost: 0, drawn: 0, points: 0, netRunRate: 0, runsFor: 0, runsAgainst: 0 
     }));
 
-    const schedules = {
-        [Format.T20]: generateLeagueSchedule(initialTeams, Format.T20, true),
-        [Format.ODI]: generateLeagueSchedule(initialTeams, Format.ODI, true),
-        [Format.SHIELD]: generateLeagueSchedule(initialTeams, Format.SHIELD, true),
-    };
+    const schedules = Object.values(Format).reduce((acc, format) => {
+        acc[format] = generateLeagueSchedule(initialTeams, format, true);
+        return acc;
+    }, {} as Record<Format, Match[]>);
 
     const newGameData: GameData = {
       userTeamId,
@@ -245,16 +244,8 @@ export const App = () => {
       allTeamsData: initialTeamsData,
       allPlayers: [...PLAYERS],
       schedule: schedules,
-      currentMatchIndex: {
-        [Format.T20]: 0,
-        [Format.ODI]: 0,
-        [Format.SHIELD]: 0,
-      },
-      standings: {
-        [Format.T20]: initialStandings(initialTeams),
-        [Format.ODI]: initialStandings(initialTeams),
-        [Format.SHIELD]: initialStandings(initialTeams),
-      },
+      currentMatchIndex: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: 0 }), {} as Record<Format, number>),
+      standings: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: initialStandings(initialTeams) }), {} as Record<Format, Standing[]>),
       matchResults: Object.values(Format).reduce((acc, format) => {
         acc[format] = [];
         return acc;

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Home, Trophy, BarChart3, Settings as SettingsIcon, Newspaper, Users, Database, LayoutGrid, ArrowRightLeft, Scale, Wallet, Gavel } from 'lucide-react';
-import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle } from '../types';
+import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle, Standing, Match } from '../types';
 import { TEAMS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from '../data';
 import { Icons } from './Icons';
 import { getPlayerById, generateLeagueSchedule, negotiateSponsorships, generateMatchNews, generatePreMatchNews } from '../utils';
@@ -420,26 +420,6 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             const STARTING_PURSE = 50.0;
             const RETENTION_BUDGET = 30.0;
 
-            // Update Emerging Player status and consecutive years
-            const playersInSquadsThisSeason = new Set<string>();
-            prevData.teams.forEach(t => t.squad.forEach(p => playersInSquadsThisSeason.add(p.id)));
-
-            const updatedAllPlayers = prevData.allPlayers.map(p => {
-                if (playersInSquadsThisSeason.has(p.id)) {
-                    const newConsecutiveYears = (p.yearsSelectedConsecutively || 0) + 1;
-                    return {
-                        ...p,
-                        yearsSelectedConsecutively: newConsecutiveYears,
-                        isEmerging: newConsecutiveYears >= 3 ? false : p.isEmerging
-                    };
-                } else {
-                    return {
-                        ...p,
-                        yearsSelectedConsecutively: 0
-                    };
-                }
-            });
-
             const calculateAsk = (player: Player) => {
                 const skill = Math.max(player.battingSkill, player.secondarySkill);
                 let baseAsk = 1.0;
@@ -450,7 +430,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 else if (skill > 60) baseAsk = 1.5;
 
                 let perfMultiplier = 1.0;
-                const formats = [Format.T20, Format.ODI, Format.SHIELD];
+                const formats = Object.values(Format);
                 let totalRuns = 0;
                 let totalWickets = 0;
                 formats.forEach(f => {
@@ -467,31 +447,45 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 return Number((baseAsk * perfMultiplier).toFixed(2));
             };
 
-            // Ensure retained players use updated data
-            const updatedRetainedPlayers = retainedPlayers.map(rp => updatedAllPlayers.find(p => p.id === rp.id) || rp);
-            const userRetentionCost = updatedRetainedPlayers.reduce((sum, p) => sum + calculateAsk(p), 0);
+            const userRetentionCost = retainedPlayers.reduce((sum, p) => sum + calculateAsk(p), 0);
 
             const newTeams = prevData.teams.map(t => {
+                let finalSquad: Player[] = [];
+                let finalPurse = 0;
+
                 if (t.id === prevData.userTeamId) {
-                    return { ...t, squad: updatedRetainedPlayers, purse: STARTING_PURSE + Math.max(0, RETENTION_BUDGET - userRetentionCost) };
-                }
-                
-                // AI Retention Logic
-                let aiRetentionSpent = 0;
-                const aiRetained: Player[] = [];
-                // Use updated players for AI squads too
-                const currentSquadUpdated = t.squad.map(p => updatedAllPlayers.find(up => up.id === p.id) || p);
-                const sortedSquad = [...currentSquadUpdated].sort((a,b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill));
-                
-                for (const p of sortedSquad) {
-                    const ask = calculateAsk(p);
-                    if (aiRetentionSpent + ask <= RETENTION_BUDGET && aiRetained.length < 6) {
-                        aiRetained.push(p);
-                        aiRetentionSpent += ask;
+                    finalSquad = retainedPlayers;
+                    finalPurse = STARTING_PURSE + Math.max(0, RETENTION_BUDGET - userRetentionCost);
+                } else {
+                    // AI Retention Logic
+                    let aiRetentionSpent = 0;
+                    const aiRetained: Player[] = [];
+                    const sortedSquad = [...t.squad].sort((a,b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill));
+                    
+                    for (const p of sortedSquad) {
+                        const ask = calculateAsk(p);
+                        if (aiRetentionSpent + ask <= RETENTION_BUDGET && aiRetained.length < 6) {
+                            aiRetained.push(p);
+                            aiRetentionSpent += ask;
+                        }
                     }
+                    finalSquad = aiRetained;
+                    finalPurse = STARTING_PURSE + Math.max(0, RETENTION_BUDGET - aiRetentionSpent);
                 }
 
-                return { ...t, squad: aiRetained, purse: STARTING_PURSE + Math.max(0, RETENTION_BUDGET - aiRetentionSpent) };
+                // Update emerging status
+                const updatedSquad = finalSquad.map(p => {
+                    if (p.isEmerging) {
+                        const years = (p.yearsSelected || 0) + 1;
+                        if (years >= 3) {
+                            return { ...p, isEmerging: false, yearsSelected: undefined };
+                        }
+                        return { ...p, yearsSelected: years };
+                    }
+                    return p;
+                });
+
+                return { ...t, squad: updatedSquad, purse: finalPurse };
             });
 
             const initialStandings = (teams: Team[]) => teams.map(team => ({ teamId: team.id, teamName: team.name, played: 0, won: 0, lost: 0, drawn: 0, points: 0, netRunRate: 0, runsFor: 0, runsAgainst: 0 }));
@@ -507,21 +501,12 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
 
             return {
                 ...prevData,
-                allPlayers: updatedAllPlayers,
                 currentSeason: prevData.currentSeason + 1,
                 currentFormat: Format.T20,
-                currentMatchIndex: { [Format.T20]: 0, [Format.ODI]: 0, [Format.SHIELD]: 0 } as Record<Format, number>,
-                matchResults: { [Format.T20]: [], [Format.ODI]: [], [Format.SHIELD]: [] } as Record<Format, MatchResult[]>,
-                standings: { 
-                    [Format.T20]: initialStandings(newTeams), 
-                    [Format.ODI]: initialStandings(newTeams), 
-                    [Format.SHIELD]: initialStandings(newTeams) 
-                },
-                schedule: { 
-                    [Format.T20]: generateLeagueSchedule(newTeams, Format.T20, true), 
-                    [Format.ODI]: generateLeagueSchedule(newTeams, Format.ODI, true), 
-                    [Format.SHIELD]: generateLeagueSchedule(newTeams, Format.SHIELD, true)
-                },
+                currentMatchIndex: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: 0 }), {} as Record<Format, number>),
+                matchResults: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, MatchResult[]>),
+                standings: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: initialStandings(newTeams) }), {} as Record<Format, Standing[]>),
+                schedule: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: generateLeagueSchedule(newTeams, f, true) }), {} as Record<Format, Match[]>),
                 teams: newTeams,
                 news: [seasonNews, ...prevData.news].slice(0, 50)
             };
