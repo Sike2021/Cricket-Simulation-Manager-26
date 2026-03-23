@@ -45,6 +45,9 @@ export interface Player {
     customProfiles?: { [key in Format]?: { avg: number; sr: number } };
     stats: Record<Format, PlayerStats>;
     recentPerformances: PlayerPerformanceSummary[];
+    isEmerging?: boolean;
+    yearsSelectedConsecutively?: number;
+    isMustBuy?: boolean;
 }
 
 export interface Team {

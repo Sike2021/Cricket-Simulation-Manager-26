@@ -195,21 +195,43 @@ const playersRaw: any[] = [
   { id: 'fa-57', name: 'M. Asghar', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 56, secondarySkill: 55, style: 'N', isOpener: false, isForeign: false },
   { id: 'fa-58', name: 'Irfaan Ali', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 70, secondarySkill: 56, style: 'N', isOpener: false, isForeign: false },
 
+  // --- PAKISTANI LOCAL FREE AGENTS (Emerging Players) ---
+  { id: 'ep-1', name: 'Ahsan Qureshi', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 68, secondarySkill: 20, style: 'D', isOpener: true, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-2', name: 'Zeeshan Malik', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 65, secondarySkill: 15, style: 'N', isOpener: true, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-3', name: 'Imran Latif', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 62, secondarySkill: 10, style: 'A', isOpener: true, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-4', name: 'Adnan Sheikh', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 67, secondarySkill: 25, style: 'N', isOpener: true, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-5', name: 'Sajid Farooq', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 69, secondarySkill: 22, style: 'D', isOpener: true, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-6', name: 'Rashid Nawaz', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 63, secondarySkill: 18, style: 'N', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-7', name: 'Kamran Siddiqui', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 64, secondarySkill: 28, style: 'D', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-8', name: 'Noman Ali', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 61, secondarySkill: 20, style: 'A', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-9', name: 'Shahid Hussain', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 66, secondarySkill: 30, style: 'N', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-10', name: 'Aqib Jatoi', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 62, secondarySkill: 15, style: 'A', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-11', name: 'Bilal Ahmed', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 60, secondarySkill: 18, style: 'D', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-12', name: 'Usman Ghani', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 65, secondarySkill: 25, style: 'N', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-13', name: 'Farhan Khan', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 67, secondarySkill: 22, style: 'A', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-14', name: 'Zohaib Ahmed', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 69, secondarySkill: 20, style: 'D', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-15', name: 'Asif Ali', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 68, secondarySkill: 24, style: 'A', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-16', name: 'M. Haris', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 72, secondarySkill: 10, style: 'A', isOpener: true, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-17', name: 'Saim Ayub', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 75, secondarySkill: 30, style: 'A', isOpener: true, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-18', name: 'Abbas Afridi', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 40, secondarySkill: 78, style: 'N', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-19', name: 'Zaman Khan', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 15, secondarySkill: 82, style: 'D', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+  { id: 'ep-20', name: 'Ihsanullah', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 10, secondarySkill: 85, style: 'D', isOpener: false, isForeign: false, isEmerging: true, yearsSelectedConsecutively: 0 },
+
   // --- MUST BUY PLAYERS (User Requested) ---
   // Spin Bowlers
-  { id: 'mb-sb-1', name: 'Rahat', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 12, secondarySkill: 59, style: 'N', isOpener: false, isForeign: false },
-  { id: 'mb-sb-2', name: 'Abrar', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 22, secondarySkill: 62, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-sb-3', name: 'Anwar', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 28, secondarySkill: 81, style: 'N', isOpener: false, isForeign: false },
-  { id: 'mb-sb-4', name: 'Arshad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 22, secondarySkill: 56, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-sb-5', name: 'Mehrab', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 16, secondarySkill: 62, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-sb-6', name: 'Bilal', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 40, secondarySkill: 78, style: 'N', isOpener: false, isForeign: false },
-  { id: 'mb-sb-7', name: 'Adnan', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 12, secondarySkill: 56, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-sb-8', name: 'Riaz', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 11, secondarySkill: 55, style: 'N', isOpener: false, isForeign: false },
-  { id: 'mb-sb-9', name: 'Amjad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 30, secondarySkill: 69, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-sb-10', name: 'Rehan', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 12, secondarySkill: 61, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-sb-11', name: 'N. Samad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 23, secondarySkill: 55, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-sb-12', name: 'M. Amjad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 45, secondarySkill: 68, style: 'N', isOpener: false, isForeign: false },
-  { id: 'mb-sb-13', name: 'Asim', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 23, secondarySkill: 71, style: 'D', isOpener: false, isForeign: false },
+  { id: 'mb-sb-1', name: 'Rahat', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 12, secondarySkill: 59, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-2', name: 'Abrar', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 22, secondarySkill: 62, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-3', name: 'Anwar', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 28, secondarySkill: 81, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-4', name: 'Arshad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 22, secondarySkill: 56, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-5', name: 'Mehrab', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 16, secondarySkill: 62, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-6', name: 'Bilal', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 40, secondarySkill: 78, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-7', name: 'Adnan', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 12, secondarySkill: 56, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-8', name: 'Riaz', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 11, secondarySkill: 55, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-9', name: 'Amjad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 30, secondarySkill: 69, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-10', name: 'Rehan', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 12, secondarySkill: 61, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-11', name: 'N. Samad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 23, secondarySkill: 55, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-12', name: 'M. Amjad', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 45, secondarySkill: 68, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-sb-13', name: 'Asim', nationality: 'Local', role: PlayerRole.SPIN_BOWLER, battingSkill: 23, secondarySkill: 71, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
 
   // All Rounders
   { id: 'mb-ar-1', name: 'Khalid', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 54, secondarySkill: 45, style: 'N', isOpener: false, isForeign: false },
@@ -228,13 +250,17 @@ const playersRaw: any[] = [
   { id: 'mb-ar-14', name: 'Muhammad Tahir', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 60, secondarySkill: 56, style: 'A', isOpener: false, isForeign: false },
   { id: 'mb-ar-15', name: 'Irfaan Ali', nationality: 'Local', role: PlayerRole.ALL_ROUNDER, battingSkill: 70, secondarySkill: 56, style: 'N', isOpener: false, isForeign: false },
 
-  // Wicket Keepers
-  { id: 'mb-wk-1', name: 'M. Imran', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 68, secondarySkill: 60, style: 'A', isOpener: false, isForeign: false },
-  { id: 'mb-wk-2', name: 'S. Khan', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 75, secondarySkill: 87, style: 'D', isOpener: true, isForeign: false },
-  { id: 'mb-wk-3', name: 'Ali', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 60, secondarySkill: 67, style: 'D', isOpener: false, isForeign: false },
-  { id: 'mb-wk-4', name: 'A. Sajjad', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 55, secondarySkill: 69, style: 'N', isOpener: false, isForeign: false },
-  { id: 'mb-wk-5', name: 'Zulqarnain', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 70, secondarySkill: 78, style: 'N', isOpener: false, isForeign: false },
-  { id: 'mb-wk-6', name: 'Haseebullah', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 72, secondarySkill: 78, style: 'NA', isOpener: true, isForeign: false },
+  // Fast Bowlers
+  { id: 'mb-fb-1', name: 'Sameen', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 11, secondarySkill: 85, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-2', name: 'Atif Maqbool', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 15, secondarySkill: 86, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-3', name: 'Naeem', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 12, secondarySkill: 82, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-4', name: 'Zohaib', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 18, secondarySkill: 84, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-5', name: 'Muzafar', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 14, secondarySkill: 81, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-6', name: 'Faraz Khan', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 15, secondarySkill: 86, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-7', name: 'Iqrar', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 12, secondarySkill: 90, style: 'D', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-8', name: 'M. Tahir', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 11, secondarySkill: 88, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-9', name: 'Bilal Ahmed (FB)', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 10, secondarySkill: 85, style: 'A', isOpener: false, isForeign: false, isMustBuy: true },
+  { id: 'mb-fb-10', name: 'Usman Ghani (FB)', nationality: 'Local', role: PlayerRole.FAST_BOWLER, battingSkill: 12, secondarySkill: 87, style: 'N', isOpener: false, isForeign: false, isMustBuy: true },
   { id: 'mb-wk-7', name: 'Shahid Latif', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 59, secondarySkill: 67, style: 'N', isOpener: false, isForeign: false },
   { id: 'mb-wk-8', name: 'Yaqoob', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 63, secondarySkill: 68, style: 'D', isOpener: false, isForeign: false },
   { id: 'mb-wk-9', name: 'I. Javed', nationality: 'Local', role: PlayerRole.WICKET_KEEPER, battingSkill: 84, secondarySkill: 85, style: 'NA', isOpener: true, isForeign: false },
@@ -391,11 +417,17 @@ const uniquePlayersRaw: any[] = Array.from(
     }, new Map<string, any>()).values()
 );
 
-export const PLAYERS: Player[] = uniquePlayersRaw.map((p: any) => ({
-    ...p,
-    photo: `https://picsum.photos/seed/${p.name}/200/200`,
-    stats: generateInitialStats()
-}));
+export const PLAYERS: Player[] = uniquePlayersRaw.map((p: any) => {
+    // Logic: After 3 consecutive years, the emerging tag is removed
+    const isStillEmerging = p.isEmerging && (p.yearsSelectedConsecutively || 0) < 3;
+    
+    return {
+        ...p,
+        isEmerging: isStillEmerging,
+        photo: `https://picsum.photos/seed/${p.name}/200/200`,
+        stats: generateInitialStats()
+    };
+});
 
 export const PRE_BUILT_SQUADS: Record<string, string[]> = {
   'team1': ['f-kin-1', 'f-kin-2', 'f-kin-3', 'l-kin-1', 'l-kin-2', 'l-kin-3', 'l-kin-4', 'l-kin-5', 'l-kin-6', 'l-kin-7', 'l-kin-8', 'l-kin-9', 'l-kin-10', 'l-kin-11', 'l-kin-12', 'l-kin-13', 'l-kin-14', 'l-kin-15'],
