@@ -380,7 +380,18 @@ const playersRaw: any[] = [
   { id: 'fa-68', name: 'Azhar', nationality: 'Local', role: PlayerRole.BATSMAN, battingSkill: 75, secondarySkill: 45, style: 'N', isOpener: false, isForeign: false },
 ];
 
-export const PLAYERS: Player[] = playersRaw.map(p => ({
+// Deduplicate playersRaw to ensure unique players by name and role
+const uniquePlayersRaw: any[] = Array.from(
+    playersRaw.reduce((map, player) => {
+        const key = `${player.name}-${player.role}`;
+        if (!map.has(key)) {
+            map.set(key, player);
+        }
+        return map;
+    }, new Map<string, any>()).values()
+);
+
+export const PLAYERS: Player[] = uniquePlayersRaw.map((p: any) => ({
     ...p,
     photo: `https://picsum.photos/seed/${p.name}/200/200`,
     stats: generateInitialStats()

@@ -347,36 +347,36 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             {/* Overlay for Franchises */}
             {activeOverlay === 'franchises' && (
                 <div className="absolute inset-0 z-[100] bg-[#0A0F0F] flex flex-col p-8 animate-in slide-in-from-bottom duration-500">
-                    <div className="flex justify-between items-center mb-8 border-b-4 border-white pb-4">
-                        <h2 className="text-5xl font-black italic tracking-tighter uppercase font-display">FRANCHISE_ROSTERS</h2>
-                        <button onClick={() => setActiveOverlay('none')} className="bg-white text-black p-3 hover:bg-teal-500 transition-all">
-                            <X size={32} />
+                    <div className="flex justify-between items-center mb-4 border-b-2 border-white pb-2">
+                        <h2 className="text-3xl font-black italic tracking-tighter uppercase font-display">FRANCHISE_ROSTERS</h2>
+                        <button onClick={() => setActiveOverlay('none')} className="bg-white text-black p-2 hover:bg-teal-500 transition-all">
+                            <X size={24} />
                         </button>
                     </div>
-                    <div className="flex-1 overflow-y-auto space-y-8 pr-4 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
                         {teams.map(team => {
                             const td = gameData.allTeamsData.find(d => d.id === team.id);
                             const isDev = td?.isYouthTeam;
                             return (
-                                <div key={team.id} className={`p-8 border-4 ${team.id === gameData.userTeamId ? 'border-teal-500 bg-teal-500/5' : 'border-white/10 bg-white/5'}`}>
-                                    <div className="flex justify-between mb-6 border-b-2 border-white/10 pb-4 items-end">
+                                <div key={team.id} className={`p-4 border-2 ${team.id === gameData.userTeamId ? 'border-teal-500 bg-teal-500/5' : 'border-white/10 bg-white/5'}`}>
+                                    <div className="flex justify-between mb-3 border-b border-white/10 pb-2 items-end">
                                         <div>
-                                            <h4 className="font-black uppercase tracking-tighter text-3xl leading-none font-display">{team.name} {isDev ? '(DEV)' : ''}</h4>
-                                            <p className="text-[10px] font-mono font-bold opacity-50 mt-2 uppercase tracking-[0.3em]">{team.squad.length} / {isDev ? 14 : 22} SIGNED</p>
+                                            <h4 className="font-black uppercase tracking-tighter text-xl leading-none font-display">{team.name} {isDev ? '(DEV)' : ''}</h4>
+                                            <p className="text-[9px] font-mono font-bold opacity-50 mt-1 uppercase tracking-[0.2em]">{team.squad.length} / {isDev ? 14 : 22} SIGNED</p>
                                         </div>
-                                        <span className="text-3xl font-black font-mono text-teal-500 tracking-tighter">{formatCurrency(team.purse)}</span>
+                                        <span className="text-xl font-black font-mono text-teal-500 tracking-tighter">{formatCurrency(team.purse)}</span>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                         {team.squad.map(p => (
-                                            <div key={p.id} className="flex justify-between items-center p-3 border border-white/10 bg-white/5 group hover:border-teal-500 transition-colors">
+                                            <div key={p.id} className="flex justify-between items-center p-2 border border-white/10 bg-white/5 group hover:border-teal-500 transition-colors">
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-black uppercase tracking-tight group-hover:text-teal-500">{p.name}</span>
-                                                    <span className="text-[9px] font-mono opacity-50 uppercase">{p.role}</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-tight group-hover:text-teal-500">{p.name}</span>
+                                                    <span className="text-[8px] font-mono opacity-50 uppercase">{p.role}</span>
                                                 </div>
-                                                <span className="text-xs font-mono font-bold">{Math.max(p.battingSkill, p.secondarySkill)}</span>
+                                                <span className="text-[10px] font-mono font-bold">{Math.max(p.battingSkill, p.secondarySkill)}</span>
                                             </div>
                                         ))}
-                                        {team.squad.length === 0 && <p className="text-sm opacity-30 italic font-mono uppercase tracking-widest">AWAITING_SIGNINGS...</p>}
+                                        {team.squad.length === 0 && <p className="text-xs opacity-30 italic font-mono uppercase tracking-widest">AWAITING_SIGNINGS...</p>}
                                     </div>
                                 </div>
                             );
@@ -386,19 +386,19 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             )}
 
             {/* Header */}
-            <header className="p-6 border-b-4 border-white/10 flex justify-between items-center bg-[#050808] z-20">
-                <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 bg-teal-500 flex items-center justify-center border-4 border-white rotate-3 shadow-[4px_4px_0px_white]">
-                        <Trophy size={28} className="text-black -rotate-3" />
+            <header className="p-4 border-b-2 border-white/10 flex justify-between items-center bg-[#050808] z-20">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-teal-500 flex items-center justify-center border-2 border-white rotate-3 shadow-[2px_2px_0px_white]">
+                        <Trophy size={20} className="text-black -rotate-3" />
                     </div>
                     <div>
-                        <h2 className="text-4xl font-black italic uppercase tracking-tighter font-display leading-none">AUCTION_HUB</h2>
-                        <p className="text-[10px] font-mono font-bold text-teal-500 tracking-[0.3em] mt-1 uppercase">LIVE_SESSION_ID: {gameData.currentSeason}</p>
+                        <h2 className="text-2xl font-black italic uppercase tracking-tighter font-display leading-none">AUCTION_HUB</h2>
+                        <p className="text-[8px] font-mono font-bold text-teal-500 tracking-[0.2em] mt-1 uppercase">LIVE_SESSION_ID: {gameData.currentSeason}</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-1">REMAINING_CAPITAL</p>
-                    <p className="text-4xl font-black font-mono text-teal-500 tracking-tighter leading-none">
+                    <p className="text-[8px] font-mono font-bold opacity-50 uppercase tracking-widest mb-1">REMAINING_CAPITAL</p>
+                    <p className="text-2xl font-black font-mono text-teal-500 tracking-tighter leading-none">
                         {formatCurrency(userTeam?.purse || 0)}
                     </p>
                 </div>
@@ -406,47 +406,47 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
 
             <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
                 {/* Left: Player Info */}
-                <div className="flex-1 p-10 overflow-y-auto border-r-4 border-white/10 bg-[#0A0F0F] custom-scrollbar">
+                <div className="flex-1 p-6 overflow-y-auto border-r-2 border-white/10 bg-[#0A0F0F] custom-scrollbar">
                     {!auctionFinished ? (
                         currentPlayer ? (
                             <motion.div
                                 key={currentPlayer.id}
-                                initial={{ x: -40, opacity: 0 }}
+                                initial={{ x: -20, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
-                                className="space-y-10 max-w-4xl"
+                                className="space-y-6 max-w-4xl"
                             >
                                 <div className="relative">
-                                    <div className="absolute -top-6 -left-6 w-24 h-24 border-t-8 border-l-8 border-teal-500" />
-                                    <div className="bg-white/5 p-10 border-4 border-white/10 relative z-10">
-                                        <div className="flex justify-between items-start mb-10">
+                                    <div className="absolute -top-3 -left-3 w-12 h-12 border-t-4 border-l-4 border-teal-500" />
+                                    <div className="bg-white/5 p-6 border-2 border-white/10 relative z-10">
+                                        <div className="flex justify-between items-start mb-6">
                                             <div>
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <span className="bg-teal-500 text-black px-3 py-1 text-[11px] font-mono font-bold tracking-[0.2em] uppercase">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="bg-teal-500 text-black px-2 py-0.5 text-[9px] font-mono font-bold tracking-[0.1em] uppercase">
                                                         {currentPlayer.role}
                                                     </span>
-                                                    <span className="border-2 border-white/20 px-3 py-1 text-[11px] font-mono font-bold tracking-[0.2em] uppercase">
+                                                    <span className="border border-white/20 px-2 py-0.5 text-[9px] font-mono font-bold tracking-[0.1em] uppercase">
                                                         {currentPlayer.isForeign ? 'INTERNATIONAL' : 'DOMESTIC'}
                                                     </span>
                                                 </div>
-                                                <h1 className="text-8xl font-black uppercase tracking-tighter font-display leading-[0.85] italic">
+                                                <h1 className="text-5xl font-black uppercase tracking-tighter font-display leading-[0.9] italic">
                                                     {currentPlayer.name}
                                                 </h1>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-2">BASE_VALUATION</p>
-                                                <p className="text-4xl font-black font-mono tracking-tighter">{formatCurrency(getBasePrice(currentPlayer))}</p>
+                                                <p className="text-[8px] font-mono font-bold opacity-50 uppercase tracking-widest mb-1">BASE_VALUATION</p>
+                                                <p className="text-2xl font-black font-mono tracking-tighter">{formatCurrency(getBasePrice(currentPlayer))}</p>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                             {[
                                                 { label: 'BATTING', value: currentPlayer.battingSkill, color: 'text-blue-400' },
                                                 { label: 'BOWLING', value: currentPlayer.secondarySkill, color: 'text-red-400' },
                                                 { label: 'OVERALL', value: Math.max(currentPlayer.battingSkill, currentPlayer.secondarySkill), highlight: true }
                                             ].map(stat => (
-                                                <div key={stat.label} className={`p-6 border-4 ${stat.highlight ? 'border-teal-500 bg-teal-500/10' : 'border-white/10 bg-white/5'}`}>
-                                                    <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-2">{stat.label}</p>
-                                                    <p className={`text-5xl font-black font-mono ${stat.highlight ? 'text-teal-500' : stat.color || ''}`}>{stat.value}</p>
+                                                <div key={stat.label} className={`p-4 border-2 ${stat.highlight ? 'border-teal-500 bg-teal-500/10' : 'border-white/10 bg-white/5'}`}>
+                                                    <p className="text-[8px] font-mono font-bold opacity-50 uppercase tracking-widest mb-1">{stat.label}</p>
+                                                    <p className={`text-3xl font-black font-mono ${stat.highlight ? 'text-teal-500' : stat.color || ''}`}>{stat.value}</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -454,49 +454,49 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                 </div>
 
                                 {/* Auction Status */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    <div className="border-4 border-white/10 p-8 bg-white/5 relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-16 h-16 bg-teal-500/10 rotate-45 translate-x-8 -translate-y-8" />
-                                        <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-6">CURRENT_VALUATION</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="border-2 border-white/10 p-6 bg-white/5 relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-12 h-12 bg-teal-500/10 rotate-45 translate-x-6 -translate-y-6" />
+                                        <p className="text-[8px] font-mono font-bold opacity-50 uppercase tracking-widest mb-4">CURRENT_VALUATION</p>
                                         <div className="flex items-baseline gap-2">
-                                            <span className="text-7xl font-black font-mono text-teal-500 tracking-tighter leading-none">
+                                            <span className="text-5xl font-black font-mono text-teal-500 tracking-tighter leading-none">
                                                 {formatCurrency(currentBid)}
                                             </span>
                                         </div>
-                                        <div className="mt-8 pt-6 border-t-2 border-white/10">
-                                            <p className="text-xs font-mono font-bold opacity-80 uppercase tracking-widest">
+                                        <div className="mt-6 pt-4 border-t border-white/10">
+                                            <p className="text-[10px] font-mono font-bold opacity-80 uppercase tracking-widest">
                                                 HIGHEST_BIDDER: <span className="text-teal-500 font-black italic ml-2">{highestBidder?.name || 'AWAITING_BID'}</span>
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div className="border-4 border-white/10 p-8 bg-white/5 flex flex-col justify-center items-center text-center relative">
-                                        <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-4">TIME_REMAINING</p>
-                                        <div className="relative w-32 h-32 flex items-center justify-center">
+                                    <div className="border-2 border-white/10 p-6 bg-white/5 flex flex-col justify-center items-center text-center relative">
+                                        <p className="text-[8px] font-mono font-bold opacity-50 uppercase tracking-widest mb-2">TIME_REMAINING</p>
+                                        <div className="relative w-20 h-20 flex items-center justify-center">
                                             <svg className="w-full h-full -rotate-90">
                                                 <circle
-                                                    cx="64"
-                                                    cy="64"
-                                                    r="56"
+                                                    cx="40"
+                                                    cy="40"
+                                                    r="34"
                                                     fill="transparent"
                                                     stroke="currentColor"
-                                                    strokeWidth="12"
+                                                    strokeWidth="8"
                                                     className="text-white/5"
                                                 />
                                                 <motion.circle
-                                                    cx="64"
-                                                    cy="64"
-                                                    r="56"
+                                                    cx="40"
+                                                    cy="40"
+                                                    r="34"
                                                     fill="transparent"
                                                     stroke="currentColor"
-                                                    strokeWidth="12"
-                                                    strokeDasharray="351.8"
-                                                    animate={{ strokeDashoffset: 351.8 * (1 - timeLeft / 10) }}
+                                                    strokeWidth="8"
+                                                    strokeDasharray="213.6"
+                                                    animate={{ strokeDashoffset: 213.6 * (1 - timeLeft / 10) }}
                                                     transition={{ duration: 1, ease: "linear" }}
                                                     className={timeLeft <= 3 ? "text-red-500" : "text-teal-500"}
                                                 />
                                             </svg>
-                                            <span className={`absolute text-5xl font-black font-mono ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : ''}`}>{timeLeft}s</span>
+                                            <span className={`absolute text-2xl font-black font-mono ${timeLeft <= 3 ? 'text-red-500 animate-pulse' : ''}`}>{timeLeft}s</span>
                                         </div>
                                     </div>
                                 </div>
@@ -535,36 +535,36 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 </div>
 
                 {/* Right: Controls & History */}
-                <div className="w-full md:w-[450px] flex flex-col bg-[#050808] border-l-4 border-white/10 z-10">
+                <div className="w-full md:w-[280px] flex flex-col bg-[#050808] border-l border-white/10 z-10">
                     {/* Controls */}
-                    <div className="p-10 border-b-4 border-white/10 space-y-6">
+                    <div className="p-4 border-b border-white/10 space-y-3">
                         <button
                             onClick={() => handleUserBid(1)}
                             disabled={!isAuctioning || isTransitioning || (userTeam && userTeam.purse < currentBid + getBidIncrement(currentBid))}
-                            className="w-full bg-teal-500 text-black font-black py-8 px-8 uppercase tracking-widest text-3xl italic hover:invert transition-all duration-300 disabled:opacity-20 disabled:grayscale flex flex-col items-center justify-center gap-1 shadow-[0_15px_40px_rgba(20,184,166,0.2)] border-4 border-white relative overflow-hidden group"
+                            className="w-full bg-teal-500 text-black font-black py-4 px-3 uppercase tracking-widest text-lg italic hover:invert transition-all duration-300 disabled:opacity-20 disabled:grayscale flex flex-col items-center justify-center gap-0.5 shadow-[0_5px_15px_rgba(20,184,166,0.2)] border border-white relative overflow-hidden group"
                         >
                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                            <div className="relative z-10 flex items-center gap-4">
-                                <DollarSign size={32} />
+                            <div className="relative z-10 flex items-center gap-2">
+                                <DollarSign size={18} />
                                 <span>PLACE_BID</span>
                             </div>
-                            <span className="relative z-10 text-sm font-mono opacity-70 mt-1">NEXT: {formatCurrency(currentBid + getBidIncrement(currentBid))}</span>
+                            <span className="relative z-10 text-[8px] font-mono opacity-70 mt-0.5">NEXT: {formatCurrency(currentBid + getBidIncrement(currentBid))}</span>
                         </button>
                         
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-2">
                             <button
                                 onClick={skipPlayer}
                                 disabled={!isAuctioning || isTransitioning}
-                                className="border-4 border-white/20 text-white font-black py-5 px-4 uppercase tracking-widest text-[10px] italic hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-20 flex items-center justify-center gap-3"
+                                className="border border-white/20 text-white font-black py-2 px-1 uppercase tracking-widest text-[8px] italic hover:bg-white hover:text-black transition-all duration-300 disabled:opacity-20 flex items-center justify-center gap-1.5"
                             >
-                                <SkipForward size={18} />
+                                <SkipForward size={12} />
                                 <span>PASS_LOT</span>
                             </button>
                             <button
                                 onClick={() => setActiveOverlay('franchises')}
-                                className="border-4 border-white/20 text-white font-black py-5 px-4 uppercase tracking-widest text-[10px] italic hover:bg-teal-500 hover:text-black hover:border-teal-500 transition-all duration-300 flex items-center justify-center gap-3"
+                                className="border border-white/20 text-white font-black py-2 px-1 uppercase tracking-widest text-[8px] italic hover:bg-teal-500 hover:text-black hover:border-teal-500 transition-all duration-300 flex items-center justify-center gap-1.5"
                             >
-                                <Trophy size={18} />
+                                <Trophy size={12} />
                                 <span>ROSTERS</span>
                             </button>
                         </div>
@@ -572,30 +572,30 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
 
                     {/* History */}
                     <div className="flex-1 flex flex-col overflow-hidden">
-                        <div className="p-6 bg-white/5 border-b-4 border-white/10 flex justify-between items-center">
-                            <span className="text-[11px] font-mono font-bold uppercase tracking-[0.3em] text-teal-500">TRANSACTION_LOG</span>
-                            <span className="text-[10px] font-mono font-bold bg-white/10 px-3 py-1 uppercase tracking-widest">{biddingLog.length} BIDS</span>
+                        <div className="p-4 bg-white/5 border-b-2 border-white/10 flex justify-between items-center">
+                            <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] text-teal-500">TRANSACTION_LOG</span>
+                            <span className="text-[8px] font-mono font-bold bg-white/10 px-2 py-0.5 uppercase tracking-widest">{biddingLog.length} BIDS</span>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-3 font-mono text-[12px] custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-2 font-mono text-[10px] custom-scrollbar">
                             {biddingLog.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center opacity-20 italic space-y-4">
-                                    <div className="w-12 h-1 bg-white/20" />
-                                    <p className="tracking-widest uppercase">AWAITING_INITIAL_BID</p>
-                                    <div className="w-12 h-1 bg-white/20" />
+                                <div className="h-full flex flex-col items-center justify-center opacity-20 italic space-y-3">
+                                    <div className="w-8 h-0.5 bg-white/20" />
+                                    <p className="tracking-widest uppercase text-[8px]">AWAITING_INITIAL_BID</p>
+                                    <div className="w-8 h-0.5 bg-white/20" />
                                 </div>
                             ) : (
                                 biddingLog.map((bid, idx) => (
                                     <motion.div
-                                        initial={{ x: 20, opacity: 0 }}
+                                        initial={{ x: 10, opacity: 0 }}
                                         animate={{ x: 0, opacity: 1 }}
                                         key={idx}
-                                        className={`flex justify-between items-center p-4 border-2 ${idx === 0 ? 'border-teal-500 bg-teal-500/10' : 'border-white/5 bg-white/[0.02] opacity-50'}`}
+                                        className={`flex justify-between items-center p-2 border ${idx === 0 ? 'border-teal-500 bg-teal-500/10' : 'border-white/5 bg-white/[0.02] opacity-50'}`}
                                     >
-                                        <div className="flex items-center gap-3">
-                                            {idx === 0 && <div className="w-2 h-2 bg-teal-500 animate-pulse" />}
+                                        <div className="flex items-center gap-2">
+                                            {idx === 0 && <div className="w-1.5 h-1.5 bg-teal-500 animate-pulse" />}
                                             <span className="font-black uppercase tracking-tight">{bid.teamName}</span>
                                         </div>
-                                        <span className={`font-black ${idx === 0 ? 'text-teal-500 text-lg' : ''}`}>{formatCurrency(bid.bid)}</span>
+                                        <span className={`font-black ${idx === 0 ? 'text-teal-500 text-sm' : ''}`}>{formatCurrency(bid.bid)}</span>
                                     </motion.div>
                                 ))
                             )}
