@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Home, Trophy, BarChart3, Settings as SettingsIcon, Newspaper, Users, Database, LayoutGrid, ArrowRightLeft, Scale, Wallet, Gavel } from 'lucide-react';
-import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle, Standing, Match } from '../types';
+import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle } from '../types';
 import { TEAMS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from '../data';
 import { Icons } from './Icons';
 import { getPlayerById, generateLeagueSchedule, negotiateSponsorships, generateMatchNews, generatePreMatchNews } from '../utils';
@@ -47,28 +47,27 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
         { name: 'HOME', screen: 'DASHBOARD' as CareerScreen, icon: Home },
         { name: 'STANDINGS', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
         { name: 'STATS', screen: 'STATS' as CareerScreen, icon: BarChart3 },
-        { name: 'EDITOR', screen: 'EDITOR' as CareerScreen, icon: Database },
         { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (
-        <nav className="bg-[#041414]/95 border-t border-white/10 flex justify-around items-center h-[80px] pb-4 backdrop-blur-xl sticky bottom-0 z-50">
+        <nav className="bg-white/80 dark:bg-[#0A0F0F]/90 border-t border-slate-200 dark:border-slate-800/50 flex justify-around items-center h-[80px] pb-4 backdrop-blur-xl sticky bottom-0 z-50">
             {navItems.map(item => {
                 const isActive = activeScreen === item.screen;
                 return (
                     <button
                         key={item.name}
                         onClick={() => setScreen(item.screen)}
-                        className={`relative flex flex-col items-center justify-center space-y-1 w-1/5 pt-2 transition-all duration-300 ${isActive ? 'text-teal-400' : 'text-white/40 hover:text-white'}`}
+                        className={`relative flex flex-col items-center justify-center space-y-1 w-1/4 pt-2 transition-all duration-300 ${isActive ? 'text-teal-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
                     >
                         {isActive && (
                             <motion.div 
                                 layoutId="nav-active"
-                                className="absolute -top-2 w-10 h-1 bg-teal-400 rounded-full shadow-[0_0_10px_rgba(45,212,191,0.5)]"
+                                className="absolute -top-2 w-12 h-1 bg-teal-500 rounded-full"
                                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                             />
                         )}
-                        <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                        <span className="text-[8px] font-black tracking-[0.1em] uppercase">{item.name}</span>
+                        <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                        <span className="text-[9px] font-black tracking-[0.15em] uppercase">{item.name}</span>
                     </button>
                 );
             })}
@@ -122,26 +121,22 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 const sortedBatters = [...formatStats.entries()].sort((a, b) => b[1].runs - a[1].runs);
                 const sortedBowlers = [...formatStats.entries()].sort((a, b) => b[1].wickets - a[1].wickets);
 
-                if (schedule && schedule.length > 0) {
-                    const finalMatchNumber = schedule[schedule.length-1].matchNumber;
-                    const lastMatchResult = gameData.matchResults[gameData.currentFormat]?.find(r => r.matchNumber === finalMatchNumber);
-                    const winnerTeam = gameData.teams.find(t => t.id === lastMatchResult?.winnerId);
+                const finalMatch = schedule[schedule.length - 1];
+                const finalMatchNumber = finalMatch?.matchNumber;
+                const lastMatchResult = finalMatchNumber ? gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === finalMatchNumber) : null;
+                const winnerTeam = gameData.teams.find(t => t.id === lastMatchResult?.winnerId);
 
-                    const newAward = { 
-                        season: gameData.currentSeason, 
-                        format: gameData.currentFormat, 
-                        winnerTeamId: winnerTeam?.id || '', 
-                        winnerTeamName: winnerTeam?.name || 'N/A', 
-                        bestBatter: { playerId: sortedBatters[0]?.[0] || '', playerName: sortedBatters[0]?.[1].playerName || 'N/A', teamName: sortedBatters[0]?.[1].teamName || 'N/A', runs: sortedBatters[0]?.[1].runs || 0 }, 
-                        bestBowler: { playerId: sortedBowlers[0]?.[0] || '', playerName: sortedBowlers[0]?.[1].playerName || 'N/A', teamName: sortedBowlers[0]?.[1].teamName || 'N/A', wickets: sortedBowlers[0]?.[1].wickets || 0 } 
-                    };
+                const newAward = { 
+                    season: gameData.currentSeason, 
+                    format: gameData.currentFormat, 
+                    winnerTeamId: winnerTeam?.id || '', 
+                    winnerTeamName: winnerTeam?.name || 'N/A', 
+                    bestBatter: { playerId: sortedBatters[0]?.[0] || '', playerName: sortedBatters[0]?.[1].playerName || 'N/A', teamName: sortedBatters[0]?.[1].teamName || 'N/A', runs: sortedBatters[0]?.[1].runs || 0 }, 
+                    bestBowler: { playerId: sortedBowlers[0]?.[0] || '', playerName: sortedBowlers[0]?.[1].playerName || 'N/A', teamName: sortedBowlers[0]?.[1].teamName || 'N/A', wickets: sortedBowlers[0]?.[1].wickets || 0 } 
+                };
 
-                    setGameData(prev => prev ? { ...prev, awardsHistory: [...prev.awardsHistory, newAward] } : null);
-                    setScreen('END_OF_FORMAT');
-                } else {
-                    // Fallback if schedule is empty
-                    setScreen('END_OF_FORMAT');
-                }
+                setGameData(prev => prev ? { ...prev, awardsHistory: [...prev.awardsHistory, newAward] } : null);
+                setScreen('END_OF_FORMAT');
             }
         }
     }, [gameData.currentMatchIndex, gameData.currentFormat, gameData.currentSeason, gameData.awardsHistory, gameData.teams, gameData.allPlayers, gameData.matchResults, gameData.schedule, setGameData]);
@@ -237,7 +232,8 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                         const resolvePlaceholder = (placeholder: string) => {
                             if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
                             if (placeholder.startsWith('SF')) {
-                                const sfRes = updatedData.matchResults[f]?.find(r => r.matchNumber === placeholder.split(' ')[0]);
+                                const sfMatchNumber = placeholder.split(' ')[0];
+                                const sfRes = updatedData.matchResults[f].find(r => r && r.matchNumber === sfMatchNumber);
                                 return updatedData.teams.find(t => t.id === sfRes?.winnerId)?.name || 'TBD';
                             }
                             return placeholder;
@@ -294,7 +290,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                     }
                     if (placeholder.startsWith('SF')) {
                         const sfMatchNumber = placeholder.split(' ')[0];
-                        const sfResult = currentData.matchResults[currentData.currentFormat]?.find(r => r.matchNumber === sfMatchNumber);
+                        const sfResult = currentData.matchResults[currentData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
                         const winner = currentData.teams.find(t => t.id === sfResult?.winnerId);
                         return winner?.name || null;
                     }
@@ -357,7 +353,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
                 if (placeholder.startsWith('SF')) {
                     const sfMatchNumber = placeholder.split(' ')[0];
-                    const sfResult = gameData.matchResults[gameData.currentFormat]?.find(r => r.matchNumber === sfMatchNumber);
+                    const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
                     return gameData.teams.find(t => t.id === sfResult?.winnerId)?.name || null;
                 }
                 return placeholder;
@@ -430,7 +426,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 else if (skill > 60) baseAsk = 1.5;
 
                 let perfMultiplier = 1.0;
-                const formats = Object.values(Format);
+                const formats = [Format.T20, Format.ODI, Format.SHIELD];
                 let totalRuns = 0;
                 let totalWickets = 0;
                 formats.forEach(f => {
@@ -450,42 +446,24 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             const userRetentionCost = retainedPlayers.reduce((sum, p) => sum + calculateAsk(p), 0);
 
             const newTeams = prevData.teams.map(t => {
-                let finalSquad: Player[] = [];
-                let finalPurse = 0;
-
                 if (t.id === prevData.userTeamId) {
-                    finalSquad = retainedPlayers;
-                    finalPurse = STARTING_PURSE + Math.max(0, RETENTION_BUDGET - userRetentionCost);
-                } else {
-                    // AI Retention Logic
-                    let aiRetentionSpent = 0;
-                    const aiRetained: Player[] = [];
-                    const sortedSquad = [...t.squad].sort((a,b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill));
-                    
-                    for (const p of sortedSquad) {
-                        const ask = calculateAsk(p);
-                        if (aiRetentionSpent + ask <= RETENTION_BUDGET && aiRetained.length < 6) {
-                            aiRetained.push(p);
-                            aiRetentionSpent += ask;
-                        }
+                    return { ...t, squad: retainedPlayers, purse: STARTING_PURSE + Math.max(0, RETENTION_BUDGET - userRetentionCost) };
+                }
+                
+                // AI Retention Logic
+                let aiRetentionSpent = 0;
+                const aiRetained: Player[] = [];
+                const sortedSquad = [...t.squad].sort((a,b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill));
+                
+                for (const p of sortedSquad) {
+                    const ask = calculateAsk(p);
+                    if (aiRetentionSpent + ask <= RETENTION_BUDGET && aiRetained.length < 6) {
+                        aiRetained.push(p);
+                        aiRetentionSpent += ask;
                     }
-                    finalSquad = aiRetained;
-                    finalPurse = STARTING_PURSE + Math.max(0, RETENTION_BUDGET - aiRetentionSpent);
                 }
 
-                // Update emerging status
-                const updatedSquad = finalSquad.map(p => {
-                    if (p.isEmerging) {
-                        const years = (p.yearsSelected || 0) + 1;
-                        if (years >= 3) {
-                            return { ...p, isEmerging: false, yearsSelected: undefined };
-                        }
-                        return { ...p, yearsSelected: years };
-                    }
-                    return p;
-                });
-
-                return { ...t, squad: updatedSquad, purse: finalPurse };
+                return { ...t, squad: aiRetained, purse: STARTING_PURSE + Math.max(0, RETENTION_BUDGET - aiRetentionSpent) };
             });
 
             const initialStandings = (teams: Team[]) => teams.map(team => ({ teamId: team.id, teamName: team.name, played: 0, won: 0, lost: 0, drawn: 0, points: 0, netRunRate: 0, runsFor: 0, runsAgainst: 0 }));
@@ -503,10 +481,18 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 ...prevData,
                 currentSeason: prevData.currentSeason + 1,
                 currentFormat: Format.T20,
-                currentMatchIndex: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: 0 }), {} as Record<Format, number>),
-                matchResults: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, MatchResult[]>),
-                standings: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: initialStandings(newTeams) }), {} as Record<Format, Standing[]>),
-                schedule: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: generateLeagueSchedule(newTeams, f, true) }), {} as Record<Format, Match[]>),
+                currentMatchIndex: { [Format.T20]: 0, [Format.ODI]: 0, [Format.SHIELD]: 0 } as Record<Format, number>,
+                matchResults: { [Format.T20]: [], [Format.ODI]: [], [Format.SHIELD]: [] } as Record<Format, MatchResult[]>,
+                standings: { 
+                    [Format.T20]: initialStandings(newTeams), 
+                    [Format.ODI]: initialStandings(newTeams), 
+                    [Format.SHIELD]: initialStandings(newTeams) 
+                },
+                schedule: { 
+                    [Format.T20]: generateLeagueSchedule(newTeams, Format.T20, true), 
+                    [Format.ODI]: generateLeagueSchedule(newTeams, Format.ODI, true), 
+                    [Format.SHIELD]: generateLeagueSchedule(newTeams, Format.SHIELD, true)
+                },
                 teams: newTeams,
                 news: [seasonNews, ...prevData.news].slice(0, 50)
             };
@@ -564,7 +550,8 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                             return gameData.standings[gameData.currentFormat][pos-1]?.teamName || 'TBD';
                         }
                         if (placeholder.startsWith('SF')) {
-                            const sfResult = gameData.matchResults[gameData.currentFormat]?.find(r => r.matchNumber === placeholder.split(' ')[0]);
+                            const sfMatchNumber = placeholder.split(' ')[0];
+                            const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
                             return gameData.teams.find(t => t.id === sfResult?.winnerId)?.name || 'TBD';
                         }
                         return placeholder;

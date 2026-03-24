@@ -1,7 +1,5 @@
 
 import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { User, MapPin, Settings, Plus, Save, Trash2, ChevronRight, Search, Filter, Database, Trophy, Users, Globe, Info, Play, Pause, X, Check, RefreshCw, TrendingUp, TrendingDown, Bot, Gavel, LineChart, LayoutDashboard, Newspaper, ListOrdered, Settings2, UserCircle, Map, Shield, History as HistoryIcon, DollarSign, Timer, SkipForward } from 'lucide-react';
 import { GameData, Player, PlayerRole, Format, BattingStyle, ScoreLimits, Ground } from '../types';
 import { getBatterTier, BATTING_PROFILES, getRoleColor, getRoleFullName, getBattingStyleLabel, BATTING_STYLE_OPTIONS } from '../utils';
 import { PITCH_TYPES, generateInitialStats } from '../data';
@@ -74,7 +72,8 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
             style: 'N',
             isOpener: false,
             isForeign: false,
-            stats: generateInitialStats()
+            stats: generateInitialStats(),
+            recentPerformances: []
         });
     }
 
@@ -216,134 +215,71 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
     if (selectedPlayer) return renderPlayerEditor();
 
     return (
-        <div className="p-6 h-[calc(100vh-90px)] flex flex-col bg-[#050808]">
-            <div className="flex justify-between items-center mb-8 border-b-4 border-white pb-4">
-                <h2 className="text-5xl font-black italic tracking-tighter uppercase font-display">DATA_EDITOR</h2>
-                <div className="flex bg-white/5 border-2 border-white/10 p-1">
-                    <button 
-                        onClick={() => setEditType('players')} 
-                        className={`px-6 py-2 text-[10px] font-black uppercase italic transition-all ${editType === 'players' ? 'bg-teal-500 text-black' : 'text-white/50 hover:text-white'}`}
-                    >
-                        PLAYERS
-                    </button>
-                    <button 
-                        onClick={() => setEditType('grounds')} 
-                        className={`px-6 py-2 text-[10px] font-black uppercase italic transition-all ${editType === 'grounds' ? 'bg-teal-500 text-black' : 'text-white/50 hover:text-white'}`}
-                    >
-                        GROUNDS
-                    </button>
-                    <button 
-                        onClick={() => setEditType('rules')} 
-                        className={`px-6 py-2 text-[10px] font-black uppercase italic transition-all ${editType === 'rules' ? 'bg-teal-500 text-black' : 'text-white/50 hover:text-white'}`}
-                    >
-                        RULES
-                    </button>
-                </div>
+        <div className="p-2 h-[calc(100vh-90px)] flex flex-col">
+            <h2 className="text-xl font-bold text-center mb-2">Game Editor</h2>
+            <div className="flex justify-center border-b border-gray-300 dark:border-gray-700 mb-2">
+                <button onClick={() => setEditType('players')} className={`px-4 py-2 font-semibold ${editType === 'players' ? 'border-b-2 border-teal-500 text-teal-500' : ''}`}>Players</button>
+                <button onClick={() => setEditType('grounds')} className={`px-4 py-2 font-semibold ${editType === 'grounds' ? 'border-b-2 border-teal-500 text-teal-500' : ''}`}>Grounds</button>
+                <button onClick={() => setEditType('rules')} className={`px-4 py-2 font-semibold ${editType === 'rules' ? 'border-b-2 border-teal-500 text-teal-500' : ''}`}>Rules</button>
             </div>
 
             {editType === 'players' && (
-                <div className="flex-grow flex flex-col overflow-hidden">
-                    <button 
-                        onClick={handleAddNewPlayer} 
-                        className="w-full bg-white text-black py-4 px-6 font-black italic tracking-tighter text-xl uppercase hover:bg-teal-500 transition-all mb-6 border-4 border-white flex items-center justify-center gap-3"
-                    >
-                        <Plus size={24} />
-                        <span>REGISTER_NEW_ENTITY</span>
-                    </button>
-                    
-                    <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
-                        <div className="grid grid-cols-1 gap-2">
-                            {gameData.allPlayers.map(p => (
-                                <motion.div 
-                                    key={p.id} 
-                                    whileHover={{ x: 10 }}
-                                    onClick={() => handleSelectPlayer(p.id)} 
-                                    className="flex items-center bg-white/5 p-4 border-2 border-white/10 cursor-pointer group hover:border-teal-500 transition-all"
-                                >
-                                    <div className={`w-12 h-12 flex items-center justify-center font-black text-xs border-2 border-white/10 mr-4 group-hover:border-teal-500/50 ${getRoleColor(p.role)}`}>
-                                        {p.role.substring(0, 3)}
-                                    </div>
-                                    <div className="flex-grow">
-                                        <p className="font-black uppercase tracking-tight text-lg leading-none group-hover:text-teal-500">{p.name}</p>
-                                        <p className="text-[10px] font-mono opacity-50 uppercase mt-1">{p.nationality} {p.isForeign ? '// INTERNATIONAL' : '// DOMESTIC'}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[10px] font-mono opacity-50 uppercase">SKILL_RATING</p>
-                                        <p className="text-xl font-black font-mono text-teal-500">{p.battingSkill}</p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
+                <div className="flex-grow overflow-y-auto">
+                    <button onClick={handleAddNewPlayer} className="w-full bg-green-500 text-white p-2 rounded mb-2">Add New Player</button>
+                    <ul className="space-y-1">
+                    {gameData.allPlayers.map(p => (
+                        <li key={p.id} onClick={() => handleSelectPlayer(p.id)} className="flex items-center bg-gray-100 dark:bg-gray-800/50 p-2 rounded-md cursor-pointer">
+                            <span className={`font-bold w-8 text-sm ${getRoleColor(p.role)}`}>{p.role}</span>
+                            <span className="flex-grow">{p.name} {p.isForeign ? '(F)' : ''}</span>
+                            <span className="font-semibold">{p.battingSkill}</span>
+                        </li>
+                    ))}
+                    </ul>
                 </div>
             )}
 
             {editType === 'grounds' && (
-                 <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar space-y-4">
+                 <div className="space-y-4 overflow-y-auto pb-20">
                     {gameData.grounds.map(g => (
-                        <div key={g.code} className="bg-white/5 p-6 border-4 border-white/10 hover:border-white/20 transition-all">
-                            <div className="flex justify-between items-end mb-6 border-b-2 border-white/10 pb-4">
-                                <div>
-                                    <h4 className="text-3xl font-black uppercase tracking-tighter italic font-display leading-none">{g.name}</h4>
-                                    <p className="text-[10px] font-mono font-bold text-teal-500 mt-2 uppercase tracking-widest">LOC_ID: {g.code}</p>
-                                </div>
+                        <div key={g.code} className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div className="flex justify-between items-center mb-2">
+                                <p className="font-bold text-lg">{g.name}</p>
+                                <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">{g.code}</span>
                             </div>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-3">
                                 <div>
-                                    <label className="text-[10px] font-mono uppercase opacity-50 mb-2 block tracking-widest">Surface_Type</label>
-                                    <select 
-                                        value={g.pitch} 
-                                        onChange={e => handleGroundChange(g.code, 'pitch', e.target.value)} 
-                                        className="w-full p-4 bg-white/5 border-2 border-white/10 focus:border-teal-500 outline-none font-black uppercase italic text-sm transition-all"
-                                    >
-                                        {PITCH_TYPES.map(pt => <option key={pt} value={pt} className="bg-[#0A0F0F]">{pt}</option>)}
+                                    <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Pitch Type</label>
+                                    <select value={g.pitch} onChange={e => handleGroundChange(g.code, 'pitch', e.target.value)} className="w-full p-2 rounded bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-sm">
+                                        {PITCH_TYPES.map(pt => <option key={pt} value={pt}>{pt}</option>)}
                                     </select>
                                 </div>
                                 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label className="text-[10px] font-mono uppercase opacity-50 mb-2 block tracking-widest">Atmosphere</label>
-                                        <select 
-                                            value={g.weather || 'Sunny'} 
-                                            onChange={e => handleGroundChange(g.code, 'weather', e.target.value)} 
-                                            className="w-full p-4 bg-white/5 border-2 border-white/10 focus:border-teal-500 outline-none font-black uppercase italic text-sm transition-all"
-                                        >
-                                            {['Sunny', 'Overcast', 'Rainy', 'Humid', 'Dry'].map(w => <option key={w} value={w} className="bg-[#0A0F0F]">{w}</option>)}
+                                        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Weather</label>
+                                        <select value={g.weather || 'Sunny'} onChange={e => handleGroundChange(g.code, 'weather', e.target.value)} className="w-full p-2 rounded bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-sm">
+                                            {['Sunny', 'Overcast', 'Rainy', 'Humid', 'Dry'].map(w => <option key={w} value={w}>{w}</option>)}
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-mono uppercase opacity-50 mb-2 block tracking-widest">Outfield_Velocity</label>
-                                        <select 
-                                            value={g.outfieldSpeed || 'Medium'} 
-                                            onChange={e => handleGroundChange(g.code, 'outfieldSpeed', e.target.value)} 
-                                            className="w-full p-4 bg-white/5 border-2 border-white/10 focus:border-teal-500 outline-none font-black uppercase italic text-sm transition-all"
-                                        >
-                                            {['Fast', 'Medium', 'Slow', 'Lightning'].map(s => <option key={s} value={s} className="bg-[#0A0F0F]">{s}</option>)}
+                                        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Outfield</label>
+                                        <select value={g.outfieldSpeed || 'Medium'} onChange={e => handleGroundChange(g.code, 'outfieldSpeed', e.target.value)} className="w-full p-2 rounded bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-sm">
+                                            {['Fast', 'Medium', 'Slow', 'Lightning'].map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label className="text-[10px] font-mono uppercase opacity-50 mb-2 block tracking-widest">Boundary_Scale</label>
-                                        <select 
-                                            value={g.boundarySize || 'Medium'} 
-                                            onChange={e => handleGroundChange(g.code, 'boundarySize', e.target.value)} 
-                                            className="w-full p-4 bg-white/5 border-2 border-white/10 focus:border-teal-500 outline-none font-black uppercase italic text-sm transition-all"
-                                        >
-                                            {['Small', 'Medium', 'Large'].map(s => <option key={s} value={s} className="bg-[#0A0F0F]">{s}</option>)}
+                                        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Boundaries</label>
+                                        <select value={g.boundarySize || 'Medium'} onChange={e => handleGroundChange(g.code, 'boundarySize', e.target.value)} className="w-full p-2 rounded bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-sm">
+                                            {['Small', 'Medium', 'Large'].map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-mono uppercase opacity-50 mb-2 block tracking-widest">Spatial_Dimensions</label>
-                                        <input 
-                                            type="text" 
-                                            value={g.dimensions || ''} 
-                                            onChange={e => handleGroundChange(g.code, 'dimensions', e.target.value)} 
-                                            className="w-full p-4 bg-white/5 border-2 border-white/10 focus:border-teal-500 outline-none font-black uppercase italic text-sm transition-all" 
-                                            placeholder="e.g. 70m / 65m" 
-                                        />
+                                        <label className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Dimensions</label>
+                                        <input type="text" value={g.dimensions || ''} onChange={e => handleGroundChange(g.code, 'dimensions', e.target.value)} className="w-full p-2 rounded bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-sm" placeholder="e.g. 70m / 65m" />
                                     </div>
                                 </div>
                             </div>
@@ -353,48 +289,36 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
             )}
 
              {editType === 'rules' && (
-                 <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar space-y-6">
+                 <div className="space-y-3 overflow-y-auto">
                     {gameData.grounds.map(g => (
-                        <div key={g.code} className="bg-white/5 p-6 border-4 border-white/10">
-                            <div className="flex justify-between items-center mb-6 border-b-2 border-white/10 pb-4">
-                                <h4 className="text-2xl font-black uppercase tracking-tighter italic font-display">{g.name}</h4>
-                                <span className="text-[10px] font-mono font-bold text-teal-500 uppercase tracking-widest">LIMIT_CONFIG</span>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                {Object.values(Format).map(format => (
-                                    <div key={format} className="space-y-4">
-                                        <p className="text-[11px] font-black uppercase tracking-widest bg-white/10 px-3 py-1 inline-block">{format}</p>
-                                        <div className="space-y-4">
-                                            {(format === Format.SHIELD ? [1, 2, 3, 4] : [1, 2]).map(inning => (
-                                                <div key={inning} className="p-4 bg-black/40 border border-white/5 space-y-3">
-                                                    <p className="text-[9px] font-mono font-bold opacity-50 uppercase tracking-widest">INNING_0{inning}</p>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <div>
-                                                            <label className="text-[8px] font-mono uppercase opacity-30 block mb-1">MAX_RUNS</label>
-                                                            <input 
-                                                                type="number" 
-                                                                value={gameData.scoreLimits?.[g.code]?.[format]?.[inning]?.maxRuns || ''}
-                                                                onChange={(e) => handleUpdateScoreLimits(g.code, format, 'maxRuns', e.target.value, inning)}
-                                                                className="w-full p-2 bg-white/5 border border-white/10 focus:border-teal-500 outline-none font-black text-xs text-center"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-[8px] font-mono uppercase opacity-30 block mb-1">MAX_WKTS</label>
-                                                            <input 
-                                                                type="number"
-                                                                value={gameData.scoreLimits?.[g.code]?.[format]?.[inning]?.maxWickets || ''}
-                                                                onChange={(e) => handleUpdateScoreLimits(g.code, format, 'maxWickets', e.target.value, inning)}
-                                                                className="w-full p-2 bg-white/5 border border-white/10 focus:border-teal-500 outline-none font-black text-xs text-center"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
+                        <div key={g.code} className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-md">
+                            <p className="font-bold mb-2">{g.name}</p>
+                            {Object.values(Format).map(format => (
+                                <div key={format} className="mb-2 last:mb-0">
+                                    <p className="font-semibold text-sm">{format}</p>
+                                    {(format === Format.SHIELD ? [1, 2, 3, 4] : [1, 2]).map(inning => (
+                                        <div key={inning} className="pl-2 mt-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Inning {inning}</p>
+                                            <div className="flex space-x-2 mt-1">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Max Runs"
+                                                    value={gameData.scoreLimits?.[g.code]?.[format]?.[inning]?.maxRuns || ''}
+                                                    onChange={(e) => handleUpdateScoreLimits(g.code, format, 'maxRuns', e.target.value, inning)}
+                                                    className="w-1/2 p-1 rounded bg-white dark:bg-gray-900 text-sm"
+                                                />
+                                                <input 
+                                                    type="number"
+                                                    placeholder="Max Wkts"
+                                                    value={gameData.scoreLimits?.[g.code]?.[format]?.[inning]?.maxWickets || ''}
+                                                    onChange={(e) => handleUpdateScoreLimits(g.code, format, 'maxWickets', e.target.value, inning)}
+                                                    className="w-1/2 p-1 rounded bg-white dark:bg-gray-900 text-sm"
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ))}
                         </div>
                     ))}
                  </div>

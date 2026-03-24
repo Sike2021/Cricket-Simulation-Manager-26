@@ -38,7 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
             }
             if (placeholder.startsWith('SF')) {
                 const sfMatchNumber = placeholder.split(' ')[0];
-                const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === sfMatchNumber);
+                const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
                 if (sfResult?.winnerId) {
                     return gameData.teams.find(t => t.id === sfResult.winnerId)?.name || 'TBD';
                 }
@@ -67,141 +67,134 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
     };
 
     return (
-        <div className="p-6 space-y-8 bg-[#E4E3E0] dark:bg-[#041414] min-h-full font-sans text-[#141414] dark:text-[#E4E3E0]">
-            <header className="card-signify flex justify-between items-center">
+        <div className="p-4 space-y-6 bg-[#E4E3E0] dark:bg-[#0A0F0F] min-h-full font-sans text-[#141414] dark:text-[#E4E3E0]">
+            <header className="border-b-2 border-[#141414] dark:border-[#E4E3E0] pb-4 flex justify-between items-end">
                 <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-white/20 text-white px-2 py-0.5 text-[9px] font-mono font-bold tracking-widest rounded">LIVE_SYSTEM</span>
-                        <p className="text-[10px] font-mono font-bold text-white/70 uppercase tracking-widest">SEASON {gameData.currentSeason} // {gameData.currentFormat}</p>
-                    </div>
+                    <p className="text-[10px] font-mono font-bold opacity-60 uppercase tracking-widest mb-1">SEASON {gameData.currentSeason} // {gameData.currentFormat}</p>
                     {sponsorship ? (
-                         <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none font-display text-white">
-                            {sponsorship.sponsorName} <span className="text-white/60 font-light not-italic">{sponsorship.tournamentName}</span>
+                         <h1 className={`text-4xl font-black italic uppercase tracking-tighter leading-none ${sponsorship.logoColor || 'text-teal-500'}`}>
+                            {sponsorship.sponsorName} <span className="text-[#141414] dark:text-[#E4E3E0] font-light not-italic">{sponsorship.tournamentName}</span>
                         </h1>
                     ) : (
-                        <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none font-display text-white">{gameData.currentFormat}</h1>
+                        <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none">{gameData.currentFormat}</h1>
                     )}
-                    <p className="text-xs font-mono font-bold mt-3 text-white/80 uppercase tracking-tight border-l-2 border-white/40 pl-3">OPERATIONAL_UNIT: {userTeam?.name || 'N/A'}</p>
+                    <p className="text-xs font-mono font-bold mt-2 opacity-80 uppercase tracking-tight">Manager: {userTeam?.name || 'N/A'}</p>
                 </div>
                 <div className="text-right hidden md:block">
                     {renderTournamentLogo()}
-                    <p className="text-[10px] font-mono font-bold mt-1 tracking-widest text-white/50">OFFICIAL_BOARD</p>
+                    <p className="text-[10px] font-mono font-bold mt-1">OFFICIAL BOARD</p>
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Next Match Card */}
-                <div className="card-green relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 bg-white/20 text-white px-4 py-1 text-[10px] font-mono font-bold uppercase tracking-widest rounded-bl-xl">
-                        NEXT_ENGAGEMENT
+                <div className="border-2 border-[#141414] dark:border-[#E4E3E0] p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 bg-[#141414] dark:bg-[#E4E3E0] text-[#E4E3E0] dark:text-[#141414] px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-widest">
+                        Next Match
                     </div>
                     
-                    <div className="mt-6 space-y-6">
+                    <div className="mt-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-mono text-white/50 uppercase mb-1">HOME_FRANCHISE</span>
-                                <span className="text-3xl font-black uppercase tracking-tighter font-display text-white">{nextMatch.teamA}</span>
+                                <span className="text-xs font-mono opacity-50 uppercase">Home</span>
+                                <span className="text-2xl font-black uppercase tracking-tighter">{nextMatch.teamA}</span>
                             </div>
-                            <div className="flex flex-col items-center">
-                                <span className="text-2xl font-light italic text-white/20 font-display">VS</span>
-                                <div className="w-px h-8 bg-white/10" />
-                            </div>
+                            <span className="text-xl font-light italic opacity-30 px-4">VS</span>
                             <div className="flex flex-col text-right">
-                                <span className="text-[10px] font-mono text-white/50 uppercase mb-1">AWAY_FRANCHISE</span>
-                                <span className="text-3xl font-black uppercase tracking-tighter font-display text-white">{nextMatch.teamB}</span>
+                                <span className="text-xs font-mono opacity-50 uppercase">Away</span>
+                                <span className="text-2xl font-black uppercase tracking-tighter">{nextMatch.teamB}</span>
                             </div>
                         </div>
 
-                        <div className="pt-6 border-t border-white/10 flex justify-between items-end">
+                        <div className="pt-4 border-t border-[#141414]/10 dark:border-[#E4E3E0]/10 flex justify-between items-end">
                             <div>
-                                <p className="text-xs font-black uppercase tracking-tight italic text-white">{homeGround?.name || 'Neutral Venue'}</p>
-                                <p className="text-[10px] font-mono text-white/60 uppercase mt-1">{nextMatch.date}</p>
+                                <p className="text-xs font-bold uppercase tracking-tight">{homeGround?.name || 'Neutral Venue'}</p>
+                                <p className="text-[10px] font-mono opacity-60 uppercase">{nextMatch.date}</p>
                             </div>
-                            <div className="flex gap-1.5">
-                                {[1, 2, 3, 4].map(i => <div key={i} className="w-2 h-2 bg-white/40" />)}
+                            <div className="flex gap-1">
+                                {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 bg-[#141414] dark:bg-[#E4E3E0]" />)}
                             </div>
                         </div>
 
                         {isUserMatch ? (
                             <button 
                                 onClick={handlePlayMatch} 
-                                className="w-full bg-white text-emerald-700 font-black py-5 px-6 uppercase tracking-widest text-lg italic hover:bg-emerald-50 transition-all duration-300 flex items-center justify-center space-x-4 shadow-xl rounded-xl"
+                                className="w-full bg-[#141414] dark:bg-[#E4E3E0] text-[#E4E3E0] dark:text-[#141414] font-black py-4 px-6 uppercase tracking-widest text-sm hover:invert transition-all duration-300 flex items-center justify-center space-x-3"
                             >
                                 <Icons.PlayMatch />
-                                <span>COMMENCE_MATCH</span>
+                                <span>Enter Match</span>
                             </button>
                         ) : (
                             <button 
                                 onClick={handleForwardDay} 
-                                className="w-full border-2 border-white/30 text-white font-black py-5 px-6 uppercase tracking-widest text-lg italic hover:bg-white/10 transition-all duration-300 flex items-center justify-center space-x-4 rounded-xl"
+                                className="w-full border-2 border-[#141414] dark:border-[#E4E3E0] text-[#141414] dark:text-[#E4E3E0] font-black py-4 px-6 uppercase tracking-widest text-sm hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-[#E4E3E0] dark:hover:text-[#141414] transition-all duration-300 flex items-center justify-center space-x-3"
                             >
                                 <Icons.PlayMatch />
-                                <span>SIMULATE_CYCLE</span>
+                                <span>Simulate Day</span>
                             </button>
                         )}
                     </div>
                 </div>
             
                 {/* Stats / Info Card */}
-                <div className="space-y-6">
-                    <div className="card-blue flex justify-between items-center">
+                <div className="space-y-4">
+                    <div className="border border-[#141414]/20 dark:border-[#E4E3E0]/20 p-4 flex justify-between items-center">
                         <div>
-                            <p className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest">FRANCHISE_POPULARITY</p>
-                            <div className="flex items-center gap-3 mt-2">
-                                <div className="w-40 h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                            <p className="text-[10px] font-mono opacity-50 uppercase">Franchise Popularity</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <div className="w-32 h-2 bg-[#141414]/10 dark:bg-[#E4E3E0]/10 rounded-full overflow-hidden">
                                     <motion.div 
                                         initial={{ width: 0 }}
                                         animate={{ width: `${popularity}%` }}
-                                        className="h-full bg-white"
+                                        className="h-full bg-teal-500"
                                     />
                                 </div>
-                                <span className="text-lg font-black font-mono text-white">{popularity}%</span>
+                                <span className="text-sm font-black font-mono">{popularity}%</span>
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest">TIER_STATUS</p>
-                            <p className="text-xl font-black uppercase tracking-tighter italic font-display text-white">
-                                {popularity >= 80 ? 'ELITE_FORCE' : popularity >= 50 ? 'PRO_UNIT' : 'ROOKIE_CLASS'}
+                            <p className="text-[10px] font-mono opacity-50 uppercase">Current Tier</p>
+                            <p className="text-sm font-black uppercase tracking-tight">
+                                {popularity >= 80 ? 'Elite' : popularity >= 50 ? 'Pro' : 'Rookie'}
                             </p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-4">
                         <button 
                             onClick={() => setScreen('NEWS')}
-                            className="card-red p-6 text-left hover:scale-[1.02] transition-all group"
+                            className="border border-[#141414]/20 dark:border-[#E4E3E0]/20 p-4 text-left hover:bg-[#141414]/5 dark:hover:bg-[#E4E3E0]/5 transition-colors"
                         >
-                            <p className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest mb-2 group-hover:text-white">INTELLIGENCE_FEED</p>
-                            <p className="text-sm font-black uppercase tracking-tight line-clamp-2 italic leading-tight text-white">{gameData.news?.[0]?.headline || 'NO_DATA'}</p>
+                            <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Latest News</p>
+                            <p className="text-xs font-bold uppercase tracking-tight line-clamp-1">{gameData.news?.[0]?.headline || 'No News'}</p>
                         </button>
                         <button 
                             onClick={() => setScreen('LEAGUES')}
-                            className="bg-gradient-to-br from-amber-500 to-orange-700 rounded-2xl p-6 text-white shadow-2xl shadow-amber-500/30 border border-white/20 text-left hover:scale-[1.02] transition-all group"
+                            className="border border-[#141414]/20 dark:border-[#E4E3E0]/20 p-4 text-left hover:bg-[#141414]/5 dark:hover:bg-[#E4E3E0]/5 transition-colors"
                         >
-                            <p className="text-[10px] font-mono font-bold text-white/50 uppercase tracking-widest mb-2 group-hover:text-white">RANKING_MATRIX</p>
-                            <p className="text-sm font-black uppercase tracking-tight italic text-white">VIEW_STANDINGS</p>
+                            <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Standings</p>
+                            <p className="text-xs font-bold uppercase tracking-tight">View Table</p>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { screen: 'LINEUPS', icon: <Icons.Lineups />, label: 'LINEUPS', color: 'bg-emerald-500' },
-                    { screen: 'TRANSFERS', icon: <Icons.Transfers />, label: 'TRANSFERS', color: 'bg-blue-500' },
-                    { screen: 'PLAYER_DATABASE', icon: <Icons.Database />, label: 'DATABASE', color: 'bg-indigo-500' },
-                    { screen: 'RATING_BOARD', icon: <Icons.Podium />, label: 'RATING_BOARD', highlight: true, color: 'bg-teal-500' },
+                    { screen: 'LINEUPS', icon: <Icons.Lineups />, label: 'Lineups' },
+                    { screen: 'TRANSFERS', icon: <Icons.Transfers />, label: 'Transfers' },
+                    { screen: 'PLAYER_DATABASE', icon: <Icons.Database />, label: 'Database' },
+                    { screen: 'RATING_BOARD', icon: <Icons.Podium />, label: 'Rating Board', highlight: true },
                 ].map((item) => (
                     <button 
                         key={item.screen}
                         onClick={() => setScreen(item.screen as CareerScreen)}
-                        className={`p-6 rounded-2xl border border-white/10 text-left hover:scale-[1.05] transition-all group relative overflow-hidden ${item.highlight ? 'bg-teal-600/20 border-teal-500/50' : 'bg-white/5'}`}
+                        className={`p-4 border ${item.highlight ? 'border-teal-500 bg-teal-500/5' : 'border-[#141414]/10 dark:border-[#E4E3E0]/10'} text-left hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-[#E4E3E0] dark:hover:text-[#141414] transition-all group`}
                     >
-                        <div className={`mb-3 ${item.highlight ? 'text-teal-400' : 'text-white/40 group-hover:text-white'}`}>
+                        <div className={`mb-2 ${item.highlight ? 'text-teal-500 group-hover:text-inherit' : 'opacity-50 group-hover:opacity-100'}`}>
                             {item.icon}
                         </div>
-                        <p className="text-xs font-black uppercase tracking-widest font-mono text-white">{item.label}</p>
-                        {item.highlight && <div className="absolute top-0 right-0 w-8 h-8 bg-teal-500 rotate-45 translate-x-4 -translate-y-4" />}
+                        <p className="text-xs font-black uppercase tracking-tight">{item.label}</p>
                     </button>
                 ))}
             </div>
