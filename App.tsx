@@ -12,8 +12,8 @@ import AuctionRoom from './components/AuctionRoom';
 import Lineups from './components/Lineups';
 import Editor from './components/Editor';
 
-export const MAX_SQUAD_SIZE = 22;
-export const MIN_SQUAD_SIZE = 15;
+export const MAX_SQUAD_SIZE = 16;
+export const MIN_SQUAD_SIZE = 16;
 export const MAX_FOREIGN_PLAYERS = 3;
 
 const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {

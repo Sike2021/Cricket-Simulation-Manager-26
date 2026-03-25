@@ -55,6 +55,7 @@ const Schedule: React.FC<ScheduleProps> = ({ gameData, userTeam, viewMatchResult
     }, [category]);
 
     const schedule = gameData.schedule[selectedFormat] || [];
+    const nextMatchIndex = gameData.currentMatchIndex[selectedFormat];
 
     return (
         <div className="p-4 flex flex-col h-full">
@@ -63,12 +64,19 @@ const Schedule: React.FC<ScheduleProps> = ({ gameData, userTeam, viewMatchResult
             <CategoryTabs category={category} setCategory={setCategory} />
             <FormatDropdown category={category} selectedFormat={selectedFormat} setSelectedFormat={setSelectedFormat} />
 
+            {nextMatchIndex < schedule.length && (
+                <div className="bg-teal-500/10 border border-teal-500/20 p-4 rounded-xl mb-4">
+                    <p className="text-teal-600 dark:text-teal-400 text-xs font-bold uppercase tracking-widest mb-1">Next Up</p>
+                    <p className="text-lg font-bold">{resolveMatch(schedule[nextMatchIndex], gameData, selectedFormat).teamA} vs {resolveMatch(schedule[nextMatchIndex], gameData, selectedFormat).teamB}</p>
+                </div>
+            )}
+
             <div className="space-y-4 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                 {schedule.map((match, index) => {
                     const resolved = resolveMatch(match, gameData, selectedFormat);
                     const result = gameData.matchResults[selectedFormat]?.find(r => r && String(r.matchNumber) === String(match.matchNumber));
                     const isUserMatch = !!userTeam && (resolved.teamA === userTeam.name || resolved.teamB === userTeam.name);
-                    const isNextMatch = selectedFormat === gameData.currentFormat && index === gameData.currentMatchIndex[selectedFormat];
+                    const isNextMatch = selectedFormat === gameData.currentFormat && index === nextMatchIndex;
                     
                     return (
                         <MatchItem 

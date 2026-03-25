@@ -11,9 +11,9 @@ interface AuctionRoomProps {
 const STARTING_PURSE = 100.0;
 const MAX_FOREIGN_LIMIT = 3; // Match App.tsx
 const MAX_EMERGING_LIMIT = 3;
-const MIN_EMERGING_LIMIT = 2;
-const MAX_SQUAD_SIZE = 22;
-const MIN_SQUAD_SIZE = 15;
+const MIN_EMERGING_LIMIT = 3;
+const MAX_SQUAD_SIZE = 16;
+const MIN_SQUAD_SIZE = 16;
 
 // Targeted Balanced Squad Ratios
 const TARGET_OPENERS = 4;
@@ -173,6 +173,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         if (!isAuctioning || !currentPlayer || auctionFinished) return;
 
         const timer = setTimeout(() => {
+            if (!isAuctioning) return;
             const increment = getBidIncrement(currentBid);
             const eligibleTeams = teams.filter(t => 
                 mainTeamIds.includes(t.id) &&
@@ -180,7 +181,8 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 t.purse >= (currentBid + increment) &&
                 t.squad.length < MAX_SQUAD_SIZE &&
                 (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
-                (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT)
+                (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT) &&
+                (!(!currentPlayer.isForeign && !currentPlayer.isEmerging) || t.squad.filter(p => !p.isForeign && !p.isEmerging).length < 10)
             );
 
             if (eligibleTeams.length > 0) {
@@ -248,7 +250,6 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     }, [isAuctioning, currentBid, highestBidderId, currentPlayer, gameData.userTeamId, mainTeamIds, teams]);
 
     const sellPlayer = () => {
-        setIsAuctioning(false);
         const winner = teams.find(t => t.id === highestBidderId);
         if (winner && currentPlayer) {
             setTeams(prev => prev.map(t => {
@@ -263,13 +264,14 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             }));
             setBiddingLog(prev => [`SOLD! ${currentPlayer.name} to ${winner.name}`, ...prev]);
         }
-        setTimeout(() => setCurrentPlayerIdx(prev => prev + 1), 600);
+        setIsAuctioning(false);
+        setCurrentPlayerIdx(prev => prev + 1);
     };
 
     const unsoldPlayer = () => {
-        setIsAuctioning(false);
         setBiddingLog(prev => [`UNSOLD: ${currentPlayer.name}`, ...prev]);
-        setTimeout(() => setCurrentPlayerIdx(prev => prev + 1), 600);
+        setIsAuctioning(false);
+        setCurrentPlayerIdx(prev => prev + 1);
     };
 
     useEffect(() => {
@@ -426,6 +428,36 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                             <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
                                                 <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Base Price</p>
                                                 <p className="text-xl font-black font-mono">{getBasePrice(currentPlayer).toFixed(2)} Cr</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-4">
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Matches</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].matches}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Runs</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].runs}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Avg</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].average.toFixed(1)}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">SR</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].strikeRate.toFixed(1)}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Wickets</p>
+                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].wickets}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Economy</p>
+                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].economy.toFixed(2)}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Bowl Avg</p>
+                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].bowlingAverage.toFixed(1)}</p>
                                             </div>
                                         </div>
                                     </div>

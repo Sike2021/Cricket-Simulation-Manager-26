@@ -456,8 +456,8 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                             <p className="text-green-400 font-bold text-xl">You won the toss!</p>
                             <p className="text-slate-300">What would you like to do?</p>
                             <div className="flex gap-4">
-                                <button onClick={() => startMatch(gameData.userTeamId, 'bat')} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">BAT 🏏</button>
-                                <button onClick={() => startMatch(gameData.userTeamId, 'bowl')} className="flex-1 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-bold">BOWL ⚾</button>
+                                <button onClick={() => { console.log("User chose to bat"); startMatch(gameData.userTeamId, 'bat'); }} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">BAT 🏏</button>
+                                <button onClick={() => { console.log("User chose to bowl"); startMatch(gameData.userTeamId, 'bowl'); }} className="flex-1 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-bold">BOWL ⚾</button>
                             </div>
                         </div>
                     )}

@@ -46,6 +46,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
     const navItems = [
         { name: 'HOME', screen: 'DASHBOARD' as CareerScreen, icon: Home },
         { name: 'STANDINGS', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
+        { name: 'FIXTURES', screen: 'SCHEDULE' as CareerScreen, icon: LayoutGrid },
         { name: 'STATS', screen: 'STATS' as CareerScreen, icon: BarChart3 },
         { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
@@ -57,7 +58,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
                     <button
                         key={item.name}
                         onClick={() => setScreen(item.screen)}
-                        className={`relative flex flex-col items-center justify-center space-y-1.5 w-1/4 pt-3 transition-all duration-500 ${isActive ? 'text-teal-400' : 'text-white/40 hover:text-white/70'}`}
+                        className={`relative flex flex-col items-center justify-center space-y-1.5 w-1/5 pt-3 transition-all duration-500 ${isActive ? 'text-teal-400' : 'text-white/40 hover:text-white/70'}`}
                     >
                         {isActive && (
                             <motion.div 

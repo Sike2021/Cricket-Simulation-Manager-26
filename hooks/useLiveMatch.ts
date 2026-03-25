@@ -123,8 +123,13 @@ export const useLiveMatch = (
     }, [match.matchNumber, match.teamA, match.teamB, gameData, state]);
 
     const startMatch = (winnerId: string, decision: 'bat' | 'bowl') => {
+        console.log("startMatch called with:", winnerId, decision);
         setState(prev => {
-            if (!prev) return null;
+            if (!prev) {
+                console.error("startMatch: prev state is null");
+                return null;
+            }
+            console.log("startMatch: updating state to ready");
             // Determine who bats first
             let battingTeam, bowlingTeam;
             const teamA = prev.battingTeam.id === prev.match.teamAId ? prev.battingTeam : prev.bowlingTeam;
