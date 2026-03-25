@@ -59,6 +59,12 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
     const teamAData = gameData.allTeamsData.find(t => t.name === nextMatch.teamA);
     const homeGround = teamAData ? gameData.grounds.find(g => g.code === teamAData.homeGround) : null;
 
+    // Calculate dynamic stats for the header
+    const avgBatting = Math.round(gameData.allPlayers.reduce((acc, p) => acc + p.battingSkill, 0) / gameData.allPlayers.length) || 0;
+    const avgBowling = Math.round(gameData.allPlayers.reduce((acc, p) => acc + p.secondarySkill, 0) / gameData.allPlayers.length) || 0;
+    const avgStrength = Math.round((avgBatting + avgBowling) / 2);
+    const stars = Math.min(5, Math.max(1, Math.floor(avgStrength / 15)));
+
     const renderTournamentLogo = () => {
         if (sponsorship?.tournamentLogo) {
             return <div className={`w-8 h-8 mx-auto mb-1 ${sponsorship.logoColor}`} dangerouslySetInnerHTML={{__html: sponsorship.tournamentLogo}}></div>;
@@ -67,59 +73,102 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
     };
 
     return (
-        <div className="p-4 space-y-6 bg-[#E4E3E0] dark:bg-[#0A0F0F] min-h-full font-sans text-[#141414] dark:text-[#E4E3E0]">
-            <header className="border-b-2 border-[#141414] dark:border-[#E4E3E0] pb-4 flex justify-between items-end">
+        <div className="p-4 space-y-6 bg-[#050808] min-h-full font-sans text-slate-100 pb-24">
+            {/* SigNify Board Ratings Header (Image Pattern) */}
+            <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="card-signify relative cursor-pointer group overflow-hidden"
+                onClick={() => setScreen('RATING_BOARD')}
+            >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-white/20 transition-all duration-700" />
+                <div className="flex justify-between items-start mb-6 relative z-10">
+                    <div>
+                        <p className="text-[8px] font-black text-white/50 uppercase tracking-[0.4em] mb-1">LIVE_DATA_STREAM</p>
+                        <h2 className="text-2xl font-black tracking-tighter text-white uppercase italic">
+                            SigNify Board <span className="text-white/40 not-italic">Ratings</span>
+                        </h2>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg text-[10px] font-bold text-white uppercase tracking-[0.3em] border border-white/10">
+                        S{gameData.currentSeason}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-3 relative z-10">
+                    <div className="subcard-signify p-3">
+                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Strength</p>
+                        <p className="text-2xl font-black text-white tracking-tighter">{avgStrength}</p>
+                    </div>
+                    <div className="subcard-signify p-3">
+                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Bowling</p>
+                        <p className="text-2xl font-black text-white tracking-tighter">{avgBowling}</p>
+                    </div>
+                    <div className="subcard-signify p-3">
+                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Batting</p>
+                        <p className="text-2xl font-black text-white tracking-tighter">{avgBatting}</p>
+                    </div>
+                    <div className="subcard-signify p-3">
+                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Stars</p>
+                        <p className="text-2xl font-black text-white tracking-tighter">{stars}</p>
+                    </div>
+                </div>
+            </motion.div>
+
+            <header className="broadcast-header">
                 <div>
-                    <p className="text-[10px] font-mono font-bold opacity-60 uppercase tracking-widest mb-1">SEASON {gameData.currentSeason} // {gameData.currentFormat}</p>
+                    <p className="text-[9px] font-black text-teal-500 uppercase tracking-[0.4em] mb-1">TOURNAMENT_FEED // {gameData.currentFormat}</p>
                     {sponsorship ? (
                          <h1 className={`text-4xl font-black italic uppercase tracking-tighter leading-none ${sponsorship.logoColor || 'text-teal-500'}`}>
-                            {sponsorship.sponsorName} <span className="text-[#141414] dark:text-[#E4E3E0] font-light not-italic">{sponsorship.tournamentName}</span>
+                            {sponsorship.sponsorName} <span className="text-white font-light not-italic">{sponsorship.tournamentName}</span>
                         </h1>
                     ) : (
                         <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none">{gameData.currentFormat}</h1>
                     )}
-                    <p className="text-xs font-mono font-bold mt-2 opacity-80 uppercase tracking-tight">Manager: {userTeam?.name || 'N/A'}</p>
                 </div>
-                <div className="text-right hidden md:block">
-                    {renderTournamentLogo()}
-                    <p className="text-[10px] font-mono font-bold mt-1">OFFICIAL BOARD</p>
+                <div className="text-right">
+                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Manager_ID</p>
+                    <p className="text-xs font-black uppercase tracking-tight text-white/80">{userTeam?.name || 'N/A'}</p>
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
                 {/* Next Match Card */}
-                <div className="border-2 border-[#141414] dark:border-[#E4E3E0] p-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 bg-[#141414] dark:bg-[#E4E3E0] text-[#E4E3E0] dark:text-[#141414] px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-widest">
+                <div className="glass-card p-8 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 bg-teal-500 text-black px-5 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] rounded-bl-2xl shadow-[0_0_20px_rgba(20,184,166,0.4)]">
                         Next Match
                     </div>
                     
-                    <div className="mt-4 space-y-4">
+                    <div className="mt-6 space-y-8">
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
-                                <span className="text-xs font-mono opacity-50 uppercase">Home</span>
-                                <span className="text-2xl font-black uppercase tracking-tighter">{nextMatch.teamA}</span>
+                                <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Home</span>
+                                <span className="text-3xl font-black uppercase tracking-tighter italic">{nextMatch.teamA}</span>
                             </div>
-                            <span className="text-xl font-light italic opacity-30 px-4">VS</span>
+                            <div className="flex flex-col items-center">
+                                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                                    <span className="text-sm font-black italic text-teal-500">VS</span>
+                                </div>
+                            </div>
                             <div className="flex flex-col text-right">
-                                <span className="text-xs font-mono opacity-50 uppercase">Away</span>
-                                <span className="text-2xl font-black uppercase tracking-tighter">{nextMatch.teamB}</span>
+                                <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Away</span>
+                                <span className="text-3xl font-black uppercase tracking-tighter italic">{nextMatch.teamB}</span>
                             </div>
                         </div>
 
-                        <div className="pt-4 border-t border-[#141414]/10 dark:border-[#E4E3E0]/10 flex justify-between items-end">
+                        <div className="pt-6 border-t border-white/5 flex justify-between items-center">
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-tight">{homeGround?.name || 'Neutral Venue'}</p>
-                                <p className="text-[10px] font-mono opacity-60 uppercase">{nextMatch.date}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-1">{homeGround?.name || 'Neutral Venue'}</p>
+                                <p className="text-[9px] font-mono text-white/30 uppercase tracking-widest">{nextMatch.date}</p>
                             </div>
-                            <div className="flex gap-1">
-                                {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 bg-[#141414] dark:bg-[#E4E3E0]" />)}
+                            <div className="flex gap-2">
+                                {[1, 2, 3].map(i => <div key={i} className="w-2 h-2 rounded-full bg-teal-500/20" />)}
                             </div>
                         </div>
 
                         {isUserMatch ? (
                             <button 
                                 onClick={handlePlayMatch} 
-                                className="w-full bg-[#141414] dark:bg-[#E4E3E0] text-[#E4E3E0] dark:text-[#141414] font-black py-4 px-6 uppercase tracking-widest text-sm hover:invert transition-all duration-300 flex items-center justify-center space-x-3"
+                                className="w-full bg-teal-500 text-black font-black py-5 px-6 rounded-[20px] uppercase tracking-[0.2em] text-sm hover:bg-teal-400 transition-all duration-500 flex items-center justify-center space-x-3 shadow-2xl shadow-teal-500/30 active:scale-[0.98]"
                             >
                                 <Icons.PlayMatch />
                                 <span>Enter Match</span>
@@ -127,7 +176,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                         ) : (
                             <button 
                                 onClick={handleForwardDay} 
-                                className="w-full border-2 border-[#141414] dark:border-[#E4E3E0] text-[#141414] dark:text-[#E4E3E0] font-black py-4 px-6 uppercase tracking-widest text-sm hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-[#E4E3E0] dark:hover:text-[#141414] transition-all duration-300 flex items-center justify-center space-x-3"
+                                className="w-full bg-white text-black font-black py-5 px-6 rounded-[20px] uppercase tracking-[0.2em] text-sm hover:opacity-90 transition-all duration-500 flex items-center justify-center space-x-3 active:scale-[0.98]"
                             >
                                 <Icons.PlayMatch />
                                 <span>Simulate Day</span>
@@ -137,64 +186,46 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                 </div>
             
                 {/* Stats / Info Card */}
-                <div className="space-y-4">
-                    <div className="border border-[#141414]/20 dark:border-[#E4E3E0]/20 p-4 flex justify-between items-center">
-                        <div>
-                            <p className="text-[10px] font-mono opacity-50 uppercase">Franchise Popularity</p>
-                            <div className="flex items-center gap-2 mt-1">
-                                <div className="w-32 h-2 bg-[#141414]/10 dark:bg-[#E4E3E0]/10 rounded-full overflow-hidden">
-                                    <motion.div 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${popularity}%` }}
-                                        className="h-full bg-teal-500"
-                                    />
-                                </div>
-                                <span className="text-sm font-black font-mono">{popularity}%</span>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 p-4 rounded-2xl">
+                        <p className="text-[9px] font-mono opacity-40 uppercase tracking-widest mb-2">Popularity</p>
+                        <div className="flex items-center gap-3">
+                            <div className="flex-grow h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${popularity}%` }}
+                                    className="h-full bg-teal-500"
+                                />
                             </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[10px] font-mono opacity-50 uppercase">Current Tier</p>
-                            <p className="text-sm font-black uppercase tracking-tight">
-                                {popularity >= 80 ? 'Elite' : popularity >= 50 ? 'Pro' : 'Rookie'}
-                            </p>
+                            <span className="text-xs font-black font-mono">{popularity}%</span>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <button 
-                            onClick={() => setScreen('NEWS')}
-                            className="border border-[#141414]/20 dark:border-[#E4E3E0]/20 p-4 text-left hover:bg-[#141414]/5 dark:hover:bg-[#E4E3E0]/5 transition-colors"
-                        >
-                            <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Latest News</p>
-                            <p className="text-xs font-bold uppercase tracking-tight line-clamp-1">{gameData.news?.[0]?.headline || 'No News'}</p>
-                        </button>
-                        <button 
-                            onClick={() => setScreen('LEAGUES')}
-                            className="border border-[#141414]/20 dark:border-[#E4E3E0]/20 p-4 text-left hover:bg-[#141414]/5 dark:hover:bg-[#E4E3E0]/5 transition-colors"
-                        >
-                            <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Standings</p>
-                            <p className="text-xs font-bold uppercase tracking-tight">View Table</p>
-                        </button>
+                    <div className="bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 p-4 rounded-2xl flex flex-col justify-center">
+                        <p className="text-[9px] font-mono opacity-40 uppercase tracking-widest mb-1">Tier</p>
+                        <p className="text-xs font-black uppercase tracking-tight text-teal-500">
+                            {popularity >= 80 ? 'Elite' : popularity >= 50 ? 'Pro' : 'Rookie'}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3">
                 {[
                     { screen: 'LINEUPS', icon: <Icons.Lineups />, label: 'Lineups' },
                     { screen: 'TRANSFERS', icon: <Icons.Transfers />, label: 'Transfers' },
                     { screen: 'PLAYER_DATABASE', icon: <Icons.Database />, label: 'Database' },
-                    { screen: 'RATING_BOARD', icon: <Icons.Podium />, label: 'Rating Board', highlight: true },
+                    { screen: 'NEWS', icon: <Icons.Podium />, label: 'News Feed' },
                 ].map((item) => (
                     <button 
                         key={item.screen}
                         onClick={() => setScreen(item.screen as CareerScreen)}
-                        className={`p-4 border ${item.highlight ? 'border-teal-500 bg-teal-500/5' : 'border-[#141414]/10 dark:border-[#E4E3E0]/10'} text-left hover:bg-[#141414] hover:text-[#E4E3E0] dark:hover:bg-[#E4E3E0] dark:hover:text-[#141414] transition-all group`}
+                        className="p-4 bg-white dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 rounded-2xl text-left hover:border-teal-500 transition-all group"
                     >
-                        <div className={`mb-2 ${item.highlight ? 'text-teal-500 group-hover:text-inherit' : 'opacity-50 group-hover:opacity-100'}`}>
+                        <div className="mb-3 text-teal-500 opacity-60 group-hover:opacity-100 transition-opacity">
                             {item.icon}
                         </div>
-                        <p className="text-xs font-black uppercase tracking-tight">{item.label}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest">{item.label}</p>
                     </button>
                 ))}
             </div>

@@ -9,35 +9,36 @@ interface StandingsProps {
 }
 
 const StandingRow: React.FC<{ standing: Standing; index: number; isFirstClass: boolean }> = ({ standing, index, isFirstClass }) => (
-    <tr className={`border-b dark:border-gray-700/50 transition-colors hover:bg-teal-500/5 dark:hover:bg-teal-500/10 ${index < 4 ? 'bg-teal-500/5' : ''}`}>
-        <td className="p-4">
-            <div className="flex items-center gap-3">
-                <span className={`text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full ${index < 4 ? 'bg-teal-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>{index + 1}</span>
-                <span className="font-bold text-sm tracking-tight">{standing.teamName}</span>
+    <tr className={`border-b border-white/5 transition-all duration-300 hover:bg-teal-500/10 group ${index < 4 ? 'bg-teal-500/5' : ''}`}>
+        <td className="p-5">
+            <div className="flex items-center gap-4">
+                <span className={`text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-lg ${index < 4 ? 'bg-teal-500 text-black shadow-[0_0_10px_rgba(20,184,166,0.5)]' : 'bg-white/10 text-white/40'}`}>{index + 1}</span>
+                <span className="font-black text-base uppercase tracking-tight group-hover:text-teal-400 transition-colors">{standing.teamName}</span>
             </div>
         </td>
-        <td className="p-4 text-center font-medium">{standing.played}</td>
-        <td className="p-4 text-center font-medium text-emerald-600 dark:text-emerald-400">{standing.won}</td>
-        <td className="p-4 text-center font-medium text-red-600 dark:text-red-400">{standing.lost}</td>
-        {isFirstClass && <td className="p-4 text-center font-medium text-gray-500">{standing.drawn}</td>}
-        <td className="p-4 text-center font-black text-teal-600 dark:text-teal-400 text-base">{standing.points}</td>
-        <td className="p-4 text-center font-mono text-xs font-bold">{standing.netRunRate > 0 ? `+${standing.netRunRate.toFixed(2)}` : standing.netRunRate.toFixed(2)}</td>
+        <td className="p-5 text-center font-mono font-bold text-white/60">{standing.played}</td>
+        <td className="p-5 text-center font-black text-teal-400">{standing.won}</td>
+        <td className="p-5 text-center font-black text-red-400">{standing.lost}</td>
+        {isFirstClass && <td className="p-5 text-center font-black text-white/40">{standing.drawn}</td>}
+        <td className="p-5 text-center font-black text-teal-400 text-xl tracking-tighter">{standing.points}</td>
+        <td className="p-5 text-center font-mono text-xs font-bold text-white/40">{standing.netRunRate > 0 ? `+${standing.netRunRate.toFixed(2)}` : standing.netRunRate.toFixed(2)}</td>
     </tr>
 );
 
 const FixtureItem: React.FC<{ match: Match; resolved: Match; result?: any }> = ({ match, resolved, result }) => (
-    <div className={`p-4 rounded-xl border-2 transition-all ${result ? 'bg-white dark:bg-gray-800/40 border-teal-500/20 shadow-sm' : 'bg-gray-50 dark:bg-gray-900/20 border-gray-100 dark:border-gray-800'}`}>
-        <div className="flex justify-between items-center text-[10px] mb-3 text-gray-400 uppercase tracking-widest font-black">
-            <span className="bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">Match {match.matchNumber}</span>
+    <div className={`p-6 rounded-3xl border transition-all duration-500 relative overflow-hidden group ${result ? 'bg-white/5 border-teal-500/30' : 'bg-white/[0.02] border-white/10 hover:border-white/20'}`}>
+        {result && <div className="absolute top-0 right-0 bg-teal-500 text-black px-3 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-bl-lg">Result</div>}
+        <div className="flex justify-between items-center text-[9px] mb-4 text-white/40 uppercase tracking-[0.2em] font-black">
+            <span className="bg-white/10 px-2 py-0.5 rounded text-white/60">Match {match.matchNumber}</span>
             <span>{match.date}</span>
         </div>
-        <div className="flex items-center justify-between gap-4">
-            <div className="flex-1 text-right font-black text-sm tracking-tight truncate">{resolved.teamA}</div>
-            <div className="px-3 py-1 bg-teal-500/10 rounded-full text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase italic">VS</div>
-            <div className="flex-1 text-left font-black text-sm tracking-tight truncate">{resolved.teamB}</div>
+        <div className="flex items-center justify-between gap-6">
+            <div className="flex-1 text-right font-black text-lg tracking-tighter uppercase italic group-hover:text-teal-400 transition-colors">{resolved.teamA}</div>
+            <div className="px-4 py-1 bg-white/10 rounded-xl text-[10px] font-black text-white/40 uppercase italic tracking-widest">VS</div>
+            <div className="flex-1 text-left font-black text-lg tracking-tighter uppercase italic group-hover:text-teal-400 transition-colors">{resolved.teamB}</div>
         </div>
         {result && (
-            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50 text-center text-[11px] text-teal-600 dark:text-teal-400 font-bold italic">
+            <div className="mt-4 pt-4 border-t border-white/5 text-center text-[11px] text-teal-400 font-black italic uppercase tracking-tight">
                 {result.summary}
             </div>
         )}
@@ -61,46 +62,49 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
     const isFirstClass = selectedFormat === Format.SHIELD;
 
     return (
-        <div className="p-4 flex flex-col h-full overflow-hidden bg-white dark:bg-[#1a1a1a]">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black tracking-tighter uppercase italic text-teal-600 dark:text-teal-400">Leagues</h2>
-                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+        <div className="p-6 flex flex-col h-full overflow-hidden bg-[#050808] text-white">
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <p className="text-[10px] font-mono font-bold text-teal-500 uppercase tracking-[0.4em] mb-1">LEAGUE_TABLES // v2.0</p>
+                    <h2 className="text-4xl font-black tracking-tighter uppercase italic leading-none">Standings</h2>
+                </div>
+                <div className="flex bg-white/5 p-1 rounded-2xl backdrop-blur-md border border-white/5">
                     <button 
                         onClick={() => setView('standings')} 
-                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${view === 'standings' ? 'bg-white dark:bg-gray-700 shadow-md text-teal-600' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-500 ${view === 'standings' ? 'bg-teal-500 text-black shadow-lg shadow-teal-500/20' : 'text-white/40 hover:text-white/70'}`}
                     >
-                        Standings
+                        Table
                     </button>
                     <button 
                         onClick={() => setView('fixtures')} 
-                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${view === 'fixtures' ? 'bg-white dark:bg-gray-700 shadow-md text-teal-600' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-500 ${view === 'fixtures' ? 'bg-teal-500 text-black shadow-lg shadow-teal-500/20' : 'text-white/40 hover:text-white/70'}`}
                     >
                         Fixtures
                     </button>
                 </div>
             </div>
             
-            <div className="space-y-4 mb-6">
+            <div className="space-y-4 mb-8">
                 <CategoryTabs category={category} setCategory={setCategory} />
                 <FormatDropdown category={category} selectedFormat={selectedFormat} setSelectedFormat={setSelectedFormat} />
             </div>
 
             <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
                 {view === 'standings' ? (
-                    <div className="bg-white dark:bg-gray-800/20 rounded-2xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl">
+                    <div className="bg-white/[0.02] rounded-[32px] border border-white/10 overflow-hidden shadow-2xl backdrop-blur-sm">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50 dark:bg-gray-800/50 border-b-2 border-gray-100 dark:border-gray-800">
+                            <thead className="bg-white/5 border-b border-white/10">
                                 <tr>
-                                    <th className="p-4 font-black text-[10px] uppercase tracking-widest text-gray-400">Team</th>
-                                    <th className="p-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">P</th>
-                                    <th className="p-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">W</th>
-                                    <th className="p-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">L</th>
-                                    {isFirstClass && <th className="p-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">D</th>}
-                                    <th className="p-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">Pts</th>
-                                    <th className="p-4 text-center font-black text-[10px] uppercase tracking-widest text-gray-400">NRR</th>
+                                    <th className="p-5 font-black text-[10px] uppercase tracking-[0.2em] text-white/40">Team</th>
+                                    <th className="p-5 text-center font-black text-[10px] uppercase tracking-[0.2em] text-white/40">P</th>
+                                    <th className="p-5 text-center font-black text-[10px] uppercase tracking-[0.2em] text-white/40">W</th>
+                                    <th className="p-5 text-center font-black text-[10px] uppercase tracking-[0.2em] text-white/40">L</th>
+                                    {isFirstClass && <th className="p-5 text-center font-black text-[10px] uppercase tracking-[0.2em] text-white/40">D</th>}
+                                    <th className="p-5 text-center font-black text-[10px] uppercase tracking-[0.2em] text-white/40">Pts</th>
+                                    <th className="p-5 text-center font-black text-[10px] uppercase tracking-[0.2em] text-white/40">NRR</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                            <tbody className="divide-y divide-white/5">
                                 {standings.map((s, index) => (
                                     <StandingRow key={s.teamId} standing={s} index={index} isFirstClass={isFirstClass} />
                                 ))}
@@ -108,7 +112,7 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
                         </table>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 gap-4 pb-8">
                         {schedule.map((match, index) => (
                             <FixtureItem 
                                 key={`${selectedFormat}-fixture-${index}`}

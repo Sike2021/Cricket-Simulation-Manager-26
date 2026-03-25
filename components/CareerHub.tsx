@@ -50,24 +50,26 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
         { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (
-        <nav className="bg-white/80 dark:bg-[#0A0F0F]/90 border-t border-slate-200 dark:border-slate-800/50 flex justify-around items-center h-[80px] pb-4 backdrop-blur-xl sticky bottom-0 z-50">
+        <nav className="bg-[#0A0F0F]/80 border-t border-white/5 flex justify-around items-center h-[85px] pb-6 backdrop-blur-2xl sticky bottom-0 z-50">
             {navItems.map(item => {
                 const isActive = activeScreen === item.screen;
                 return (
                     <button
                         key={item.name}
                         onClick={() => setScreen(item.screen)}
-                        className={`relative flex flex-col items-center justify-center space-y-1 w-1/4 pt-2 transition-all duration-300 ${isActive ? 'text-teal-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+                        className={`relative flex flex-col items-center justify-center space-y-1.5 w-1/4 pt-3 transition-all duration-500 ${isActive ? 'text-teal-400' : 'text-white/40 hover:text-white/70'}`}
                     >
                         {isActive && (
                             <motion.div 
                                 layoutId="nav-active"
-                                className="absolute -top-2 w-12 h-1 bg-teal-500 rounded-full"
-                                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                                className="absolute -top-3 w-14 h-1 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                             />
                         )}
-                        <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                        <span className="text-[9px] font-black tracking-[0.15em] uppercase">{item.name}</span>
+                        <div className={`p-2 rounded-xl transition-all duration-500 ${isActive ? 'bg-teal-500/10' : 'bg-transparent'}`}>
+                            <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.5} />
+                        </div>
+                        <span className={`text-[9px] font-black tracking-[0.2em] uppercase transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-60'}`}>{item.name}</span>
                     </button>
                 );
             })}

@@ -201,27 +201,29 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
 
             {/* SigNify Board Ratings */}
             {teamRatings && (
-                <div className="bg-gradient-to-br from-teal-500 to-blue-600 text-white p-4 rounded-xl shadow-lg mb-4">
-                    <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-bold text-lg">SigNify Board Ratings</h3>
-                        <div className="bg-white/20 px-2 py-1 rounded text-xs font-bold">Season {gameData.currentSeason}</div>
+                <div className="card-signify p-6 mb-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-black italic uppercase tracking-tighter text-xl text-white">SigNify Board Ratings</h3>
+                        <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
+                            Season {gameData.currentSeason}
+                        </div>
                     </div>
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Strength</div>
-                            <div className="text-xl font-bold">{teamRatings.strength}</div>
+                    <div className="grid grid-cols-4 gap-3">
+                        <div className="subcard-signify p-3 text-center">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Strength</div>
+                            <div className="text-2xl font-black font-mono text-white">{teamRatings.strength}</div>
                         </div>
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Bowling</div>
-                            <div className="text-xl font-bold">{teamRatings.bowling}</div>
+                        <div className="subcard-signify p-3 text-center">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Bowling</div>
+                            <div className="text-2xl font-black font-mono text-white">{teamRatings.bowling}</div>
                         </div>
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Batting</div>
-                            <div className="text-xl font-bold">{teamRatings.batting}</div>
+                        <div className="subcard-signify p-3 text-center">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Batting</div>
+                            <div className="text-2xl font-black font-mono text-white">{teamRatings.batting}</div>
                         </div>
-                        <div className="bg-white/10 p-2 rounded-lg">
-                            <div className="text-xs opacity-80">Stars</div>
-                            <div className="text-xl font-bold">{teamRatings.starPlayers}</div>
+                        <div className="subcard-signify p-3 text-center">
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Stars</div>
+                            <div className="text-2xl font-black font-mono text-white">{teamRatings.starPlayers}</div>
                         </div>
                     </div>
                 </div>

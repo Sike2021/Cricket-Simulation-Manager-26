@@ -55,12 +55,18 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
 
   const sortedPlayers = [...playersWithPR].sort((a, b) => b.pr - a.pr);
 
+  // Calculate dynamic stats for the header
+  const avgBatting = Math.round(players.reduce((acc, p) => acc + p.battingSkill, 0) / players.length) || 0;
+  const avgBowling = Math.round(players.reduce((acc, p) => acc + p.secondarySkill, 0) / players.length) || 0;
+  const avgStrength = Math.round((avgBatting + avgBowling) / 2);
+  const stars = Math.min(5, Math.max(1, Math.floor(avgStrength / 15)));
+
   return (
     <div className="bg-[#E4E3E0] dark:bg-[#041414] min-h-full p-6 font-sans text-gray-900 dark:text-[#E4E3E0]">
       {/* SigNify Board Ratings Header (Image Pattern) */}
       <div className="card-signify mb-8 relative">
         <div className="flex justify-between items-start mb-6">
-          <h2 className="text-3xl font-black tracking-tight text-white">
+          <h2 className="text-2xl font-black tracking-tight text-white uppercase">
             SigNify Board Ratings
           </h2>
           <div className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-lg text-sm font-bold text-white">
@@ -68,22 +74,22 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-3">
           <div className="subcard-signify">
-            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Strength</p>
-            <p className="text-3xl font-black text-white">54</p>
+            <p className="text-[10px] font-mono font-bold text-white/70 uppercase tracking-widest mb-1">Strength</p>
+            <p className="text-2xl font-black text-white">{avgStrength}</p>
           </div>
           <div className="subcard-signify">
-            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Bowling</p>
-            <p className="text-3xl font-black text-white">48</p>
+            <p className="text-[10px] font-mono font-bold text-white/70 uppercase tracking-widest mb-1">Bowling</p>
+            <p className="text-2xl font-black text-white">{avgBowling}</p>
           </div>
           <div className="subcard-signify">
-            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Batting</p>
-            <p className="text-3xl font-black text-white">60</p>
+            <p className="text-[10px] font-mono font-bold text-white/70 uppercase tracking-widest mb-1">Batting</p>
+            <p className="text-2xl font-black text-white">{avgBatting}</p>
           </div>
           <div className="subcard-signify">
-            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Stars</p>
-            <p className="text-3xl font-black text-white">5</p>
+            <p className="text-[10px] font-mono font-bold text-white/70 uppercase tracking-widest mb-1">Stars</p>
+            <p className="text-2xl font-black text-white">{stars}</p>
           </div>
         </div>
       </div>

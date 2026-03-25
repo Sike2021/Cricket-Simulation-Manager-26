@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Anton&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -51,6 +52,32 @@
 
   .neo-card {
     @apply bg-white/5 border border-white/10 relative overflow-hidden;
+  }
+
+  /* SigNify Board Ratings Styles */
+  .card-signify {
+    @apply bg-gradient-to-br from-[#14b8a6] to-[#2563eb] p-6 rounded-[24px] shadow-2xl;
+  }
+
+  .subcard-signify {
+    @apply bg-white/15 backdrop-blur-md p-4 rounded-xl flex flex-col items-center justify-center border border-white/10;
+  }
+
+  .broadcast-header {
+    @apply border-b-2 border-white/10 pb-4 mb-6 flex justify-between items-end relative;
+  }
+
+  .broadcast-header::after {
+    content: '';
+    @apply absolute bottom-[-2px] left-0 w-12 h-0.5 bg-teal-500 shadow-[0_0_10px_#14b8a6];
+  }
+
+  .neon-glow {
+    @apply shadow-[0_0_15px_rgba(20,184,166,0.3)] border-teal-500/30;
+  }
+
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl;
   }
 }
 
