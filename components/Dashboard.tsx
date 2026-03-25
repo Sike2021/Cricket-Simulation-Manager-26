@@ -74,46 +74,6 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
 
     return (
         <div className="p-4 space-y-6 bg-[#050808] min-h-full font-sans text-slate-100 pb-24">
-            {/* SigNify Board Ratings Header (Image Pattern) */}
-            <motion.div 
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="card-signify relative cursor-pointer group overflow-hidden"
-                onClick={() => setScreen('RATING_BOARD')}
-            >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-white/20 transition-all duration-700" />
-                <div className="flex justify-between items-start mb-6 relative z-10">
-                    <div>
-                        <p className="text-[8px] font-black text-white/50 uppercase tracking-[0.4em] mb-1">LIVE_DATA_STREAM</p>
-                        <h2 className="text-2xl font-black tracking-tighter text-white uppercase italic">
-                            SigNify Board <span className="text-white/40 not-italic">Ratings</span>
-                        </h2>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-lg text-[10px] font-bold text-white uppercase tracking-[0.3em] border border-white/10">
-                        S{gameData.currentSeason}
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-4 gap-3 relative z-10">
-                    <div className="subcard-signify p-3">
-                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Strength</p>
-                        <p className="text-2xl font-black text-white tracking-tighter">{avgStrength}</p>
-                    </div>
-                    <div className="subcard-signify p-3">
-                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Bowling</p>
-                        <p className="text-2xl font-black text-white tracking-tighter">{avgBowling}</p>
-                    </div>
-                    <div className="subcard-signify p-3">
-                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Batting</p>
-                        <p className="text-2xl font-black text-white tracking-tighter">{avgBatting}</p>
-                    </div>
-                    <div className="subcard-signify p-3">
-                        <p className="text-[8px] font-black text-white/40 uppercase tracking-widest mb-1">Stars</p>
-                        <p className="text-2xl font-black text-white tracking-tighter">{stars}</p>
-                    </div>
-                </div>
-            </motion.div>
-
             <header className="broadcast-header">
                 <div>
                     <p className="text-[9px] font-black text-teal-500 uppercase tracking-[0.4em] mb-1">TOURNAMENT_FEED // {gameData.currentFormat}</p>

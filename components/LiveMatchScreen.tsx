@@ -466,7 +466,12 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
         );
     }
 
+    if (!innings || innings.length === 0) {
+        return <div className="text-white">Loading match...</div>;
+    }
+
     const currentInning = innings[currentInningIndex];
+    console.log("LiveMatchScreen state status:", state.status);
     const striker = currentInning.batting.find(b => b.playerId === currentBatters.strikerId);
     const nonStriker = currentInning.batting.find(b => b.playerId === currentBatters.nonStrikerId);
     const bowler = currentInning.bowling.find(b => b.playerId === currentBowlerId);

@@ -134,61 +134,55 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
     const rightPanelList = tradeSource === 'free-agents' ? freeAgents : (gameData.teams.find(t => t.id === tradeSource)?.squad || []);
 
     return (
-        <div className="p-6 h-full flex flex-col bg-white dark:bg-[#0A0F0F] overflow-hidden font-sans text-gray-900 dark:text-white">
-            <div className="flex items-center justify-between mb-8">
+        <div className="p-6 h-full flex flex-col bg-slate-50 dark:bg-[#050808] font-sans text-gray-900 dark:text-white">
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-3xl font-black italic uppercase tracking-tighter leading-none">Transfer <span className="text-teal-600">Hub</span></h2>
-                    <p className="text-[10px] font-black opacity-40 uppercase tracking-widest mt-1">SQUAD_REINFORCEMENT_PROTOCOL</p>
+                    <h2 className="text-4xl font-black italic uppercase tracking-tighter leading-none">Transfer <span className="text-teal-600">Hub</span></h2>
+                    <p className="text-[10px] font-black opacity-40 uppercase tracking-widest mt-1">Manage your squad and negotiate trades</p>
                 </div>
-                <div className="bg-gray-50 dark:bg-white/5 px-4 py-2 rounded-2xl border border-gray-100 dark:border-white/10">
-                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40">SQUAD_SIZE: {selectedTeam.squad.length}/{LOCAL_MAX_SQUAD_SIZE}</span>
-                </div>
-            </div>
-
-            <div className="mb-8">
-                 <div className="relative">
-                    <select 
-                        value={selectedTeamId} 
-                        onChange={(e) => setSelectedTeamId(e.target.value)}
-                        className="w-full p-5 rounded-3xl bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-teal-600 text-xs font-black uppercase tracking-widest appearance-none outline-none transition-all"
-                    >
-                        {gameData.teams.map(team => <option key={team.id} value={team.id} className="dark:bg-[#0A0F0F]">{team.name}</option>)}
-                    </select>
-                    <Icons.ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 w-4 h-4 opacity-20 pointer-events-none" />
+                <div className="bg-white dark:bg-white/5 px-6 py-3 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Squad Size: {selectedTeam.squad.length}/{LOCAL_MAX_SQUAD_SIZE}</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-grow overflow-hidden">
+            <div className="mb-6">
+                <select 
+                    value={selectedTeamId} 
+                    onChange={(e) => setSelectedTeamId(e.target.value)}
+                    className="w-full p-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-teal-600 text-sm font-bold uppercase tracking-widest outline-none transition-all"
+                >
+                    {gameData.teams.map(team => <option key={team.id} value={team.id} className="dark:bg-[#0A0F0F]">{team.name}</option>)}
+                </select>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow overflow-hidden">
                 {/* Left Panel: My Squad */}
-                <div className="flex flex-col overflow-hidden">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-1.5 h-1.5 rounded-full bg-teal-600" />
-                        <h3 className="font-black text-[10px] uppercase tracking-widest opacity-40">{selectedTeam.name}_ROSTER</h3>
-                    </div>
-                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-2">
+                <div className="flex flex-col bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <h3 className="font-black text-xs uppercase tracking-widest mb-4 text-teal-600">My Roster</h3>
+                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-3">
                         {selectedTeam.squad.map(p => (
                             <div key={p.id} 
                                 onClick={() => tradeSource !== 'free-agents' && setPlayerToTradeOut(p)}
                                 className={`flex items-center p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                                     playerToTradeOut?.id === p.id 
-                                    ? 'bg-teal-600/10 border-teal-600 shadow-lg' 
-                                    : 'bg-gray-50 dark:bg-white/5 border-transparent hover:border-gray-200 dark:hover:border-white/10'
+                                    ? 'bg-teal-600/10 border-teal-600' 
+                                    : 'bg-gray-50 dark:bg-black/20 border-transparent hover:border-gray-200 dark:hover:border-white/10'
                                 }`}
                             >
                                 <div className="flex-grow">
-                                    <p className="text-sm font-black tracking-tight leading-none mb-1">{p.name} {p.isForeign ? '(F)' : ''}</p>
-                                    <p className="text-[8px] font-black opacity-40 uppercase tracking-widest">{p.role}</p>
+                                    <p className="text-sm font-bold">{p.name} {p.isForeign ? <span className="text-[10px] bg-amber-500/20 text-amber-600 px-1.5 py-0.5 rounded">F</span> : ''}</p>
+                                    <p className="text-[10px] opacity-50 uppercase">{p.role}</p>
                                 </div>
                                 <div className="text-right mr-4">
-                                    <p className="text-[8px] font-black opacity-40 uppercase tracking-widest mb-0.5">SKILL</p>
-                                    <p className="text-sm font-black font-mono">{p.battingSkill}</p>
+                                    <p className="text-[10px] opacity-40">SKILL</p>
+                                    <p className="font-mono font-bold">{p.battingSkill}</p>
                                 </div>
                                 {tradeSource === 'free-agents' && (
                                     <button 
                                         onClick={(e) => { e.stopPropagation(); releasePlayer(p.id); }}
-                                        className="p-2 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
                                     >
-                                        <Icons.RemoveCircle className="w-4 h-4" />
+                                        <Icons.RemoveCircle className="w-5 h-5" />
                                     </button>
                                 )}
                             </div>
@@ -197,45 +191,42 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                 </div>
 
                 {/* Right Panel: Market */}
-                <div className="flex flex-col overflow-hidden">
-                    <div className="relative mb-6">
-                        <select 
-                            value={tradeSource} 
-                            onChange={e => setTradeSource(e.target.value)}
-                            className="w-full p-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-black uppercase tracking-widest appearance-none outline-none transition-all"
-                        >
-                            <option value="free-agents">FREE_AGENTS_MARKET</option>
-                            {gameData.teams.filter(t => t.id !== selectedTeamId).map(team => (
-                                <option key={team.id} value={team.id}>{team.name.toUpperCase()}_SQUAD</option>
-                            ))}
-                        </select>
-                        <Icons.ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 rotate-90 w-4 h-4 opacity-40 pointer-events-none" />
-                    </div>
+                <div className="flex flex-col bg-white dark:bg-white/5 rounded-3xl p-6 border border-gray-200 dark:border-white/10 shadow-sm">
+                    <select 
+                        value={tradeSource} 
+                        onChange={e => setTradeSource(e.target.value)}
+                        className="w-full p-4 mb-4 rounded-2xl bg-gray-100 dark:bg-black/20 border-transparent text-xs font-bold uppercase tracking-widest outline-none"
+                    >
+                        <option value="free-agents">Free Agents Market</option>
+                        {gameData.teams.filter(t => t.id !== selectedTeamId).map(team => (
+                            <option key={team.id} value={team.id}>{team.name} Squad</option>
+                        ))}
+                    </select>
 
-                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-2">
+                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-3">
                         {rightPanelList.map(p => (
                             <div key={p.id} 
                                 onClick={() => tradeSource !== 'free-agents' && setPlayerToTradeIn(p)}
                                 className={`flex items-center p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                                     playerToTradeIn?.id === p.id 
-                                    ? 'bg-teal-600/10 border-teal-600 shadow-lg' 
-                                    : 'bg-gray-50 dark:bg-white/5 border-transparent hover:border-gray-200 dark:hover:border-white/10'
+                                    ? 'bg-teal-600/10 border-teal-600' 
+                                    : 'bg-gray-50 dark:bg-black/20 border-transparent hover:border-gray-200 dark:hover:border-white/10'
                                 }`}
                             >
                                 <div className="flex-grow">
-                                    <p className="text-sm font-black tracking-tight leading-none mb-1">{p.name} {p.isForeign ? '(F)' : ''}</p>
-                                    <p className="text-[8px] font-black opacity-40 uppercase tracking-widest">{p.role}</p>
+                                    <p className="text-sm font-bold">{p.name} {p.isForeign ? <span className="text-[10px] bg-amber-500/20 text-amber-600 px-1.5 py-0.5 rounded">F</span> : ''}</p>
+                                    <p className="text-[10px] opacity-50 uppercase">{p.role}</p>
                                 </div>
                                 <div className="text-right mr-4">
-                                    <p className="text-[8px] font-black opacity-40 uppercase tracking-widest mb-0.5">SKILL</p>
-                                    <p className="text-sm font-black font-mono">{p.battingSkill}</p>
+                                    <p className="text-[10px] opacity-40">SKILL</p>
+                                    <p className="font-mono font-bold">{p.battingSkill}</p>
                                 </div>
                                 {tradeSource === 'free-agents' && (
                                     <button 
                                         onClick={(e) => { e.stopPropagation(); signPlayer(p); }}
-                                        className="p-2 bg-teal-600/10 text-teal-600 rounded-xl hover:bg-teal-600 hover:text-white transition-all"
+                                        className="p-2 text-teal-600 hover:bg-teal-600/10 rounded-xl transition-all"
                                     >
-                                        <Icons.PlusCircle className="w-4 h-4" />
+                                        <Icons.PlusCircle className="w-5 h-5" />
                                     </button>
                                 )}
                             </div>
@@ -245,27 +236,25 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
             </div>
 
              {tradeSource !== 'free-agents' && (
-                <div className="mt-8 bg-gray-900 dark:bg-white p-8 rounded-[40px] text-white dark:text-gray-900 shadow-2xl shadow-teal-600/20">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="flex-1 w-full space-y-4">
-                            <div className="flex items-center justify-between border-b border-white/10 dark:border-gray-900/10 pb-4">
-                                <span className="text-[10px] font-black uppercase tracking-widest opacity-40">OFFERING</span>
-                                <span className="text-sm font-black uppercase tracking-tight">{playerToTradeOut?.name || 'SELECT_PLAYER'}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black uppercase tracking-widest opacity-40">REQUESTING</span>
-                                <span className="text-sm font-black uppercase tracking-tight">{playerToTradeIn?.name || 'SELECT_PLAYER'}</span>
-                            </div>
+                <div className="mt-6 bg-white dark:bg-white/5 p-6 rounded-3xl border border-gray-200 dark:border-white/10 flex items-center justify-between">
+                    <div className="flex gap-4">
+                        <div className="bg-gray-100 dark:bg-black/20 p-4 rounded-2xl">
+                            <p className="text-[10px] opacity-40 uppercase">Offering</p>
+                            <p className="font-bold">{playerToTradeOut?.name || '---'}</p>
                         </div>
-                        
-                        <button 
-                            onClick={handleTrade}
-                            disabled={!playerToTradeOut || !playerToTradeIn}
-                            className="w-full md:w-auto bg-teal-600 text-white font-black py-5 px-12 rounded-2xl uppercase tracking-widest text-xs hover:bg-teal-700 transition-all active:scale-95 disabled:opacity-20 disabled:scale-100 shadow-xl shadow-teal-600/20"
-                        >
-                            PROPOSE_TRADE
-                        </button>
+                        <div className="bg-gray-100 dark:bg-black/20 p-4 rounded-2xl">
+                            <p className="text-[10px] opacity-40 uppercase">Requesting</p>
+                            <p className="font-bold">{playerToTradeIn?.name || '---'}</p>
+                        </div>
                     </div>
+                    
+                    <button 
+                        onClick={handleTrade}
+                        disabled={!playerToTradeOut || !playerToTradeIn}
+                        className="bg-teal-600 text-white font-bold py-4 px-8 rounded-2xl uppercase text-xs hover:bg-teal-700 transition-all disabled:opacity-30"
+                    >
+                        Propose Trade
+                    </button>
                 </div>
             )}
         </div>

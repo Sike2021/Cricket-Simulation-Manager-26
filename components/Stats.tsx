@@ -159,6 +159,31 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
                     <span className="text-teal-600">STATS</span>
                 </h1>
                 
+                {/* SigNify Board */}
+                <div className="mt-8 p-6 bg-gray-900 dark:bg-white rounded-3xl text-white dark:text-gray-900">
+                    <h2 className="text-xl font-black tracking-tighter uppercase italic mb-4">
+                        SigNify Board <span className="text-white/40 not-italic">Ratings</span>
+                    </h2>
+                    <div className="grid grid-cols-4 gap-3">
+                        <div className="bg-white/10 dark:bg-black/5 p-3 rounded-xl">
+                            <p className="text-[8px] font-black opacity-60 uppercase tracking-widest mb-1">Strength</p>
+                            <p className="text-2xl font-black tracking-tighter">{(Math.round(gameData.allPlayers.reduce((acc, p) => acc + p.battingSkill + p.secondarySkill, 0) / (gameData.allPlayers.length * 2)) || 0)}</p>
+                        </div>
+                        <div className="bg-white/10 dark:bg-black/5 p-3 rounded-xl">
+                            <p className="text-[8px] font-black opacity-60 uppercase tracking-widest mb-1">Bowling</p>
+                            <p className="text-2xl font-black tracking-tighter">{Math.round(gameData.allPlayers.reduce((acc, p) => acc + p.secondarySkill, 0) / gameData.allPlayers.length) || 0}</p>
+                        </div>
+                        <div className="bg-white/10 dark:bg-black/5 p-3 rounded-xl">
+                            <p className="text-[8px] font-black opacity-60 uppercase tracking-widest mb-1">Batting</p>
+                            <p className="text-2xl font-black tracking-tighter">{Math.round(gameData.allPlayers.reduce((acc, p) => acc + p.battingSkill, 0) / gameData.allPlayers.length) || 0}</p>
+                        </div>
+                        <div className="bg-white/10 dark:bg-black/5 p-3 rounded-xl">
+                            <p className="text-[8px] font-black opacity-60 uppercase tracking-widest mb-1">Stars</p>
+                            <p className="text-2xl font-black tracking-tighter">{Math.min(5, Math.max(1, Math.floor((Math.round(gameData.allPlayers.reduce((acc, p) => acc + p.battingSkill + p.secondarySkill, 0) / (gameData.allPlayers.length * 2)) || 0) / 15)))}</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <div className="flex flex-col gap-4 mt-8">
                     {/* Category Tabs */}
                     <div className="flex bg-gray-100 dark:bg-white/5 p-1 rounded-xl w-fit">
