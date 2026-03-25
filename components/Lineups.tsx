@@ -164,7 +164,7 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                     <li key={player.id} className={`flex items-center p-2 rounded-md transition-colors ${playerToSwap?.id === player.id ? 'bg-teal-200 dark:bg-teal-800' : 'bg-gray-100 dark:bg-gray-900/50'} ${dropStatus ? 'border-l-4 border-red-500' : ''}`}>
                         <span className={`font-bold w-8 text-sm ${getRoleColor(player.role)}`}>{player.role}</span>
                         <div className="flex-grow flex flex-col">
-                            <span className="text-sm font-medium">{player.name} {player.isForeign ? '(F)' : ''} {player.id === captainId ? '(C)' : ''}</span>
+                            <span className="text-sm font-medium">{player.name} {player.isForeign ? '(F)' : ''} {player.isEmerging ? '(E)' : ''} {player.id === captainId ? '(C)' : ''}</span>
                             {dropStatus && <span className="text-[10px] text-red-500 font-semibold">{dropStatus.message}</span>}
                         </div>
                         <span className="font-semibold mr-2 text-sm">{player.battingSkill}</span>

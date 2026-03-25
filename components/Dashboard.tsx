@@ -38,7 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
             }
             if (placeholder.startsWith('SF')) {
                 const sfMatchNumber = placeholder.split(' ')[0];
-                const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === sfMatchNumber);
+                const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
                 if (sfResult?.winnerId) {
                     return gameData.teams.find(t => t.id === sfResult.winnerId)?.name || 'TBD';
                 }

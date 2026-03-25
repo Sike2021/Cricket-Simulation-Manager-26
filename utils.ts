@@ -149,7 +149,13 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const keepers = sortedSquad.filter(p => p.role === PlayerRole.WICKET_KEEPER);
     if (keepers.length > 0) addPlayer(keepers[0]);
 
-    // 2. Must have 5 Batters (Best available)
+    // 2. Ensure at least one Emerging Player (if available)
+    const emerging = sortedSquad.filter(p => p.isEmerging);
+    if (emerging.length > 0) {
+        addPlayer(emerging[0]);
+    }
+
+    // 3. Must have 5 Batters (Best available)
     const batters = sortedSquad.filter(p => p.role === PlayerRole.BATSMAN);
     let bCount = 0;
     for (const p of batters) {

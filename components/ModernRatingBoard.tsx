@@ -56,28 +56,40 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
   const sortedPlayers = [...playersWithPR].sort((a, b) => b.pr - a.pr);
 
   return (
-    <div className="bg-[#0A0F0F] min-h-full p-4 font-sans text-[#E4E3E0]">
-      {/* Header */}
-      <div className="border-b-2 border-teal-500/30 pb-4 mb-6 flex justify-between items-end">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 bg-teal-500 animate-pulse" />
-            <p className="text-[10px] font-mono font-bold text-teal-500 uppercase tracking-[0.2em]">Live Performance Metrics</p>
-          </div>
-          <h2 className="text-4xl font-black tracking-tighter uppercase italic leading-none">
-            {title} <span className="text-teal-500/50 not-italic font-light">2026</span>
+    <div className="bg-[#E4E3E0] dark:bg-[#041414] min-h-full p-6 font-sans text-gray-900 dark:text-[#E4E3E0]">
+      {/* SigNify Board Ratings Header (Image Pattern) */}
+      <div className="card-signify mb-8 relative">
+        <div className="flex justify-between items-start mb-6">
+          <h2 className="text-3xl font-black tracking-tight text-white">
+            SigNify Board Ratings
           </h2>
+          <div className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-lg text-sm font-bold text-white">
+            Season 1
+          </div>
         </div>
-        <div className="text-right hidden sm:block">
-          <p className="text-[10px] font-mono font-bold opacity-40">SIG_BOARD_V4.2</p>
-          <div className="flex gap-1 mt-1 justify-end">
-            {[1, 2, 3, 4].map(i => <div key={i} className="w-4 h-1 bg-teal-500/20" />)}
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Strength</p>
+            <p className="text-3xl font-black text-white">54</p>
+          </div>
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Bowling</p>
+            <p className="text-3xl font-black text-white">48</p>
+          </div>
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Batting</p>
+            <p className="text-3xl font-black text-white">60</p>
+          </div>
+          <div className="subcard-signify">
+            <p className="text-[10px] font-mono font-bold text-white/60 uppercase tracking-widest mb-1">Stars</p>
+            <p className="text-3xl font-black text-white">5</p>
           </div>
         </div>
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_1fr_80px_70px] gap-4 px-4 py-2 bg-white/5 border-y border-white/10 text-[10px] font-mono font-bold text-teal-500/70 uppercase tracking-widest">
+      <div className="grid grid-cols-[40px_1fr_80px_70px] gap-4 px-4 py-2 bg-white/5 border-y border-white/10 text-[10px] font-mono font-bold text-teal-500 uppercase tracking-widest">
         <span>Rank</span>
         <span>Player Identity</span>
         <span className="text-center">Class</span>
@@ -95,10 +107,10 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.02 }}
               key={player.id}
-              className="grid grid-cols-[40px_1fr_80px_70px] gap-4 px-4 py-4 bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-teal-500/30 transition-all group cursor-pointer relative overflow-hidden"
+              className="grid grid-cols-[40px_1fr_80px_70px] gap-4 px-4 py-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:bg-green-50 dark:hover:bg-white/[0.05] hover:border-green-600/30 transition-all group cursor-pointer relative overflow-hidden rounded-lg"
             >
               {/* Rank Background Decoration */}
-              <div className="absolute -left-2 top-1/2 -translate-y-1/2 text-4xl font-black opacity-[0.03] italic pointer-events-none">
+              <div className="absolute -left-2 top-1/2 -translate-y-1/2 text-4xl font-black opacity-[0.03] dark:opacity-[0.03] italic pointer-events-none text-green-600">
                 {index + 1}
               </div>
 
@@ -110,18 +122,18 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
 
               <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-2">
-                  <span className="font-black text-base tracking-tight uppercase group-hover:text-teal-400 transition-colors">
+                  <span className="font-black text-base tracking-tight uppercase group-hover:text-green-600 transition-colors">
                     {player.name}
                   </span>
                   {player.isForeign && (
-                    <span className="text-[8px] border border-white/20 px-1 rounded-sm opacity-50">INTL</span>
+                    <span className="text-[8px] border border-gray-300 dark:border-white/20 px-1 rounded-sm opacity-50">INTL</span>
                   )}
                 </div>
                 <span className="text-[9px] font-mono opacity-40 uppercase tracking-wider">{player.nationality}</span>
               </div>
 
               <div className="flex items-center justify-center">
-                <span className={`text-[9px] font-black px-2 py-1 bg-white/5 border border-white/10 rounded-sm uppercase tracking-tighter ${getRoleColor(player.role)}`}>
+                <span className={`text-[9px] font-black px-2 py-1 bg-white/5 border border-gray-200 dark:border-white/10 rounded-sm uppercase tracking-tighter ${getRoleColor(player.role)}`}>
                   {player.role}
                 </span>
               </div>
@@ -131,7 +143,7 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
                   <span className={`font-mono text-2xl font-black italic leading-none ${ratingColor}`}>
                     {player.pr}
                   </span>
-                  <div className="h-1 w-full bg-white/10 mt-1 overflow-hidden">
+                  <div className="h-1 w-full bg-gray-200 dark:bg-white/10 mt-1 overflow-hidden rounded-full">
                     <div 
                       className={`h-full transition-all duration-1000 ${ratingColor.replace('text-', 'bg-')}`} 
                       style={{ width: `${player.pr}%` }} 
@@ -145,7 +157,7 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
       </div>
 
       {/* Footer Decoration */}
-      <div className="mt-12 pt-6 border-t border-white/10 flex justify-between items-center">
+      <div className="mt-12 pt-6 border-t border-gray-200 dark:border-white/10 flex justify-between items-center">
         <div className="flex gap-8">
           <div className="flex flex-col">
             <span className="text-[9px] font-mono opacity-40 uppercase tracking-widest">Database Size</span>
@@ -153,16 +165,16 @@ const ModernRatingBoard: React.FC<ModernRatingBoardProps> = ({ players, title = 
           </div>
           <div className="flex flex-col">
             <span className="text-[9px] font-mono opacity-40 uppercase tracking-widest">Format Focus</span>
-            <span className="text-lg font-black italic text-teal-500">{currentFormat}</span>
+            <span className="text-lg font-black italic text-green-600">{currentFormat}</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
             <div className="text-right">
                 <p className="text-[8px] font-mono opacity-40 uppercase">System Status</p>
-                <p className="text-[10px] font-bold text-green-500">ENCRYPTED_FEED</p>
+                <p className="text-[10px] font-bold text-green-600">ENCRYPTED_FEED</p>
             </div>
-            <div className="w-10 h-10 bg-teal-500 flex items-center justify-center skew-x-[-12deg]">
-              <span className="text-[10px] font-black text-[#0A0F0F] -skew-x-[-12deg]">SIG</span>
+            <div className="w-10 h-10 bg-green-600 flex items-center justify-center skew-x-[-12deg] shadow-lg shadow-green-500/20">
+              <span className="text-[10px] font-black text-white -skew-x-[-12deg]">SIG</span>
             </div>
         </div>
       </div>

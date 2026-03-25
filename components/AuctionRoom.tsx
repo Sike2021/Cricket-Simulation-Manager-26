@@ -10,6 +10,8 @@ interface AuctionRoomProps {
 
 const STARTING_PURSE = 100.0;
 const MAX_FOREIGN_LIMIT = 3; // Match App.tsx
+const MAX_EMERGING_LIMIT = 3;
+const MIN_EMERGING_LIMIT = 2;
 const MAX_SQUAD_SIZE = 22;
 const MIN_SQUAD_SIZE = 15;
 
@@ -68,6 +70,11 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     const userTeam = teams.find(t => t.id === gameData.userTeamId);
 
     const getBasePrice = (player: Player) => {
+        // Use custom base price if defined (convert Lacs to Crore)
+        if (player.basePrice !== undefined) {
+            return player.basePrice / 100;
+        }
+
         const attr = Math.max(player.battingSkill, player.secondarySkill);
         if (attr > 70) return 2.0;
         if (attr >= 61) return 1.0; 
@@ -112,6 +119,11 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             return;
         }
 
+        if (currentPlayer.isEmerging && userTeam.squad.filter(p => p.isEmerging).length >= MAX_EMERGING_LIMIT) {
+            setBiddingLog(prev => [`Emerging limit reached!`, ...prev.slice(0, 5)]);
+            return;
+        }
+
         const increment = getBidIncrement(currentBid) * multiplier;
         const nextBid = Number((currentBid + increment).toFixed(2));
         if (userTeam.purse < nextBid) return;
@@ -130,8 +142,9 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             mainTeamIds.includes(t.id) &&
             t.id !== gameData.userTeamId &&
             t.purse >= (getBasePrice(currentPlayer) + 0.2) &&
-            t.squad.length < 22 &&
-            (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT)
+            t.squad.length < MAX_SQUAD_SIZE &&
+            (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
+            (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT)
         );
 
         if (eligibleTeams.length > 0) {
@@ -165,8 +178,9 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 mainTeamIds.includes(t.id) &&
                 t.id !== highestBidderId && 
                 t.purse >= (currentBid + increment) &&
-                t.squad.length < 22 &&
-                (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT)
+                t.squad.length < MAX_SQUAD_SIZE &&
+                (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
+                (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT)
             );
 
             if (eligibleTeams.length > 0) {
@@ -270,6 +284,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         // Shuffle the pool for true randomness in AI squads
         let pool = shuffle([...unauctioned]);
 
+        // 1. Fill minimum squad size (15) and minimum emerging players (2)
         const finalTeams = teams.map(team => {
             const isDev = gameData.allTeamsData.find(td => td.id === team.id)?.isYouthTeam;
             const targetTotalSize = isDev ? 14 : 20;
@@ -277,12 +292,18 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             let squad = [...team.squad];
             let purse = team.purse;
 
-            const fillNeeded = (role: PlayerRole, count: number, foreignOk: boolean = true) => {
-                let existing = squad.filter(p => p.role === role).length;
+            const fillNeeded = (role: PlayerRole | 'EMERGING', count: number, foreignOk: boolean = true) => {
+                let existing = role === 'EMERGING' 
+                    ? squad.filter(p => p.isEmerging).length
+                    : squad.filter(p => p.role === role).length;
+                
                 while (existing < count && pool.length > 0) {
-                    const choices = pool.filter(p => p.role === role && (foreignOk || !p.isForeign)).slice(0, 10);
+                    const choices = pool.filter(p => 
+                        (role === 'EMERGING' ? p.isEmerging : p.role === role) && 
+                        (foreignOk || !p.isForeign)
+                    ).slice(0, 10);
+                    
                     if (choices.length > 0) {
-                        // Sort by skill to pick better players during auto-draft
                         choices.sort((a, b) => Math.max(b.battingSkill, b.secondarySkill) - Math.max(a.battingSkill, a.secondarySkill));
                         const p = choices[0];
                         const poolIdx = pool.findIndex(pl => pl.id === p.id);
@@ -295,6 +316,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             };
 
             if (squad.length < targetTotalSize) {
+                fillNeeded('EMERGING', MIN_EMERGING_LIMIT);
                 fillNeeded(PlayerRole.WICKET_KEEPER, TARGET_KEEPERS);
                 fillNeeded(PlayerRole.ALL_ROUNDER, TARGET_ALL_ROUNDERS);
                 fillNeeded(PlayerRole.SPIN_BOWLER, 2);

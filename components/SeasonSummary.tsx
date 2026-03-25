@@ -27,6 +27,26 @@ const SeasonSummary: React.FC<SeasonSummaryProps> = ({ gameData, onContinue }) =
         const updatedPlayers = JSON.parse(JSON.stringify(gameData.allPlayers)) as Player[];
 
         updatedPlayers.forEach(player => {
+            // Emerging Status Logic
+            if (player.teamName && player.teamName !== 'Free Agent') {
+                player.yearsInTeam = (player.yearsInTeam || 0) + 1;
+                if (player.isEmerging && player.yearsInTeam >= 3) {
+                    player.isEmerging = false;
+                    ratingChanges.push({
+                        playerId: player.id,
+                        playerName: player.name,
+                        oldBatting: player.battingSkill,
+                        newBatting: player.battingSkill,
+                        oldBowling: player.secondarySkill,
+                        newBowling: player.secondarySkill,
+                        reason: 'No longer an emerging player (3 years completed).',
+                        type: 'neutral'
+                    });
+                }
+            } else {
+                player.yearsInTeam = 0; // Reset if they become free agent
+            }
+
             const seasonStats = aggregateStats(player, Object.values(Format));
             const oldBatting = player.battingSkill;
             const oldBowling = player.secondarySkill;
