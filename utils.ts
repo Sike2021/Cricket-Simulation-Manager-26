@@ -25,7 +25,7 @@ export const resolveMatch = (match: Match, gameData: GameData, format: Format) =
             }
             if (placeholder.startsWith('SF')) {
                 const sfMatchNumber = placeholder.split(' ')[0];
-                const sfResult = gameData.matchResults[format]?.find(r => r && r.matchNumber === sfMatchNumber);
+                const sfResult = gameData.matchResults[format]?.find(r => r.matchNumber === sfMatchNumber);
                 if (sfResult?.winnerId) {
                     return gameData.teams.find(t => t.id === sfResult.winnerId)?.name || 'TBD';
                 }

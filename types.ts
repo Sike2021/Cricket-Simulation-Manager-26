@@ -2,13 +2,7 @@
 export enum Format {
     T20 = 'Premier T20 League',
     ODI = 'Premier One-Day Cup',
-    SHIELD = 'Premier First-Class Shield',
-    DEV_T20 = 'Development T20 Cup',
-    DEV_LISTA = 'Development List-A Cup',
-    DEV_FC = 'Development First-Class Cup',
-    RISE_T20 = 'Rise T20 Cup',
-    RISE_LISTA = 'Rise List-A Cup',
-    RISE_FC = 'Rise First-Class Cup'
+    SHIELD = 'Premier First-Class Shield'
 }
 
 export enum PlayerRole {
@@ -41,15 +35,7 @@ export interface PlayerPerformanceSummary {
 export interface Player {
     id: string; name: string; nationality: string; role: PlayerRole; battingSkill: number; secondarySkill: number;
     style: BattingStyle; isOpener: boolean; isForeign: boolean; teamName?: string;
-    isEmerging?: boolean;
-    yearsSelected?: number;
-    photo?: string;
     potential?: number; form?: number; fitness?: number;
-    aggression?: number;
-    battingAverage?: number;
-    battingStrikeRate?: number;
-    bowlingAverage?: number;
-    economy?: number;
     customProfiles?: { [key in Format]?: { avg: number; sr: number } };
     stats: Record<Format, PlayerStats>;
     recentPerformances: PlayerPerformanceSummary[];

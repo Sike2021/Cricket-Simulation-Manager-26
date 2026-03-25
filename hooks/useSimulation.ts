@@ -124,26 +124,26 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 // First innings aggression - Boosted for higher scores
                 const progress = balls / maxBalls;
                 if (isT20) {
-                    if (progress > 0.8) aggressionFactor = 2.8; // Death overs - Boosted from 2.4
-                    else if (progress > 0.5) aggressionFactor = 2.2; // Boosted from 1.9
-                    else if (progress < 0.3) aggressionFactor = 2.0; // Powerplay - Boosted from 1.8
-                    else aggressionFactor = 2.1; // Middle overs - Boosted from 1.85
+                    if (progress > 0.8) aggressionFactor = 2.4; // Death overs - Boosted from 2.1
+                    else if (progress > 0.5) aggressionFactor = 1.9; // Boosted from 1.75
+                    else if (progress < 0.3) aggressionFactor = 1.8; // Powerplay - Boosted from 1.6
+                    else aggressionFactor = 1.85; // Middle overs - Boosted from 1.65
                 } else if (isODI) {
-                    if (progress > 0.9) aggressionFactor = 2.4;
-                    else if (progress > 0.7) aggressionFactor = 1.9;
-                    else if (progress < 0.2) aggressionFactor = 1.6;
-                    else aggressionFactor = 1.55;
+                    if (progress > 0.9) aggressionFactor = 2.0;
+                    else if (progress > 0.7) aggressionFactor = 1.6;
+                    else if (progress < 0.2) aggressionFactor = 1.4;
+                    else aggressionFactor = 1.35;
                 } else {
                     // First Class
-                    aggressionFactor = 1.4;
+                    aggressionFactor = 1.25;
                 }
 
-                // Subtle score normalization for T20 to hit 200-350 range
+                // Subtle score normalization for T20 to hit 180-300 range
                 if (isT20 && !target && balls > 0) {
                     const currentRR = (score / balls) * 6;
                     if (balls > 36) { // After 6 overs
-                        if (currentRR < 12.0) aggressionFactor *= 1.4; // Nudge up more aggressively
-                        if (currentRR > 22.0) aggressionFactor *= 0.8; // Nudge down only if extremely fast
+                        if (currentRR < 10.0) aggressionFactor *= 1.35; // Nudge up more aggressively
+                        if (currentRR > 18.0) aggressionFactor *= 0.8; // Nudge down only if extremely fast
                     }
                 }
             }
@@ -164,20 +164,20 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
             
             // Skill impact increased: Higher rated batters perform significantly better
             let wicketProbability = (baseWicketProb * pressureFactor)
-                + (((bowlerDetails.secondarySkill * bowlerFatigue) - (onStrikeBatterDetails.battingSkill * batterFatigue)) / 450) // Reduced bowler impact slightly
+                + (((bowlerDetails.secondarySkill * bowlerFatigue) - (onStrikeBatterDetails.battingSkill * batterFatigue)) / 400) 
                 + (bowlerDetails.role === PlayerRole.FAST_BOWLER ? pitchMods.paceBonus / 2 : 0) 
                 + (bowlerDetails.role === PlayerRole.SPIN_BOWLER ? pitchMods.spinBonus / 2 : 0);
             
-            wicketProbability *= formatMods.wicketChance * 0.9; // Slightly reduced wicket chance for higher scores
+            wicketProbability *= formatMods.wicketChance;
             
             // Format specific adjustments for realism
             if (format.includes('First-Class')) {
-                wicketProbability *= 0.75; // Longer games, fewer wickets per ball
+                wicketProbability *= 0.8; // Longer games, fewer wickets per ball
             } else if (isT20) {
-                wicketProbability *= 1.0; // Balanced for T20
+                wicketProbability *= 1.1; // More risks in T20
             }
 
-            wicketProbability = Math.max(0.003, Math.min(0.35, wicketProbability));
+            wicketProbability = Math.max(0.004, Math.min(0.4, wicketProbability));
 
             balls++;
             onStrikeBatter.balls++;
@@ -193,10 +193,10 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
             } else {
                 let runsScored = 0;
                 // Boosted scoring probabilities for high scoring games
-                let p_dot = 0.28, p_1 = 0.42, p_2 = 0.10, p_3 = 0.01, p_4 = 0.13, p_6 = 0.06;
+                let p_dot = 0.35, p_1 = 0.40, p_2 = 0.08, p_3 = 0.01, p_4 = 0.11, p_6 = 0.05;
                 
                 if (format.includes('First-Class')) {
-                    p_dot = 0.55; p_1 = 0.28; p_2 = 0.06; p_3 = 0.01; p_4 = 0.09; p_6 = 0.01;
+                    p_dot = 0.62; p_1 = 0.24; p_2 = 0.05; p_3 = 0.01; p_4 = 0.07; p_6 = 0.01;
                 }
 
                 switch (onStrikeBatterDetails.style) {

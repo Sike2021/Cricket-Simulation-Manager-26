@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameData, Team, Format, MatchResult, Standing, Player, Match } from './types';
+import { AppState, GameData, Team, Format, MatchResult, Standing, Player } from './types';
 import { PLAYERS, TEAMS, GROUNDS, PRE_BUILT_SQUADS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from './data';
 import { LoadingSpinner, generateLeagueSchedule } from './utils';
 
@@ -9,8 +9,6 @@ import MainMenu from './components/MainMenu';
 import TeamSelection from './components/TeamSelection';
 import CareerHub from './components/CareerHub';
 import AuctionRoom from './components/AuctionRoom';
-import Lineups from './components/Lineups';
-import Editor from './components/Editor';
 
 export const MAX_SQUAD_SIZE = 22;
 export const MIN_SQUAD_SIZE = 15;
@@ -34,13 +32,13 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative mb-8"
       >
-        <div className="w-32 h-32 bg-teal-500 rounded-none flex items-center justify-center shadow-2xl shadow-teal-500/20 rotate-12 border-4 border-white">
-          <span className="text-6xl font-black text-white -rotate-12 tracking-tighter font-display">CM</span>
+        <div className="w-32 h-32 bg-teal-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-teal-500/40 rotate-12">
+          <span className="text-6xl font-black text-white -rotate-12 tracking-tighter">CM</span>
         </div>
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          className="absolute -inset-6 border-2 border-dashed border-teal-500/30 rounded-full"
+          className="absolute -inset-4 border-2 border-dashed border-teal-500/30 rounded-full"
         />
       </motion.div>
       
@@ -48,20 +46,20 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="text-5xl font-black italic uppercase tracking-tighter text-white mb-2 font-display"
+        className="text-3xl font-black italic uppercase tracking-tighter text-white mb-2"
       >
-        CRICKET MANAGER
+        Cricket Manager
       </motion.h1>
       <motion.p 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="text-teal-500 font-bold tracking-[0.4em] uppercase text-[10px] font-mono"
+        className="text-teal-500 font-black tracking-[0.3em] uppercase text-[10px]"
       >
-        SYSTEM_INITIALIZING_V2.0
+        The Next Generation
       </motion.p>
 
-      <div className="absolute bottom-12 w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+      <div className="absolute bottom-12 w-48 h-1 bg-white/10 rounded-full overflow-hidden">
         <motion.div 
           initial={{ x: "-100%" }}
           animate={{ x: "0%" }}
@@ -72,8 +70,6 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
     </motion.div>
   );
 };
-
-export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB' | 'EDITOR';
 
 export const App = () => {
   const [appState, setAppState] = useState<AppState>('MAIN_MENU');
@@ -162,36 +158,6 @@ export const App = () => {
     setAppState('TEAM_SELECTION');
   };
 
-  const handleOpenEditor = () => {
-    if (!gameData) {
-      // Provide default data if no save exists
-      setGameData({
-        userTeamId: '',
-        teams: [],
-        grounds: [...GROUNDS],
-        allTeamsData: [...TEAMS],
-        allPlayers: [...PLAYERS],
-        schedule: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, Match[]>),
-        currentMatchIndex: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: 0 }), {} as Record<Format, number>),
-        standings: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, Standing[]>),
-        matchResults: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: [] }), {} as Record<Format, MatchResult[]>),
-        playingXIs: {},
-        currentSeason: 1,
-        currentFormat: Format.T20,
-        awardsHistory: [],
-        scoreLimits: {},
-        records: { batterVsBowler: [], teamVsTeam: [], playerVsTeam: [] },
-        promotionHistory: [],
-        popularity: 50,
-        sponsorships: INITIAL_SPONSORSHIPS,
-        news: INITIAL_NEWS,
-        activeMatch: null,
-        settings: { isDoubleRoundRobin: true }
-      });
-    }
-    setAppState('EDITOR');
-  };
-
   const initializeNewGame = (userTeamId: string) => {
     setIsLoading(true);
     const allPlayersPool = [...PLAYERS].sort(() => Math.random() - 0.5);
@@ -232,10 +198,11 @@ export const App = () => {
         teamId: team.id, teamName: team.name, played: 0, won: 0, lost: 0, drawn: 0, points: 0, netRunRate: 0, runsFor: 0, runsAgainst: 0 
     }));
 
-    const schedules = Object.values(Format).reduce((acc, format) => {
-        acc[format] = generateLeagueSchedule(initialTeams, format, true);
-        return acc;
-    }, {} as Record<Format, Match[]>);
+    const schedules = {
+        [Format.T20]: generateLeagueSchedule(initialTeams, Format.T20, true),
+        [Format.ODI]: generateLeagueSchedule(initialTeams, Format.ODI, true),
+        [Format.SHIELD]: generateLeagueSchedule(initialTeams, Format.SHIELD, true),
+    };
 
     const newGameData: GameData = {
       userTeamId,
@@ -244,8 +211,16 @@ export const App = () => {
       allTeamsData: initialTeamsData,
       allPlayers: [...PLAYERS],
       schedule: schedules,
-      currentMatchIndex: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: 0 }), {} as Record<Format, number>),
-      standings: Object.values(Format).reduce((acc, f) => ({ ...acc, [f]: initialStandings(initialTeams) }), {} as Record<Format, Standing[]>),
+      currentMatchIndex: {
+        [Format.T20]: 0,
+        [Format.ODI]: 0,
+        [Format.SHIELD]: 0,
+      },
+      standings: {
+        [Format.T20]: initialStandings(initialTeams),
+        [Format.ODI]: initialStandings(initialTeams),
+        [Format.SHIELD]: initialStandings(initialTeams),
+      },
       matchResults: Object.values(Format).reduce((acc, format) => {
         acc[format] = [];
         return acc;
@@ -303,41 +278,10 @@ export const App = () => {
         );
     }
     switch(appState) {
-        case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} onOpenEditor={handleOpenEditor} hasSaveData={hasSaveData} />;
+        case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} hasSaveData={hasSaveData} />;
         case 'TEAM_SELECTION': return <TeamSelection onTeamSelected={initializeNewGame} theme={theme} />;
         case 'AUCTION': return gameData ? <AuctionRoom gameData={gameData} onAuctionComplete={handleAuctionComplete} /> : null;
         case 'CAREER_HUB': return gameData ? <CareerHub gameData={gameData} setGameData={setGameData} onResetGame={resetGame} theme={theme} setTheme={setTheme} saveGame={saveGame} loadGame={loadGame} showFeedback={showFeedback} /> : null;
-        case 'EDITOR': return gameData ? (
-            <div className="h-full flex flex-col">
-                <div className="bg-[#050808] p-4 border-b-2 border-white/10 flex justify-between items-center">
-                    <button onClick={() => setAppState('MAIN_MENU')} className="text-teal-500 font-black uppercase italic text-xs hover:text-white transition-colors flex items-center gap-2">
-                        <span>← BACK_TO_MENU</span>
-                    </button>
-                    <span className="text-[10px] font-mono font-bold opacity-30 uppercase tracking-widest">SYSTEM_ADMIN_MODE</span>
-                </div>
-                <div className="flex-grow overflow-hidden">
-                    <Editor 
-                        gameData={gameData} 
-                        handleUpdatePlayer={(p) => setGameData(prev => prev ? ({...prev, allPlayers: prev.allPlayers.map(pl => pl.id === p.id ? p : pl)}) : null)}
-                        handleCreatePlayer={(p) => setGameData(prev => prev ? ({...prev, allPlayers: [...prev.allPlayers, p]}) : null)}
-                        handleUpdateGround={(code, updates) => setGameData(prev => prev ? ({...prev, grounds: prev.grounds.map(g => g.code === code ? {...g, ...(typeof updates === 'string' ? {pitch: updates} : updates)} : g)}) : null)}
-                        handleUpdateScoreLimits={(groundCode, format, field, value, inning) => {
-                            setGameData(prev => {
-                                if (!prev) return null;
-                                const numValue = parseInt(value, 10);
-                                const newLimits: any = JSON.parse(JSON.stringify(prev.scoreLimits || {}));
-                                if (!newLimits[groundCode]) newLimits[groundCode] = {};
-                                if (!newLimits[groundCode][format]) newLimits[groundCode][format] = {};
-                                if (!newLimits[groundCode][format][inning]) newLimits[groundCode][format][inning] = {};
-                                if (value === '' || isNaN(numValue) || numValue <= 0) delete newLimits[groundCode][format][inning][field];
-                                else newLimits[groundCode][format][inning][field] = numValue;
-                                return { ...prev, scoreLimits: newLimits };
-                            });
-                        }}
-                    />
-                </div>
-            </div>
-        ) : null;
         default: return <div>Error</div>;
     }
   }

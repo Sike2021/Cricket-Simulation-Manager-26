@@ -121,9 +121,8 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 const sortedBatters = [...formatStats.entries()].sort((a, b) => b[1].runs - a[1].runs);
                 const sortedBowlers = [...formatStats.entries()].sort((a, b) => b[1].wickets - a[1].wickets);
 
-                const finalMatch = schedule[schedule.length - 1];
-                const finalMatchNumber = finalMatch?.matchNumber;
-                const lastMatchResult = finalMatchNumber ? gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === finalMatchNumber) : null;
+                const finalMatchNumber = schedule[schedule.length-1].matchNumber;
+                const lastMatchResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === finalMatchNumber);
                 const winnerTeam = gameData.teams.find(t => t.id === lastMatchResult?.winnerId);
 
                 const newAward = { 
@@ -232,8 +231,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                         const resolvePlaceholder = (placeholder: string) => {
                             if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
                             if (placeholder.startsWith('SF')) {
-                                const sfMatchNumber = placeholder.split(' ')[0];
-                                const sfRes = updatedData.matchResults[f].find(r => r && r.matchNumber === sfMatchNumber);
+                                const sfRes = updatedData.matchResults[f].find(r => r.matchNumber === placeholder.split(' ')[0]);
                                 return updatedData.teams.find(t => t.id === sfRes?.winnerId)?.name || 'TBD';
                             }
                             return placeholder;
@@ -290,7 +288,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                     }
                     if (placeholder.startsWith('SF')) {
                         const sfMatchNumber = placeholder.split(' ')[0];
-                        const sfResult = currentData.matchResults[currentData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
+                        const sfResult = currentData.matchResults[currentData.currentFormat].find(r => r.matchNumber === sfMatchNumber);
                         const winner = currentData.teams.find(t => t.id === sfResult?.winnerId);
                         return winner?.name || null;
                     }
@@ -353,7 +351,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                 if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) return getTeamName(parseInt(placeholder[0]));
                 if (placeholder.startsWith('SF')) {
                     const sfMatchNumber = placeholder.split(' ')[0];
-                    const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
+                    const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === sfMatchNumber);
                     return gameData.teams.find(t => t.id === sfResult?.winnerId)?.name || null;
                 }
                 return placeholder;
@@ -550,8 +548,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                             return gameData.standings[gameData.currentFormat][pos-1]?.teamName || 'TBD';
                         }
                         if (placeholder.startsWith('SF')) {
-                            const sfMatchNumber = placeholder.split(' ')[0];
-                            const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
+                            const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r.matchNumber === placeholder.split(' ')[0]);
                             return gameData.teams.find(t => t.id === sfResult?.winnerId)?.name || 'TBD';
                         }
                         return placeholder;

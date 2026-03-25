@@ -72,8 +72,7 @@ const Editor: React.FC<EditorProps> = ({ gameData, handleUpdatePlayer, handleCre
             style: 'N',
             isOpener: false,
             isForeign: false,
-            stats: generateInitialStats(),
-            recentPerformances: []
+            stats: generateInitialStats()
         });
     }
 

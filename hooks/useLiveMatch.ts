@@ -572,7 +572,7 @@ export const useLiveMatch = (
                 }
             }
 
-            if (matchEnded && match) {
+            if (matchEnded) {
                 stopAutoPlay(); // Ensure stopped
                 const result: MatchResult = {
                     matchNumber: match.matchNumber,

@@ -66,7 +66,7 @@ const Schedule: React.FC<ScheduleProps> = ({ gameData, userTeam, viewMatchResult
             <div className="space-y-4 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                 {schedule.map((match, index) => {
                     const resolved = resolveMatch(match, gameData, selectedFormat);
-                    const result = gameData.matchResults[selectedFormat]?.find(r => r && String(r.matchNumber) === String(match.matchNumber));
+                    const result = gameData.matchResults[selectedFormat]?.find(r => String(r.matchNumber) === String(match.matchNumber));
                     const isUserMatch = !!userTeam && (resolved.teamA === userTeam.name || resolved.teamB === userTeam.name);
                     const isNextMatch = selectedFormat === gameData.currentFormat && index === gameData.currentMatchIndex[selectedFormat];
                     

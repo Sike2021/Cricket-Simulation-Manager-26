@@ -271,8 +271,7 @@ const playersRaw: any[] = [
 
 export const PLAYERS: Player[] = playersRaw.map(p => ({
     ...p,
-    stats: generateInitialStats(),
-    recentPerformances: []
+    stats: generateInitialStats()
 }));
 
 export const PRE_BUILT_SQUADS: Record<string, string[]> = {
