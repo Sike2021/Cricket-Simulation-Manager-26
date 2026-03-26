@@ -9,11 +9,12 @@ interface AuctionRoomProps {
 }
 
 const STARTING_PURSE = 100.0;
-const MAX_FOREIGN_LIMIT = 3; // Match App.tsx
+const MAX_FOREIGN_LIMIT = 3; 
 const MAX_EMERGING_LIMIT = 3;
 const MIN_EMERGING_LIMIT = 3;
 const MAX_SQUAD_SIZE = 16;
 const MIN_SQUAD_SIZE = 16;
+const DOMESTIC_LIMIT = 10;
 
 // Targeted Balanced Squad Ratios
 const TARGET_OPENERS = 4;
@@ -138,13 +139,15 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         if (!currentPlayer || !isAuctioning) return;
         setIsAuctioning(false);
 
+        // Safety: don't skip if already processing next
         const eligibleTeams = teams.filter(t => 
             mainTeamIds.includes(t.id) &&
             t.id !== gameData.userTeamId &&
             t.purse >= (getBasePrice(currentPlayer) + 0.2) &&
             t.squad.length < MAX_SQUAD_SIZE &&
             (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
-            (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT)
+            (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT) &&
+            (!(!currentPlayer.isForeign && !currentPlayer.isEmerging) || t.squad.filter(p => !p.isForeign && !p.isEmerging).length < DOMESTIC_LIMIT)
         );
 
         if (eligibleTeams.length > 0) {
@@ -182,7 +185,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 t.squad.length < MAX_SQUAD_SIZE &&
                 (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
                 (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT) &&
-                (!(!currentPlayer.isForeign && !currentPlayer.isEmerging) || t.squad.filter(p => !p.isForeign && !p.isEmerging).length < 10)
+                (currentPlayer.isForeign || currentPlayer.isEmerging || t.squad.filter(p => !p.isForeign && !p.isEmerging).length < DOMESTIC_LIMIT)
             );
 
             if (eligibleTeams.length > 0) {
@@ -244,10 +247,10 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             } else {
                 unsoldPlayer();
             }
-        }, 500 + Math.random() * 500);
+        }, 800 + Math.random() * 700); // Slightly slower AI for better UX
 
         return () => clearTimeout(timer);
-    }, [isAuctioning, currentBid, highestBidderId, currentPlayer, gameData.userTeamId, mainTeamIds, teams]);
+    }, [isAuctioning, currentBid, highestBidderId, currentPlayer, gameData.userTeamId, mainTeamIds, teams, auctionFinished]);
 
     const sellPlayer = () => {
         const winner = teams.find(t => t.id === highestBidderId);
@@ -283,27 +286,27 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     const finishAuction = () => {
         const soldPlayerIds = new Set(teams.flatMap(t => t.squad.map(p => p.id)));
         const unauctioned = gameData.allPlayers.filter(p => !soldPlayerIds.has(p.id));
-        // Shuffle the pool for true randomness in AI squads
         let pool = shuffle([...unauctioned]);
 
-        // 1. Fill minimum squad size (15) and minimum emerging players (2)
         const finalTeams = teams.map(team => {
             const isDev = gameData.allTeamsData.find(td => td.id === team.id)?.isYouthTeam;
-            const targetTotalSize = isDev ? 14 : 20;
+            const targetTotalSize = 16;
             
             let squad = [...team.squad];
             let purse = team.purse;
 
-            const fillNeeded = (role: PlayerRole | 'EMERGING', count: number, foreignOk: boolean = true) => {
-                let existing = role === 'EMERGING' 
-                    ? squad.filter(p => p.isEmerging).length
-                    : squad.filter(p => p.role === role).length;
+            const fillNeeded = (type: 'FOREIGN' | 'EMERGING' | 'DOMESTIC', count: number) => {
+                let existing = 0;
+                if (type === 'FOREIGN') existing = squad.filter(p => p.isForeign).length;
+                if (type === 'EMERGING') existing = squad.filter(p => p.isEmerging).length;
+                if (type === 'DOMESTIC') existing = squad.filter(p => !p.isForeign && !p.isEmerging).length;
                 
                 while (existing < count && pool.length > 0) {
-                    const choices = pool.filter(p => 
-                        (role === 'EMERGING' ? p.isEmerging : p.role === role) && 
-                        (foreignOk || !p.isForeign)
-                    ).slice(0, 10);
+                    const choices = pool.filter(p => {
+                        if (type === 'FOREIGN') return p.isForeign;
+                        if (type === 'EMERGING') return p.isEmerging;
+                        return !p.isForeign && !p.isEmerging;
+                    }).slice(0, 20);
                     
                     if (choices.length > 0) {
                         choices.sort((a, b) => Math.max(b.battingSkill, b.secondarySkill) - Math.max(a.battingSkill, a.secondarySkill));
@@ -317,25 +320,10 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 }
             };
 
-            if (squad.length < targetTotalSize) {
-                fillNeeded('EMERGING', MIN_EMERGING_LIMIT);
-                fillNeeded(PlayerRole.WICKET_KEEPER, TARGET_KEEPERS);
-                fillNeeded(PlayerRole.ALL_ROUNDER, TARGET_ALL_ROUNDERS);
-                fillNeeded(PlayerRole.SPIN_BOWLER, 2);
-                fillNeeded(PlayerRole.FAST_BOWLER, 3);
-            }
-
-            // Final fill to squad size
-            while (squad.length < targetTotalSize && pool.length > 0) {
-                const choices = pool.slice(0, 10);
-                // Sort by skill to pick better players during final auto-draft fill
-                choices.sort((a, b) => Math.max(b.battingSkill, b.secondarySkill) - Math.max(a.battingSkill, a.secondarySkill));
-                const p = choices[0];
-                const poolIdx = pool.findIndex(pl => pl.id === p.id);
-                pool.splice(poolIdx, 1);
-                squad.push(p);
-                if (!isDev) purse = Math.max(0, purse - 0.2);
-            }
+            // Strict enforcement of 16 players: 3 Foreign, 3 Emerging, 10 Domestic
+            fillNeeded('FOREIGN', MAX_FOREIGN_LIMIT);
+            fillNeeded('EMERGING', MAX_EMERGING_LIMIT);
+            fillNeeded('DOMESTIC', DOMESTIC_LIMIT);
 
             return { ...team, squad, purse };
         });
@@ -430,35 +418,62 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                                 <p className="text-xl font-black font-mono">{getBasePrice(currentPlayer).toFixed(2)} Cr</p>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-4">
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Matches</p>
-                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].matches}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Runs</p>
-                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].runs}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Avg</p>
-                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].average.toFixed(1)}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">SR</p>
-                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].strikeRate.toFixed(1)}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Wickets</p>
-                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].wickets}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Economy</p>
-                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].economy.toFixed(2)}</p>
-                                            </div>
-                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
-                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Bowl Avg</p>
-                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].bowlingAverage.toFixed(1)}</p>
-                                            </div>
+
+                                        {/* Detailed Stats Section */}
+                                        <div className="mt-8 pt-6 border-t border-[#E4E3E0]/10">
+                                            <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-4">CAREER STATISTICS (ALL FORMATS)</p>
+                                            {(() => {
+                                                const stats = aggregateStats(currentPlayer, [Format.T20, Format.ODI, Format.SHIELD]);
+                                                const isBatter = [PlayerRole.BATSMAN, PlayerRole.WICKET_KEEPER, PlayerRole.ALL_ROUNDER].includes(currentPlayer.role);
+                                                const isBowler = [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(currentPlayer.role);
+
+                                                return (
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
+                                                        {(isBatter || currentPlayer.role === PlayerRole.ALL_ROUNDER) && (
+                                                            <>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">Matches</span>
+                                                                    <span className="text-lg font-black font-mono">{stats.matches}</span>
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">Runs</span>
+                                                                    <span className="text-lg font-black font-mono">{stats.runs}</span>
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">Avg</span>
+                                                                    <span className="text-lg font-black font-mono">{stats.average.toFixed(2)}</span>
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">S/R</span>
+                                                                    <span className="text-lg font-black font-mono">{stats.strikeRate.toFixed(1)}</span>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                        {(isBowler || currentPlayer.role === PlayerRole.ALL_ROUNDER) && (
+                                                            <>
+                                                                {!(isBatter || currentPlayer.role === PlayerRole.ALL_ROUNDER) && (
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[9px] font-mono opacity-40 uppercase">Matches</span>
+                                                                        <span className="text-lg font-black font-mono">{stats.matches}</span>
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-mono opacity-40 uppercase text-red-400">Wickets</span>
+                                                                    <span className="text-lg font-black font-mono text-red-400">{stats.wickets}</span>
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-mono opacity-40 uppercase text-red-400">Econ</span>
+                                                                    <span className="text-lg font-black font-mono text-red-400">{stats.economy.toFixed(2)}</span>
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-mono opacity-40 uppercase text-red-400">Bowl Avg</span>
+                                                                    <span className="text-lg font-black font-mono text-red-400">{stats.bowlingAverage.toFixed(2)}</span>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
 

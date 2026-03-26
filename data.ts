@@ -7,7 +7,7 @@ export const MAX_FOREIGN_PLAYERS = 3;
 
 export const BRANDS = [
     { name: "Sike's", color: "text-yellow-500", style: "font-extrabold tracking-tight font-display", logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" /></svg>' },
-    { name: "Signify", color: "text-cyan-400", style: "font-sans tracking-widest uppercase", logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>' },
+    { name: "Apex", color: "text-cyan-400", style: "font-sans tracking-widest uppercase", logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>' },
     { name: "Malik", color: "text-red-600", style: "font-serif italic font-bold", logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14.06 9.02l.92.92L3.92 21h16.16V23H3a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h1V9.02zM12 3a2 2 0 0 1 2 2v4h-4V5a2 2 0 0 1 2-2z"/></svg>' },
     { name: "G.S", color: "text-green-500", style: "font-mono font-bold", logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" /></svg>' }
 ];
@@ -16,7 +16,7 @@ export const TV_CHANNELS = [
     { id: 'tv-prime', name: 'PrimeCast Ultra', logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="4" width="20" height="16" rx="2" /><circle cx="12" cy="12" r="4" fill="white" fill-opacity="0.3"/><path d="M10 9l5 3-5 3V9z" fill="white"/></svg>', color: 'text-purple-500', minPopularity: 40, tier: 'Premium' },
     { id: 'tv-roar', name: 'Roar Sports', logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6h6l-5 4 2 6-6-4-6 4 2-6-5-4h6z"/></svg>', color: 'text-red-600', minPopularity: 55, tier: 'Premium' },
     { id: 'tv-now', name: 'CricketNow HD', logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4z"/><path d="M8 10h8v4H8z" fill="white"/></svg>', color: 'text-blue-500', minPopularity: 30, tier: 'Standard' },
-    { id: 'tv-sig', name: 'Signify TV', logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2 12h20M2 12l10-9 10 9M2 12l10 9 10-9" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>', color: 'text-cyan-400', minPopularity: 50, tier: 'Premium' },
+    { id: 'tv-apex', name: 'Apex Sports', logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2 12h20M2 12l10-9 10 9M2 12l10 9 10-9" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>', color: 'text-cyan-400', minPopularity: 50, tier: 'Premium' },
 ];
 
 export const TOURNAMENT_LOGOS = [
@@ -25,14 +25,14 @@ export const TOURNAMENT_LOGOS = [
 ];
 
 export const SPONSOR_THRESHOLDS = {
-    [Format.T20]: { "Sike's": 40, "Signify": 35, "Malik": 30, "G.S": 25 },
-    [Format.ODI]: { "Sike's": 45, "Signify": 40, "Malik": 30, "G.S": 25 },
-    [Format.SHIELD]: { "Sike's": 40, "Signify": 35, "Malik": 30, "G.S": 25 },
+    [Format.T20]: { "Sike's": 40, "Apex": 35, "Malik": 30, "G.S": 25 },
+    [Format.ODI]: { "Sike's": 45, "Apex": 40, "Malik": 30, "G.S": 25 },
+    [Format.SHIELD]: { "Sike's": 40, "Apex": 35, "Malik": 30, "G.S": 25 },
 };
 
 export const INITIAL_SPONSORSHIPS: Record<Format, Sponsorship> = {
     [Format.T20]: { sponsorName: "Sike's", tournamentName: "Super Smash 26", logoColor: "text-yellow-500", tournamentLogo: TOURNAMENT_LOGOS[0].svg, tvChannel: "CricketNow HD", tvLogo: "" },
-    [Format.ODI]: { sponsorName: "Signify", tournamentName: "Pro Cup 26", logoColor: "text-cyan-400", tournamentLogo: TOURNAMENT_LOGOS[0].svg, tvChannel: "Signify TV", tvLogo: "" },
+    [Format.ODI]: { sponsorName: "Apex", tournamentName: "Pro Cup 26", logoColor: "text-cyan-400", tournamentLogo: TOURNAMENT_LOGOS[0].svg, tvChannel: "Apex Sports", tvLogo: "" },
     [Format.SHIELD]: { sponsorName: "Malik", tournamentName: "Shield 26", logoColor: "text-red-600", tournamentLogo: TOURNAMENT_LOGOS[1].svg, tvChannel: "PrimeCast Ultra", tvLogo: "" },
 };
 

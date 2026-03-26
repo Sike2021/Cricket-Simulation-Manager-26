@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Home, Trophy, BarChart3, Settings as SettingsIcon, Newspaper, Users, Database, LayoutGrid, ArrowRightLeft, Scale, Wallet, Gavel } from 'lucide-react';
+import { Home, Trophy, BarChart3, Settings as SettingsIcon, Newspaper, Users, Database, LayoutGrid, ArrowRightLeft, Scale, Wallet, Gavel, Star } from 'lucide-react';
 import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle } from '../types';
 import { TEAMS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from '../data';
 import { Icons } from './Icons';
@@ -46,7 +46,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
     const navItems = [
         { name: 'HOME', screen: 'DASHBOARD' as CareerScreen, icon: Home },
         { name: 'STANDINGS', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
-        { name: 'FIXTURES', screen: 'SCHEDULE' as CareerScreen, icon: LayoutGrid },
+        { name: 'RATINGS', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
         { name: 'STATS', screen: 'STATS' as CareerScreen, icon: BarChart3 },
         { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];

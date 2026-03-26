@@ -152,9 +152,9 @@ const AutoArrivalNotification = ({ playerName, onOverride, secondsLeft }: { play
     </div>
 );
 
-// Signify AI Chat Overlay
-const SignifyChat = ({ gameData, onClose }: { gameData: GameData, onClose: () => void }) => {
-    const [messages, setMessages] = useState<Message[]>([{ id: '1', text: "Signify Online. Analyzing real-time match data... How can I assist?", sender: 'bot' }]);
+// Broadcast Style Chat Overlay
+const MatchChat = ({ gameData, onClose }: { gameData: GameData, onClose: () => void }) => {
+    const [messages, setMessages] = useState<Message[]>([{ id: '1', text: "Analyzing real-time match data... How can I assist?", sender: 'bot' }]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const endRef = useRef<HTMLDivElement>(null);
@@ -189,7 +189,7 @@ const SignifyChat = ({ gameData, onClose }: { gameData: GameData, onClose: () =>
                         <Icons.Bot />
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-lg">Signify AI</h3>
+                        <h3 className="font-bold text-white text-lg">Match Analyst</h3>
                         <p className="text-[10px] text-cyan-400 uppercase tracking-wider">Real-Time Analyst</p>
                     </div>
                 </div>
@@ -215,13 +215,13 @@ const SignifyChat = ({ gameData, onClose }: { gameData: GameData, onClose: () =>
 };
 
 const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMatchComplete, onExit, savedState }) => {
-    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, declareInning, stopAutoPlay } = useLiveMatch(match, gameData, onMatchComplete, savedState);
+    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay } = useLiveMatch(match, gameData, onMatchComplete, savedState);
     const commentaryRef = useRef<HTMLDivElement>(null);
     const [lastBallSpeed, setLastBallSpeed] = useState<string>("-");
     
     // Match Centre State
     const [showMatchCentre, setShowMatchCentre] = useState(false);
-    const [showSignify, setShowSignify] = useState(false);
+    const [showAnalyst, setShowAnalyst] = useState(false);
     const [activeTab, setActiveTab] = useState<'scorecard' | 'commentary' | 'analysis'>('scorecard');
     
     const [selectedOpener1, setSelectedOpener1] = useState('');
@@ -420,54 +420,116 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
     };
 
     if (showPreMatch && state.status === 'ready') {
-        return <PreMatchPanel match={match} gameData={gameData} onStart={() => setShowPreMatch(false)} />;
+        return <PreMatchPanel match={match} gameData={gameData} onStart={() => { setShowPreMatch(false); beginMatch(); }} />;
     }
 
     if (state.status === 'toss') {
         return (
-            <div className="absolute inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center p-6 text-white">
-                <h2 className="text-3xl font-bold mb-8 text-teal-400">Match Toss</h2>
-                <div className="bg-slate-800 p-8 rounded-xl shadow-2xl w-full max-w-sm text-center border border-slate-700 relative">
-                    {tvLogo && (
-                        <div className={`absolute -top-12 right-0 w-16 h-16 opacity-80 ${tvColor}`} dangerouslySetInnerHTML={{ __html: tvLogo }} />
-                    )}
-                    <div className="flex justify-between items-center mb-6 text-lg font-semibold">
-                         <span>{match.teamA}</span>
-                         <span className="text-slate-500">vs</span>
-                         <span>{match.teamB}</span>
+            <div className="absolute inset-0 z-[100] bg-[#050808] flex flex-col items-center justify-center p-6 text-white overflow-hidden">
+                {/* Background Glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-500/10 blur-[120px] rounded-full pointer-events-none" />
+                
+                <div className="relative z-10 flex flex-col items-center max-w-md w-full">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="bg-teal-500 text-black px-2 py-0.5 font-black text-[10px] uppercase tracking-widest">LIVE BROADCAST</div>
+                        <span className="text-[10px] font-mono font-bold opacity-40 uppercase tracking-widest">MATCH DAY // TOSS</span>
                     </div>
-                    {tossState === 'coin' ? (
-                        <button 
-                            onClick={() => {
-                                const winner = Math.random() > 0.5 ? gameData.teams.find(t => t.name === match.teamA) : gameData.teams.find(t => t.name === match.teamB);
-                                if (winner?.id === gameData.userTeamId) {
-                                    setTossState('result');
-                                } else {
-                                    const decision = Math.random() > 0.5 ? 'bat' : 'bowl';
-                                    startMatch(winner!.id, decision);
-                                }
-                            }}
-                            className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-4 px-8 rounded-full text-xl shadow-lg transform transition hover:scale-105"
-                        >
-                            🪙 FLIP COIN
-                        </button>
-                    ) : (
-                        <div className="space-y-4 animate-fade-in">
-                            <p className="text-green-400 font-bold text-xl">You won the toss!</p>
-                            <p className="text-slate-300">What would you like to do?</p>
-                            <div className="flex gap-4">
-                                <button onClick={() => { console.log("User chose to bat"); startMatch(gameData.userTeamId, 'bat'); }} className="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">BAT 🏏</button>
-                                <button onClick={() => { console.log("User chose to bowl"); startMatch(gameData.userTeamId, 'bowl'); }} className="flex-1 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-bold">BOWL ⚾</button>
+                    
+                    <h2 className="text-5xl font-black italic uppercase tracking-tighter mb-12 text-center leading-none">THE <span className="text-teal-500">TOSS</span></h2>
+                    
+                    <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[40px] border border-white/10 w-full text-center shadow-2xl">
+                        {tvLogo && (
+                            <div className={`absolute -top-10 -right-4 w-20 h-20 opacity-80 ${tvColor}`} dangerouslySetInnerHTML={{ __html: tvLogo }} />
+                        )}
+                        
+                        <div className="flex justify-between items-center mb-10 px-4">
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-2xl font-black italic mb-2 border border-white/10">
+                                    {match.teamA[0]}
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{match.teamA}</p>
+                            </div>
+                            <div className="text-xs font-mono font-bold opacity-20 uppercase tracking-widest">VS</div>
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-2xl font-black italic mb-2 border border-white/10">
+                                    {match.teamB[0]}
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{match.teamB}</p>
                             </div>
                         </div>
-                    )}
+
+                        {tossState === 'coin' ? (
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                    const winnerId = Math.random() > 0.5 ? gameData.teams.find(t => t.name === match.teamA)?.id : gameData.teams.find(t => t.name === match.teamB)?.id;
+                                    const winnerTeam = gameData.teams.find(t => t.id === winnerId);
+
+                                    if (!winnerTeam) {
+                                        console.error('Toss winner not found!');
+                                        return;
+                                    }
+
+                                    if (winnerTeam.id === gameData.userTeamId) {
+                                        setTossState('result');
+                                    } else {
+                                        const decision = Math.random() > 0.5 ? 'bat' : 'bowl';
+                                        startMatch(winnerTeam.id, decision);
+                                    }
+                                }}
+                                className="w-full bg-teal-500 text-black font-black py-6 rounded-3xl text-2xl uppercase italic tracking-tighter shadow-[0_0_30px_rgba(20,184,166,0.3)] hover:invert transition-all"
+                            >
+                                FLIP COIN 🪙
+                            </motion.button>
+                        ) : (
+                            <div className="space-y-6 animate-fade-in">
+                                <div>
+                                    <p className="text-teal-400 font-black text-2xl uppercase italic tracking-tighter">YOU WON THE TOSS!</p>
+                                    <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mt-1">SELECT YOUR STRATEGY</p>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button 
+                                        onClick={() => { console.log("User chose to bat"); startMatch(gameData.userTeamId, 'bat'); }} 
+                                        className="flex-1 bg-white text-black py-5 rounded-2xl font-black uppercase italic tracking-tighter hover:bg-teal-500 transition-all"
+                                    >
+                                        BAT 🏏
+                                    </button>
+                                    <button 
+                                        onClick={() => { console.log("User chose to bowl"); startMatch(gameData.userTeamId, 'bowl'); }} 
+                                        className="flex-1 bg-white/10 text-white border border-white/10 py-5 rounded-2xl font-black uppercase italic tracking-tighter hover:bg-white/20 transition-all"
+                                    >
+                                        BOWL ⚾
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         );
     }
 
     if (!innings || innings.length === 0) {
-        return <div className="text-white">Loading match...</div>;
+        console.warn('LiveMatchScreen: Innings data not available yet.');
+        return (
+            <div className="h-full flex flex-col items-center justify-center bg-slate-900 text-white p-8">
+                <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <h2 className="text-2xl font-black italic uppercase tracking-tighter">Initializing Match...</h2>
+                <p className="text-xs font-mono opacity-40 uppercase tracking-widest mt-2">Preparing the field and players</p>
+            </div>
+        );
+    }
+
+    // Ensure currentInningIndex is valid
+    if (currentInningIndex < 0 || currentInningIndex >= innings.length) {
+        console.error('LiveMatchScreen: Invalid currentInningIndex:', currentInningIndex);
+        return (
+            <div className="h-full flex flex-col items-center justify-center bg-slate-900 text-white p-8">
+                <h2 className="text-2xl font-black italic uppercase tracking-tighter text-red-500">Error: Invalid Inning State</h2>
+                <p className="text-xs font-mono opacity-40 uppercase tracking-widest mt-2">Something went wrong with the match initialization</p>
+            </div>
+        );
     }
 
     const currentInning = innings[currentInningIndex];
@@ -680,9 +742,9 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                 </div>
             )}
 
-            {/* Signify AI Button */}
+            {/* Analyst Button */}
             <div className="absolute top-28 right-2 z-20">
-                <button onClick={() => setShowSignify(true)} className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/50 flex items-center justify-center text-white border-2 border-white/20 active:scale-95 transition-transform">
+                <button onClick={() => setShowAnalyst(true)} className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/50 flex items-center justify-center text-white border-2 border-white/20 active:scale-95 transition-transform">
                     <Icons.Bot />
                 </button>
             </div>
@@ -721,9 +783,9 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
             {waitingFor === 'bowler' && renderSelectionModal("Select Next Bowler", currentInning.bowling.filter(p => p.playerId !== currentBowlerId), (id) => setSelectedBowler(id), () => { selectNextBowler(selectedBowler); setSelectedBowler(''); }, selectedBowler, setSelectedBowler)}
 
             {showMatchCentre && renderMatchCentre()}
-            {showSignify && <SignifyChat gameData={gameData} onClose={() => setShowSignify(false)} />}
+            {showAnalyst && <MatchChat gameData={gameData} onClose={() => setShowAnalyst(false)} />}
 
-            {/* TOP BAR - SigNify Broadcast Style */}
+            {/* TOP BAR - Broadcast Style */}
             <div className="bg-[#050808] p-3 flex justify-between items-center z-20 border-b border-white/10 flex-shrink-0 relative overflow-hidden">
                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-teal-500/5 to-transparent pointer-events-none" />
                  
@@ -746,7 +808,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
 
                  <div className="flex items-center gap-6 relative z-10">
                      <div className="hidden md:flex flex-col items-end">
-                         <p className="text-[8px] font-black text-teal-500/40 uppercase tracking-[0.5em] italic">SigNify Broadcast</p>
+                         <p className="text-[8px] font-black text-teal-500/40 uppercase tracking-[0.5em] italic">Apex Broadcast</p>
                          <div className="h-0.5 w-12 bg-teal-500/20 mt-1" />
                      </div>
                      <div className="text-right">
@@ -914,7 +976,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                 </div>
             </div>
 
-            {/* BOTTOM INFO BAR - SigNify Style */}
+            {/* BOTTOM INFO BAR - Broadcast Style */}
             <div className="bg-[#050808] border-t border-white/10 p-2 flex-shrink-0">
                 <div className="flex items-stretch bg-white/[0.03] rounded-2xl overflow-hidden text-xs border border-white/5">
                     
@@ -962,7 +1024,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                 </div>
             </div>
 
-            {/* CONTROL PANEL - SigNify Style */}
+            {/* CONTROL PANEL - Apex Style */}
             <div className="bg-[#050808] p-4 pb-8 flex-shrink-0">
                  <div className="flex gap-3 mb-4">
                     {isUserBatting && (

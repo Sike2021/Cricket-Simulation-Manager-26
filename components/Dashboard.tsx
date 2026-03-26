@@ -175,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                     { screen: 'LINEUPS', icon: <Icons.Lineups />, label: 'Lineups' },
                     { screen: 'TRANSFERS', icon: <Icons.Transfers />, label: 'Transfers' },
                     { screen: 'PLAYER_DATABASE', icon: <Icons.Database />, label: 'Database' },
-                    { screen: 'NEWS', icon: <Icons.Podium />, label: 'News Feed' },
+                    { screen: 'NEWS', icon: <Icons.Newspaper />, label: 'News Feed' },
                 ].map((item) => (
                     <button 
                         key={item.screen}

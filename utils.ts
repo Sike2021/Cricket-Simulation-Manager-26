@@ -125,7 +125,9 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const xi: Player[] = [];
     const selectedIds = new Set<string>();
     
-    const MAX_FOREIGN_IN_XI = 4; 
+    // Strict rule: No foreign players in ODI and SHIELD (First Class)
+    const isDomesticOnly = [Format.ODI, Format.SHIELD].includes(format);
+    const MAX_FOREIGN_IN_XI = isDomesticOnly ? 0 : 4; 
     let foreignInXI = 0;
 
     const addPlayer = (p: Player) => {
