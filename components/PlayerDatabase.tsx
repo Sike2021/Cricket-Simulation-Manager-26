@@ -47,130 +47,151 @@ const PlayerDatabase: React.FC<PlayerDatabaseProps> = ({ gameData, onAddPlayer, 
     , [groupedPlayers]);
 
     return (
-        <div className="h-full flex flex-col bg-white dark:bg-[#0A0F0F] font-sans text-gray-900 dark:text-white overflow-hidden">
-            <header className="p-6 bg-white dark:bg-[#0A0F0F] border-b border-gray-100 dark:border-white/10">
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 className="text-3xl font-black italic uppercase tracking-tighter leading-none">Player <span className="text-teal-600">Registry</span></h2>
-                        <p className="text-[10px] font-black opacity-40 uppercase tracking-widest mt-1">GLOBAL_TALENT_DATABASE</p>
-                    </div>
-                    <button 
-                        onClick={onAddPlayer}
-                        className="bg-teal-600 hover:bg-teal-700 text-white p-4 rounded-2xl shadow-xl shadow-teal-600/20 transition-all active:scale-95"
-                        title="Add New Player"
-                    >
-                        <Icons.PlusCircle className="w-6 h-6" />
-                    </button>
+        <div className="h-full flex flex-col bg-[#050808] font-sans text-white overflow-hidden">
+            {/* V2.0 Broadcast Header */}
+            <div className="px-8 pt-12 pb-8 border-b border-white/10 relative overflow-hidden bg-[#0A0F0F]">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 via-blue-500 to-teal-500 animate-pulse" />
+                <div className="absolute top-0 right-0 p-4 opacity-5">
+                    <Icons.Database className="w-48 h-48" />
                 </div>
-
-                <div className="space-y-6">
-                    <div className="relative">
-                        <Icons.Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 opacity-20" />
-                        <input 
-                            type="text" 
-                            placeholder="SEARCH_WORLD_TALENT..." 
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-6 py-5 bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-teal-600 rounded-3xl text-xs font-black uppercase tracking-widest outline-none transition-all"
-                        />
-                    </div>
-
-                    <div className="flex gap-4 items-center">
-                        <div className="flex-1 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                            {(['ALL', ...Object.values(PlayerRole)] as const).map(role => (
-                                <button
-                                    key={role}
-                                    onClick={() => setRoleFilter(role)}
-                                    className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${
-                                        roleFilter === role 
-                                        ? 'bg-teal-600 border-teal-600 text-white shadow-lg shadow-teal-600/20' 
-                                        : 'bg-gray-50 dark:bg-white/5 border-transparent opacity-40 hover:opacity-100'
-                                    }`}
-                                >
-                                    {role === 'ALL' ? 'WORLD' : getRoleFullName(role as PlayerRole).toUpperCase()}
-                                </button>
-                            ))}
-                        </div>
+                
+                <div className="relative z-10">
+                    <div className="flex justify-between items-start mb-2">
+                        <p className="text-[10px] font-mono font-bold text-teal-500 uppercase tracking-[0.4em]">GLOBAL_TALENT_REGISTRY // v2.0</p>
                         <button 
-                            onClick={() => setShowOnlyForeign(!showOnlyForeign)}
-                            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${
-                                showOnlyForeign 
-                                ? 'bg-teal-600 border-teal-600 text-white' 
-                                : 'bg-gray-50 dark:bg-white/5 border-transparent opacity-40 hover:opacity-100'
-                            }`}
+                            onClick={onAddPlayer}
+                            className="glass-button px-4 py-1.5 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 group"
                         >
-                            FOREIGN ✈️
+                            <Icons.PlusCircle className="w-3 h-3 text-teal-400 group-hover:scale-125 transition-transform" />
+                            Register New Player
                         </button>
                     </div>
+                    <h1 className="text-6xl font-black italic uppercase tracking-tighter leading-[0.8] text-white mb-8">
+                        PLAYER<br/>
+                        <span className="text-teal-500">DATABASE</span>
+                    </h1>
 
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40 pt-2 border-t border-gray-100 dark:border-white/10">
-                        <span>SORT_BY</span>
-                        <div className="flex gap-6">
+                    <div className="space-y-6">
+                        <div className="relative max-w-2xl">
+                            <Icons.Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-500/40" />
+                            <input 
+                                type="text" 
+                                placeholder="SEARCH_WORLD_TALENT..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="glass-input pl-14 pr-6 py-4 text-[10px] font-black uppercase tracking-widest"
+                            />
+                        </div>
+
+                        <div className="flex gap-4 items-center">
+                            <div className="flex-1 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                {(['ALL', ...Object.values(PlayerRole)] as const).map(role => (
+                                    <button
+                                        key={role}
+                                        onClick={() => setRoleFilter(role)}
+                                        className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${
+                                            roleFilter === role 
+                                            ? 'bg-teal-500 border-teal-500 text-black shadow-lg shadow-teal-500/20' 
+                                            : 'bg-white/5 border-white/5 text-white/40 hover:text-white/70 hover:bg-white/10'
+                                        }`}
+                                    >
+                                        {role === 'ALL' ? 'WORLD' : getRoleFullName(role as PlayerRole).toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
                             <button 
-                                onClick={() => setSortBy('skill')}
-                                className={sortBy === 'skill' ? 'text-teal-600 opacity-100' : 'hover:opacity-100'}
+                                onClick={() => setShowOnlyForeign(!showOnlyForeign)}
+                                className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${
+                                    showOnlyForeign 
+                                    ? 'bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-500/20' 
+                                    : 'bg-white/5 border-white/5 text-white/40 hover:text-white/70 hover:bg-white/10'
+                                }`}
                             >
-                                SKILL
+                                FOREIGN_ONLY
                             </button>
-                            <button 
-                                onClick={() => setSortBy('name')}
-                                className={sortBy === 'name' ? 'text-teal-600 opacity-100' : 'hover:opacity-100'}
-                            >
-                                NAME
-                            </button>
+                        </div>
+
+                        <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-white/20 pt-4 border-t border-white/5">
+                            <div className="flex items-center gap-2">
+                                <Icons.ArrowRightLeft className="w-2.5 h-2.5 text-teal-500" />
+                                <span>SORT_BY</span>
+                            </div>
+                            <div className="flex gap-6">
+                                <button 
+                                    onClick={() => setSortBy('skill')}
+                                    className={`transition-colors ${sortBy === 'skill' ? 'text-teal-400' : 'hover:text-white'}`}
+                                >
+                                    SKILL_RATING
+                                </button>
+                                <button 
+                                    onClick={() => setSortBy('name')}
+                                    className={`transition-colors ${sortBy === 'name' ? 'text-teal-400' : 'hover:text-white'}`}
+                                >
+                                    ALPHABETICAL
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </header>
+            </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-12 scrollbar-hide">
-                {nationalities.length > 0 ? nationalities.map(nat => (
-                    <div key={nat} className="space-y-6">
-                        <div className="flex items-center gap-4">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest opacity-40">{nat}</h3>
-                            <div className="h-px bg-gray-100 dark:bg-white/10 flex-1"></div>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3">
-                            {groupedPlayers[nat].map(player => (
-                                <div 
-                                    key={player.id}
-                                    onClick={() => onViewPlayer(player)}
-                                    className="group bg-gray-50 dark:bg-white/5 border-2 border-transparent hover:border-teal-600 p-5 rounded-[32px] flex items-center justify-between transition-all cursor-pointer hover:shadow-2xl hover:shadow-teal-600/10"
-                                >
-                                    <div className="flex items-center gap-6">
-                                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/10 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">
-                                            {player.role === PlayerRole.WICKET_KEEPER ? '🧤' : player.role === PlayerRole.BATSMAN ? '🏏' : '⚾'}
+            <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+                <div className="max-w-6xl mx-auto space-y-12">
+                    {nationalities.length > 0 ? nationalities.map(nat => (
+                        <section key={nat} className="space-y-6">
+                            <div className="flex items-center gap-4 px-2">
+                                <h3 className="text-[10px] font-mono font-bold text-teal-500 uppercase tracking-[0.4em]">{nat}</h3>
+                                <div className="h-px flex-1 bg-gradient-to-r from-teal-500/20 to-transparent" />
+                                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{groupedPlayers[nat].length} ASSETS</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {groupedPlayers[nat].map(player => (
+                                    <div 
+                                        key={player.id} 
+                                        onClick={() => onViewPlayer(player)}
+                                        className="glass-card p-5 flex items-center gap-4 border-white/5 hover:border-teal-500/30 transition-all duration-500 group cursor-pointer relative overflow-hidden"
+                                    >
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-teal-500/20 group-hover:bg-teal-500 transition-colors" />
+                                        
+                                        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-teal-500/50 transition-colors">
+                                            <img 
+                                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
+                                                alt={player.name}
+                                                className="w-full h-full object-cover"
+                                                referrerPolicy="no-referrer"
+                                            />
                                         </div>
-                                        <div>
-                                            <p className="text-lg font-black uppercase tracking-tighter leading-none mb-2 group-hover:text-teal-600 transition-colors">{player.name}</p>
-                                            <div className="flex items-center gap-3">
-                                                <span className={`text-[9px] font-black uppercase tracking-widest ${getRoleColor(player.role)}`}>
-                                                    {getRoleFullName(player.role).toUpperCase()}
-                                                </span>
-                                                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-white/20"></span>
-                                                <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{player.style === 'A' ? 'AGGRESSIVE' : player.style === 'D' ? 'DEFENSIVE' : 'BALANCED'}</span>
+
+                                        <div className="flex-grow min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h4 className="text-sm font-black italic uppercase tracking-tight text-white truncate group-hover:text-teal-400 transition-colors">{player.name}</h4>
+                                                {player.isForeign && <span className="text-[7px] font-black bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded uppercase tracking-widest border border-blue-500/30">F</span>}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[8px] font-black uppercase tracking-widest ${getRoleColor(player.role)}`}>{player.role}</span>
+                                                <div className="w-1 h-1 rounded-full bg-white/10" />
+                                                <span className="text-[9px] font-bold text-white/40 uppercase tracking-tighter">SKILL: {player.battingSkill + player.secondarySkill}</span>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-6">
-                                        <div className="text-right">
-                                            <p className="text-xl font-black text-teal-600 font-mono leading-none mb-1">{Math.max(player.battingSkill, player.secondarySkill)}</p>
-                                            <p className="text-[8px] font-black uppercase tracking-widest opacity-40">RATING</p>
-                                        </div>
-                                        <div className="w-10 h-10 rounded-full border-2 border-gray-100 dark:border-white/10 flex items-center justify-center group-hover:border-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-all">
-                                            <Icons.ChevronRight className="w-4 h-4" />
+
+                                        <div className="flex flex-col items-end">
+                                            <div className="text-lg font-black font-mono text-white/80 group-hover:text-teal-400 transition-colors">
+                                                {Math.max(player.battingSkill, player.secondarySkill)}
+                                            </div>
+                                            <div className="text-[7px] font-black text-white/20 uppercase tracking-widest">RATING</div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+                        </section>
+                    )) : (
+                        <div className="glass-card p-20 text-center">
+                            <Icons.Search className="w-12 h-12 text-white/10 mx-auto mb-4" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">No players found matching your criteria.</p>
                         </div>
-                    </div>
-                )) : (
-                    <div className="h-full flex flex-col items-center justify-center opacity-20 py-20">
-                        <Icons.Database className="w-16 h-16 mb-6" />
-                        <p className="text-[10px] font-black uppercase tracking-widest">NO_PLAYERS_FOUND</p>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );

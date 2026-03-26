@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { motion } from 'motion/react';
 import { Category, getFormatsForCategory } from '../utils';
 import { Format } from '../types';
+import { Layers, ChevronDown } from 'lucide-react';
 
 interface CategoryTabsProps {
     category: Category;
@@ -13,14 +15,25 @@ export const CategoryTabs: React.FC<CategoryTabsProps> = ({ category, setCategor
     const categories: Category[] = ['T20', 'List A', 'First Class'];
     
     return (
-        <div className={`flex justify-center border-b border-gray-300 dark:border-gray-700 mb-4 ${className}`}>
+        <div className={`flex items-center justify-center gap-2 p-1 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md mb-8 ${className}`}>
             {categories.map((cat) => (
                 <button 
                     key={cat} 
                     onClick={() => setCategory(cat)} 
-                    className={`px-4 py-2 text-sm font-semibold transition-all ${category === cat ? 'border-b-2 border-teal-500 text-teal-500' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+                    className={`relative px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                        category === cat 
+                        ? 'text-black' 
+                        : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                    }`}
                 >
-                    {cat}
+                    {category === cat && (
+                        <motion.div 
+                            layoutId="activeCategory"
+                            className="absolute inset-0 bg-teal-500 rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)]"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                    )}
+                    <span className="relative z-10">{cat}</span>
                 </button>
             ))}
         </div>
@@ -38,16 +51,22 @@ export const FormatDropdown: React.FC<FormatDropdownProps> = ({ category, select
     const formats = getFormatsForCategory(category);
     
     return (
-        <div className={`mb-4 ${className}`}>
+        <div className={`relative group ${className}`}>
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Layers className="w-4 h-4 text-teal-500/50 group-focus-within:text-teal-500 transition-colors" />
+            </div>
             <select
                 value={selectedFormat}
                 onChange={(e) => setSelectedFormat(e.target.value as Format)}
-                className="w-full p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                className="w-full pl-12 pr-12 py-4 rounded-2xl glass-input border border-white/10 text-xs font-black uppercase tracking-widest appearance-none focus:border-teal-500/50 transition-all cursor-pointer"
             >
                 {formats.map(f => (
-                    <option key={f} value={f}>{f}</option>
+                    <option key={f} value={f} className="bg-[#0a0f0f] text-white py-2">{f}</option>
                 ))}
             </select>
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                <ChevronDown className="w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors" />
+            </div>
         </div>
     );
 };

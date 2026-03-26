@@ -9,16 +9,18 @@ import {
   ChevronRight,
   Trophy,
   Activity,
-  DollarSign
+  DollarSign,
+  UserCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TEAMS, PLAYERS, MATCHES } from './data';
-import { Team, Player, Match } from './types';
+import { Team, Player, Match, PlayerRoleSelection } from './types';
 import Squad from './components/Squad';
 import Fixtures from './components/Fixtures';
 import Stats from './components/Stats';
 import Market from './components/Market';
 import MatchView from './components/MatchView';
+import SquadSelection from './components/SquadSelection';
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
   <button
@@ -117,7 +119,14 @@ const Dashboard = ({ team, onSimulate }: { team: Team, onSimulate: () => void })
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const myTeam = TEAMS[0];
+  const [myTeam, setMyTeam] = useState<Team>(TEAMS[0]);
+  const [playingXI, setPlayingXI] = useState<PlayerRoleSelection[]>([]);
+
+  const handleSquadSelection = (selection: PlayerRoleSelection[]) => {
+    setPlayingXI(selection);
+    setActiveTab('dashboard');
+    alert("Playing XI Confirmed!");
+  };
 
   return (
     <div className="flex min-h-screen bg-bg text-ink">
@@ -144,6 +153,12 @@ export default function App() {
             label="Squad" 
             active={activeTab === 'squad'} 
             onClick={() => setActiveTab('squad')} 
+          />
+          <SidebarItem 
+            icon={UserCheck} 
+            label="Selection" 
+            active={activeTab === 'selection'} 
+            onClick={() => setActiveTab('selection')} 
           />
           <SidebarItem 
             icon={Calendar} 
@@ -180,7 +195,7 @@ export default function App() {
         <header className="flex justify-between items-center mb-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight mb-1">
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              {activeTab === 'selection' ? 'Squad Selection' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </h2>
             <p className="text-ink/40">Welcome back, Manager. Season 2026 is in full swing.</p>
           </div>
@@ -208,6 +223,7 @@ export default function App() {
           >
             {activeTab === 'dashboard' && <Dashboard team={myTeam} onSimulate={() => setActiveTab('simulation')} />}
             {activeTab === 'squad' && <Squad players={myTeam.squad} />}
+            {activeTab === 'selection' && <SquadSelection squad={myTeam.squad} onConfirm={handleSquadSelection} />}
             {activeTab === 'fixtures' && <Fixtures matches={MATCHES} teams={TEAMS} />}
             {activeTab === 'stats' && <Stats players={PLAYERS} />}
             {activeTab === 'market' && <Market />}
