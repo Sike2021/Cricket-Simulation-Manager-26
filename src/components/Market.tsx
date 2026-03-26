@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { Player } from '../types';
-import { ShoppingBag, Search, Filter, TrendingUp, SkipForward, Gavel, ArrowRightLeft } from 'lucide-react';
-import { PLAYERS } from '../data';
-import { motion, AnimatePresence } from 'motion/react';
+import { Player, Team } from '../types';
+import { ShoppingBag, Search, Filter, TrendingUp, Gavel, ArrowRightLeft } from 'lucide-react';
+import { PLAYERS, TEAMS } from '../data';
+import AuctionView from './AuctionView';
 
-const MarketPlayerCard = ({ player, onBuy }: { player: Player, onBuy: (p: Player) => void }) => (
-  <div className="bg-card-bg border border-border rounded-3xl p-8 hover:border-accent/30 transition-all group">
+interface MarketProps {
+  myTeam: Team;
+  allPlayers: Player[];
+  onUpdateTeam: (team: Team) => void;
+  onUpdatePlayers: (players: Player[]) => void;
+}
+
+const MarketPlayerCard = ({ player, onBuy, canAfford }: { player: Player, onBuy: (p: Player) => void, canAfford: boolean }) => (
+  <div className="bg-card-bg border border-border rounded-[32px] p-8 hover:border-accent/30 transition-all group">
     <div className="flex justify-between items-start mb-8">
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl font-black text-accent/20 group-hover:text-accent transition-colors">
@@ -39,157 +46,110 @@ const MarketPlayerCard = ({ player, onBuy }: { player: Player, onBuy: (p: Player
 
     <button 
       onClick={() => onBuy(player)}
-      className="w-full bg-accent text-bg py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] transition-all"
+      disabled={!canAfford}
+      className="w-full bg-accent text-bg py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] transition-all disabled:opacity-50 disabled:hover:shadow-none"
     >
       <ShoppingBag size={18} />
-      Make Offer
+      {canAfford ? 'Make Offer' : 'Insufficient Funds'}
     </button>
   </div>
 );
 
-export default function Market() {
-  const [mode, setMode] = useState<'auction' | 'transfer'>('auction');
+export default function Market({ myTeam, allPlayers, onUpdateTeam, onUpdatePlayers }: MarketProps) {
+  const [view, setView] = useState<'auction' | 'transfer'>('auction');
   const [auctionIndex, setAuctionIndex] = useState(0);
-  const [mySquad, setMySquad] = useState<Player[]>([]);
-  const [budget, setBudget] = useState(50000000);
 
-  const currentAuctionPlayer = PLAYERS[auctionIndex];
+  const auctionPool = allPlayers.filter(p => !p.teamId);
 
-  const handleAuctionAction = (action: 'buy' | 'skip') => {
-    if (action === 'buy' && currentAuctionPlayer) {
-      if (budget >= currentAuctionPlayer.value) {
-        setBudget(prev => prev - currentAuctionPlayer.value);
-        setMySquad(prev => [...prev, currentAuctionPlayer]);
-      } else {
-        alert("Insufficient budget!");
-        return;
-      }
-    }
+  const handleAuctionBuy = (player: Player, price: number) => {
+    const updatedPlayer = { ...player, teamId: myTeam.id };
+    const updatedPlayers = allPlayers.map(p => p.id === player.id ? updatedPlayer : p);
     
-    // Increment index only once
-    if (auctionIndex < PLAYERS.length - 1) {
-      setAuctionIndex(prev => prev + 1);
-    } else {
-      alert("Auction completed!");
-    }
+    const updatedTeam = {
+      ...myTeam,
+      budget: myTeam.budget - price,
+      squad: [...myTeam.squad, updatedPlayer]
+    };
+
+    onUpdatePlayers(updatedPlayers);
+    onUpdateTeam(updatedTeam);
+    setAuctionIndex(prev => prev + 1);
+  };
+
+  const handleAuctionSkip = () => {
+    setAuctionIndex(prev => prev + 1);
   };
 
   const handleTransferBuy = (player: Player) => {
-    if (budget >= player.value) {
-      setBudget(prev => prev - player.value);
-      setMySquad(prev => [...prev, player]);
-      alert(`${player.name} added to your squad!`);
-    } else {
-      alert("Insufficient budget!");
+    if (myTeam.budget >= player.value) {
+      handleAuctionBuy(player, player.value);
     }
   };
 
   return (
     <div className="space-y-12">
-      {/* Mode Switcher */}
-      <div className="flex gap-4 bg-card-bg p-2 rounded-3xl border border-border w-fit mx-auto">
-        <button 
-          onClick={() => setMode('auction')}
-          className={`px-8 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all ${mode === 'auction' ? 'bg-accent text-bg shadow-[0_0_20px_rgba(0,255,136,0.3)]' : 'text-ink/60 hover:text-ink'}`}
-        >
-          <Gavel size={18} /> Auction
-        </button>
-        <button 
-          onClick={() => setMode('transfer')}
-          className={`px-8 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all ${mode === 'transfer' ? 'bg-accent text-bg shadow-[0_0_20px_rgba(0,255,136,0.3)]' : 'text-ink/60 hover:text-ink'}`}
-        >
-          <ArrowRightLeft size={18} /> Transfer
-        </button>
-      </div>
-
-      <div className="flex justify-between items-center bg-card-bg p-6 rounded-3xl border border-border">
-        <div className="flex items-center gap-4">
-          <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500">
-            <TrendingUp size={24} />
-          </div>
-          <div>
-            <div className="text-sm text-ink/40 uppercase tracking-widest">Available Budget</div>
-            <div className="text-3xl font-black tracking-tighter">${(budget / 1000000).toFixed(1)}M</div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-sm text-ink/40 uppercase tracking-widest">Squad Size</div>
-          <div className="text-3xl font-black tracking-tighter">{mySquad.length}<span className="text-ink/20">/16</span></div>
+      <div className="flex justify-center mb-12">
+        <div className="bg-white/5 p-2 rounded-[24px] border border-border flex gap-2">
+          <button
+            onClick={() => setView('auction')}
+            className={`px-8 py-3 rounded-2xl font-black uppercase tracking-tighter flex items-center gap-2 transition-all ${
+              view === 'auction' ? 'bg-accent text-bg' : 'text-ink/40 hover:text-ink'
+            }`}
+          >
+            <Gavel size={18} />
+            Auction
+          </button>
+          <button
+            onClick={() => setView('transfer')}
+            className={`px-8 py-3 rounded-2xl font-black uppercase tracking-tighter flex items-center gap-2 transition-all ${
+              view === 'transfer' ? 'bg-accent text-bg' : 'text-ink/40 hover:text-ink'
+            }`}
+          >
+            <ArrowRightLeft size={18} />
+            Transfer Market
+          </button>
         </div>
       </div>
 
-      {mode === 'auction' ? (
-        <div className="max-w-2xl mx-auto">
-          <AnimatePresence mode="wait">
-            {currentAuctionPlayer ? (
-              <motion.div
-                key={currentAuctionPlayer.id}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                className="bg-card-bg border border-border rounded-[40px] p-12 text-center relative overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 w-full h-2 bg-accent/20">
-                  <motion.div 
-                    className="h-full bg-accent" 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${((auctionIndex + 1) / PLAYERS.length) * 100}%` }}
-                  />
-                </div>
-
-                <div className="text-xs font-mono text-accent mb-4 uppercase tracking-[0.3em]">Current Lot #{auctionIndex + 1}</div>
-                <div className="w-32 h-32 rounded-[40px] bg-white/5 mx-auto mb-8 flex items-center justify-center text-5xl font-black text-accent/20">
-                  {currentAuctionPlayer.name.split(' ').map(n => n[0]).join('')}
-                </div>
-                <h3 className="text-4xl font-black tracking-tighter mb-2">{currentAuctionPlayer.name}</h3>
-                <p className="text-xl text-ink/40 uppercase tracking-widest mb-12">{currentAuctionPlayer.role}</p>
-
-                <div className="grid grid-cols-2 gap-6 mb-12">
-                  <div className="bg-white/5 rounded-3xl p-6">
-                    <div className="text-xs text-ink/40 uppercase tracking-widest mb-2">Base Price</div>
-                    <div className="text-3xl font-black text-accent">${(currentAuctionPlayer.value / 1000000).toFixed(1)}M</div>
-                  </div>
-                  <div className="bg-white/5 rounded-3xl p-6">
-                    <div className="text-xs text-ink/40 uppercase tracking-widest mb-2">Batting Rating</div>
-                    <div className="text-3xl font-black">{currentAuctionPlayer.batting}</div>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <button 
-                    onClick={() => handleAuctionAction('skip')}
-                    className="flex-1 bg-white/5 border border-border py-6 rounded-3xl font-black uppercase tracking-tighter flex items-center justify-center gap-3 hover:bg-white/10 transition-all"
-                  >
-                    <SkipForward size={24} /> Skip Player
-                  </button>
-                  <button 
-                    onClick={() => handleAuctionAction('buy')}
-                    className="flex-1 bg-accent text-bg py-6 rounded-3xl font-black uppercase tracking-tighter flex items-center justify-center gap-3 hover:shadow-[0_0_50px_rgba(0,255,136,0.3)] transition-all"
-                  >
-                    <Gavel size={24} /> Buy Player
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              <div className="text-center py-20 bg-card-bg border border-border rounded-[40px]">
-                <div className="text-6xl mb-6">🏆</div>
-                <h3 className="text-3xl font-black tracking-tighter mb-4">Auction Complete</h3>
-                <p className="text-ink/40 mb-8">You have built your squad. Ready for the season?</p>
-                <button 
-                  onClick={() => setAuctionIndex(0)}
-                  className="bg-accent text-bg px-12 py-4 rounded-2xl font-bold uppercase tracking-widest"
-                >
-                  Restart Auction
-                </button>
-              </div>
-            )}
-          </AnimatePresence>
-        </div>
+      {view === 'auction' ? (
+        <AuctionView 
+          players={auctionPool} 
+          myTeam={myTeam} 
+          onBuy={handleAuctionBuy} 
+          onSkip={handleAuctionSkip} 
+          currentIndex={auctionIndex} 
+        />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {PLAYERS.map(player => (
-            <MarketPlayerCard key={player.id} player={player} onBuy={handleTransferBuy} />
-          ))}
+        <div className="space-y-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink/40" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search players..." 
+                className="w-full bg-card-bg border border-border rounded-2xl py-4 pl-12 pr-4 focus:border-accent/50 outline-none transition-all"
+              />
+            </div>
+            <div className="flex gap-4 w-full md:w-auto">
+              <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white/5 border border-border px-6 py-4 rounded-2xl font-bold hover:bg-white/10 transition-colors">
+                <Filter size={18} /> Filter
+              </button>
+              <button className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-white/5 border border-border px-6 py-4 rounded-2xl font-bold hover:bg-white/10 transition-colors">
+                <TrendingUp size={18} /> Sort
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {allPlayers.filter(p => p.teamId && p.teamId !== myTeam.id).map(player => (
+              <MarketPlayerCard 
+                key={player.id} 
+                player={player} 
+                onBuy={handleTransferBuy} 
+                canAfford={myTeam.budget >= player.value}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

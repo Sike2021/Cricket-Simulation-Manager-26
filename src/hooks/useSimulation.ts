@@ -2,20 +2,19 @@ import { useState, useEffect } from 'react';
 import { BallResult, simulateMatchInnings } from '../services/geminiService';
 import { Team } from '../types';
 
-export function useSimulation(battingTeam: Team, bowlingTeam: Team, aggression: number, intensity: number) {
+export function useSimulation(battingTeam: Team, bowlingTeam: Team) {
   const [balls, setBalls] = useState<BallResult[]>([]);
   const [currentBallIndex, setCurrentBallIndex] = useState(0);
   const [isSimulating, setIsSimulating] = useState(false);
   const [score, setScore] = useState({ runs: 0, wickets: 0, overs: 0, balls: 0 });
-  const [recentBalls, setRecentBalls] = useState<number[]>([]);
+  const [aggression, setAggression] = useState(50);
+  const [intensity, setIntensity] = useState(50);
 
   const startSimulation = async () => {
     setIsSimulating(true);
     setCurrentBallIndex(0);
     setScore({ runs: 0, wickets: 0, overs: 0, balls: 0 });
-    setRecentBalls([]);
     
-    // Pass aggression and intensity to simulation service
     const results = await simulateMatchInnings(battingTeam, bowlingTeam, aggression, intensity);
     setBalls(results);
   };
@@ -34,15 +33,8 @@ export function useSimulation(battingTeam: Team, bowlingTeam: Team, aggression: 
             balls: newBalls === 6 ? 0 : newBalls
           };
         });
-        
-        setRecentBalls(prev => {
-          const next = [...prev, ball.runs];
-          if (next.length > 6) return next.slice(1);
-          return next;
-        });
-
         setCurrentBallIndex(prev => prev + 1);
-      }, 1000); // Faster simulation
+      }, 1500);
 
       return () => clearTimeout(timer);
     } else if (currentBallIndex >= balls.length && balls.length > 0) {
@@ -55,8 +47,11 @@ export function useSimulation(battingTeam: Team, bowlingTeam: Team, aggression: 
     currentBallIndex,
     isSimulating,
     score,
-    recentBalls,
     startSimulation,
+    aggression,
+    setAggression,
+    intensity,
+    setIntensity,
     currentBall: balls[currentBallIndex - 1]
   };
 }

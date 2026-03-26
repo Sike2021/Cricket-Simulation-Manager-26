@@ -9,18 +9,17 @@ import {
   ChevronRight,
   Trophy,
   Activity,
-  DollarSign,
-  UserCheck
+  DollarSign
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TEAMS, PLAYERS, MATCHES } from './data';
-import { Team, Player, Match, PlayerRoleSelection } from './types';
+import { Team, Player, Match } from './types';
 import Squad from './components/Squad';
 import Fixtures from './components/Fixtures';
 import Stats from './components/Stats';
 import Market from './components/Market';
 import MatchView from './components/MatchView';
-import SquadSelection from './components/SquadSelection';
+import { quickSimulateMatch } from './services/geminiService';
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
   <button
@@ -49,17 +48,27 @@ const StatCard = ({ label, value, icon: Icon, color }: { label: string, value: s
   </div>
 );
 
-const Dashboard = ({ team, onSimulate }: { team: Team, onSimulate: () => void }) => (
+const Dashboard = ({ team, nextMatch, onPlay, onQuickSimulate }: { team: Team, nextMatch: Match | undefined, onPlay: () => void, onQuickSimulate: () => void }) => (
   <div className="space-y-8">
     <div className="flex justify-between items-center mb-8">
       <h3 className="text-2xl font-bold">Season Overview</h3>
-      <button 
-        onClick={onSimulate}
-        className="bg-accent text-bg px-8 py-3 rounded-2xl font-black uppercase tracking-tighter hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] transition-all flex items-center gap-2"
-      >
-        <Activity size={20} />
-        Simulate Next Match
-      </button>
+      {nextMatch && (
+        <div className="flex gap-4">
+          <button 
+            onClick={onQuickSimulate}
+            className="bg-white/5 text-ink/60 px-6 py-3 rounded-2xl font-bold hover:bg-white/10 transition-all flex items-center gap-2"
+          >
+            Quick Simulate
+          </button>
+          <button 
+            onClick={onPlay}
+            className="bg-accent text-bg px-8 py-3 rounded-2xl font-black uppercase tracking-tighter hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] transition-all flex items-center gap-2"
+          >
+            <Activity size={20} />
+            Play Next Match
+          </button>
+        </div>
+      )}
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard label="League Position" value="2nd" icon={Trophy} color="yellow-500" />
@@ -120,12 +129,99 @@ const Dashboard = ({ team, onSimulate }: { team: Team, onSimulate: () => void })
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [myTeam, setMyTeam] = useState<Team>(TEAMS[0]);
-  const [playingXI, setPlayingXI] = useState<PlayerRoleSelection[]>([]);
+  const [allPlayers, setAllPlayers] = useState<Player[]>(PLAYERS);
+  const [allMatches, setAllMatches] = useState<Match[]>(MATCHES);
+  const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
 
-  const handleSquadSelection = (selection: PlayerRoleSelection[]) => {
-    setPlayingXI(selection);
+  const handleUpdateTeam = (updatedTeam: Team) => {
+    setMyTeam(updatedTeam);
+  };
+
+  const handleUpdatePlayers = (updatedPlayers: Player[]) => {
+    setAllPlayers(updatedPlayers);
+  };
+
+  const nextMatch = allMatches.find(m => m.status === 'Upcoming' && (m.homeTeamId === myTeam.id || m.awayTeamId === myTeam.id));
+
+  const handlePlayMatch = (match: Match) => {
+    setCurrentMatch(match);
+    setActiveTab('simulation');
+  };
+
+  const handleQuickSimulate = async (match: Match) => {
+    const homeTeam = TEAMS.find(t => t.id === match.homeTeamId)!;
+    const awayTeam = TEAMS.find(t => t.id === match.awayTeamId)!;
+    
+    const result = await quickSimulateMatch(homeTeam, awayTeam);
+    
+    const updatedMatch: Match = {
+      ...match,
+      status: 'Completed',
+      result: result.result,
+      score: {
+        home: result.homeScore,
+        away: result.awayScore
+      }
+    };
+
+    setAllMatches(prev => prev.map(m => m.id === match.id ? updatedMatch : m));
+    
+    // Update team stats (simplified)
+    const isHomeWin = result.result.toLowerCase().includes(homeTeam.name.toLowerCase());
+    if (match.homeTeamId === myTeam.id) {
+      setMyTeam(prev => ({
+        ...prev,
+        played: prev.played + 1,
+        won: prev.won + (isHomeWin ? 1 : 0),
+        lost: prev.lost + (isHomeWin ? 0 : 1),
+        points: prev.points + (isHomeWin ? 2 : 0)
+      }));
+    } else if (match.awayTeamId === myTeam.id) {
+      setMyTeam(prev => ({
+        ...prev,
+        played: prev.played + 1,
+        won: prev.won + (!isHomeWin ? 1 : 0),
+        lost: prev.lost + (!isHomeWin ? 0 : 1),
+        points: prev.points + (!isHomeWin ? 2 : 0)
+      }));
+    }
+  };
+
+  const handleMatchComplete = (matchId: string, result: string, score: any) => {
+    const match = allMatches.find(m => m.id === matchId);
+    if (!match) return;
+
+    const updatedMatch: Match = {
+      ...match,
+      status: 'Completed',
+      result,
+      score
+    };
+
+    setAllMatches(prev => prev.map(m => m.id === matchId ? updatedMatch : m));
+    
+    // Update team stats
+    const isHomeWin = result.toLowerCase().includes(TEAMS.find(t => t.id === match.homeTeamId)!.name.toLowerCase());
+    if (match.homeTeamId === myTeam.id) {
+      setMyTeam(prev => ({
+        ...prev,
+        played: prev.played + 1,
+        won: prev.won + (isHomeWin ? 1 : 0),
+        lost: prev.lost + (isHomeWin ? 0 : 1),
+        points: prev.points + (isHomeWin ? 2 : 0)
+      }));
+    } else if (match.awayTeamId === myTeam.id) {
+      setMyTeam(prev => ({
+        ...prev,
+        played: prev.played + 1,
+        won: prev.won + (!isHomeWin ? 1 : 0),
+        lost: prev.lost + (!isHomeWin ? 0 : 1),
+        points: prev.points + (!isHomeWin ? 2 : 0)
+      }));
+    }
+    
     setActiveTab('dashboard');
-    alert("Playing XI Confirmed!");
+    setCurrentMatch(null);
   };
 
   return (
@@ -153,12 +249,6 @@ export default function App() {
             label="Squad" 
             active={activeTab === 'squad'} 
             onClick={() => setActiveTab('squad')} 
-          />
-          <SidebarItem 
-            icon={UserCheck} 
-            label="Selection" 
-            active={activeTab === 'selection'} 
-            onClick={() => setActiveTab('selection')} 
           />
           <SidebarItem 
             icon={Calendar} 
@@ -195,7 +285,7 @@ export default function App() {
         <header className="flex justify-between items-center mb-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight mb-1">
-              {activeTab === 'selection' ? 'Squad Selection' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </h2>
             <p className="text-ink/40">Welcome back, Manager. Season 2026 is in full swing.</p>
           </div>
@@ -221,17 +311,96 @@ export default function App() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {activeTab === 'dashboard' && <Dashboard team={myTeam} onSimulate={() => setActiveTab('simulation')} />}
-            {activeTab === 'squad' && <Squad players={myTeam.squad} />}
-            {activeTab === 'selection' && <SquadSelection squad={myTeam.squad} onConfirm={handleSquadSelection} />}
-            {activeTab === 'fixtures' && <Fixtures matches={MATCHES} teams={TEAMS} />}
-            {activeTab === 'stats' && <Stats players={PLAYERS} />}
-            {activeTab === 'market' && <Market />}
-            {activeTab === 'simulation' && <MatchView battingTeam={myTeam} bowlingTeam={TEAMS[1]} onComplete={() => setActiveTab('dashboard')} />}
+            {activeTab === 'dashboard' && (
+              <Dashboard 
+                team={myTeam} 
+                nextMatch={nextMatch}
+                onPlay={() => nextMatch && handlePlayMatch(nextMatch)}
+                onQuickSimulate={() => nextMatch && handleQuickSimulate(nextMatch)}
+              />
+            )}
+            {activeTab === 'squad' && (
+              <Squad 
+                players={myTeam.squad} 
+                team={myTeam} 
+                onUpdateTeam={handleUpdateTeam} 
+              />
+            )}
+            {activeTab === 'fixtures' && (
+              <Fixtures 
+                matches={allMatches} 
+                teams={TEAMS} 
+                onPlay={handlePlayMatch}
+                onSimulate={handleQuickSimulate}
+              />
+            )}
+            {activeTab === 'stats' && <Stats players={allPlayers} />}
+            {activeTab === 'market' && (
+              <Market 
+                myTeam={myTeam} 
+                allPlayers={allPlayers} 
+                onUpdateTeam={handleUpdateTeam} 
+                onUpdatePlayers={handleUpdatePlayers} 
+              />
+            )}
+            {activeTab === 'simulation' && currentMatch && (
+              <MatchView 
+                battingTeam={TEAMS.find(t => t.id === currentMatch.homeTeamId)!} 
+                bowlingTeam={TEAMS.find(t => t.id === currentMatch.awayTeamId)!} 
+                onComplete={(result, score) => handleMatchComplete(currentMatch.id, result, score)} 
+              />
+            )}
             {activeTab === 'settings' && (
-              <div className="flex flex-col items-center justify-center h-96 text-ink/20">
-                <Activity size={64} className="mb-4 opacity-10" />
-                <p className="text-xl font-medium uppercase tracking-widest">Module Under Construction</p>
+              <div className="max-w-2xl mx-auto space-y-12">
+                <div className="bg-card-bg border border-border rounded-3xl p-8">
+                  <h3 className="text-xl font-bold mb-8 flex items-center gap-3">
+                    <Settings size={24} className="text-accent" />
+                    General Settings
+                  </h3>
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div>
+                        <div className="font-bold">Team Name</div>
+                        <div className="text-sm text-ink/40">Change your franchise name</div>
+                      </div>
+                      <input 
+                        type="text" 
+                        value={myTeam.name}
+                        onChange={(e) => handleUpdateTeam({...myTeam, name: e.target.value})}
+                        className="bg-bg border border-border px-4 py-2 rounded-xl text-sm font-bold focus:border-accent outline-none transition-all"
+                      />
+                    </div>
+                    <div className="flex justify-between items-center p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div>
+                        <div className="font-bold">Short Name</div>
+                        <div className="text-sm text-ink/40">3-letter abbreviation</div>
+                      </div>
+                      <input 
+                        type="text" 
+                        maxLength={3}
+                        value={myTeam.shortName}
+                        onChange={(e) => handleUpdateTeam({...myTeam, shortName: e.target.value.toUpperCase()})}
+                        className="bg-bg border border-border px-4 py-2 rounded-xl text-sm font-bold focus:border-accent outline-none transition-all w-20 text-center"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card-bg border border-border rounded-3xl p-8">
+                  <h3 className="text-xl font-bold mb-8 flex items-center gap-3 text-red-500">
+                    <Activity size={24} />
+                    Danger Zone
+                  </h3>
+                  <div className="p-6 rounded-2xl bg-red-500/5 border border-red-500/10">
+                    <p className="text-sm text-ink/60 mb-6">Resetting the game will clear all your progress, including your squad, budget, and match history. This action cannot be undone.</p>
+                    <button 
+                      onClick={() => window.location.reload()}
+                      className="w-full bg-red-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-red-600 transition-all"
+                    >
+                      Reset Game Data
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </motion.div>

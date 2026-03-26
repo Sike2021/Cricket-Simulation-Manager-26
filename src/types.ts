@@ -9,6 +9,8 @@ export interface Player {
   fitness: number;
   form: number;
   value: number;
+  teamId?: string;
+  isAuctioned?: boolean;
   stats: {
     matches: number;
     runs: number;
@@ -25,6 +27,7 @@ export interface Team {
   logo: string;
   color: string;
   squad: Player[];
+  playingXIIds: string[];
   budget: number;
   points: number;
   played: number;
@@ -42,43 +45,14 @@ export interface Match {
   status: 'Upcoming' | 'Live' | 'Completed';
   result?: string;
   score?: {
-    home: { runs: number; wickets: number; overs: number };
-    away: { runs: number; wickets: number; overs: number };
+    home: { runs: number; wickets: number; overs: number; balls: number };
+    away: { runs: number; wickets: number; overs: number; balls: number };
   };
 }
 
-export interface BallResult {
-  over: number;
-  ball: number;
-  runs: number;
-  isWicket: boolean;
-  batsman: string;
-  bowler: string;
-  commentary: string;
-}
-
-export interface MatchState {
-  target: number;
-  currentInnings: 1 | 2;
-  battingTeamId: string;
-  bowlingTeamId: string;
-  score: {
-    runs: number;
-    wickets: number;
-    overs: number;
-    balls: number;
-  };
-  activeBatsmen: {
-    striker: Player;
-    nonStriker: Player;
-  };
-  currentBowler: Player;
-  recentBalls: number[];
-  isCompleted: boolean;
-}
-
-export interface PlayerRoleSelection {
-  playerId: string;
-  role: 'BT' | 'BL' | 'WK' | 'AR';
-  position: number;
+export interface AuctionState {
+  currentPool: Player[];
+  currentIndex: number;
+  soldPlayers: { playerId: string; teamId: string; price: number }[];
+  skippedPlayerIds: string[];
 }

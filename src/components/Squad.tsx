@@ -1,74 +1,158 @@
-import React from 'react';
-import { Player } from '../types';
-import { Activity, Shield, Zap, Heart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Player, Team } from '../types';
+import { Users, Shield, Zap, Star, ChevronDown, GripVertical, Check } from 'lucide-react';
+import { motion, Reorder } from 'motion/react';
 
-const PlayerCard = ({ player }: { player: Player }) => (
-  <div className="bg-card-bg border border-border rounded-2xl p-6 hover:border-accent/50 transition-all group">
-    <div className="flex justify-between items-start mb-6">
-      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl font-black text-accent/20 group-hover:text-accent transition-colors">
-        {player.name.split(' ').map(n => n[0]).join('')}
-      </div>
-      <div className="text-right">
-        <div className="text-xs text-ink/40 uppercase tracking-widest mb-1">{player.role}</div>
-        <div className="text-xl font-bold">{player.name}</div>
-      </div>
-    </div>
+interface SquadProps {
+  players: Player[];
+  team: Team;
+  onUpdateTeam: (team: Team) => void;
+}
 
-    <div className="grid grid-cols-2 gap-4 mb-6">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
-          <Zap size={12} /> Batting
-        </div>
-        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-          <div className="h-full bg-accent" style={{ width: `${player.batting}%` }} />
-        </div>
-      </div>
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
-          <Shield size={12} /> Bowling
-        </div>
-        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-          <div className="h-full bg-blue-500" style={{ width: `${player.bowling}%` }} />
-        </div>
-      </div>
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
-          <Heart size={12} /> Fitness
-        </div>
-        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-          <div className="h-full bg-red-500" style={{ width: `${player.fitness}%` }} />
-        </div>
-      </div>
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
-          <Activity size={12} /> Form
-        </div>
-        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-          <div className="h-full bg-yellow-500" style={{ width: `${player.form}%` }} />
-        </div>
-      </div>
-    </div>
+export default function Squad({ players, team, onUpdateTeam }: SquadProps) {
+  const [playingXI, setPlayingXI] = useState<Player[]>([]);
+  const [reserves, setReserves] = useState<Player[]>([]);
 
-    <div className="flex justify-between items-center pt-4 border-t border-border">
-      <div className="text-sm font-mono text-ink/60">VALUE</div>
-      <div className="text-lg font-bold text-accent">${(player.value / 1000000).toFixed(1)}M</div>
-    </div>
-  </div>
-);
+  useEffect(() => {
+    const xi = players.filter(p => team.playingXIIds.includes(p.id));
+    const res = players.filter(p => !team.playingXIIds.includes(p.id));
+    
+    // Maintain order for XI if possible
+    const orderedXI = team.playingXIIds
+      .map(id => xi.find(p => p.id === id))
+      .filter((p): p is Player => !!p);
 
-export default function Squad({ players }: { players: Player[] }) {
+    setPlayingXI(orderedXI);
+    setReserves(res);
+  }, [players, team.playingXIIds]);
+
+  const togglePlayer = (player: Player) => {
+    if (playingXI.find(p => p.id === player.id)) {
+      if (playingXI.length > 7) { // Minimum 7 players
+        const newXI = playingXI.filter(p => p.id !== player.id);
+        setPlayingXI(newXI);
+        setReserves([...reserves, player]);
+      }
+    } else {
+      if (playingXI.length < 11) {
+        const newRes = reserves.filter(p => p.id !== player.id);
+        setReserves(newRes);
+        setPlayingXI([...playingXI, player]);
+      }
+    }
+  };
+
+  const handleConfirm = () => {
+    onUpdateTeam({
+      ...team,
+      playingXIIds: playingXI.map(p => p.id)
+    });
+  };
+
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold">Active Squad ({players.length})</h3>
-        <button className="bg-accent text-bg px-6 py-2 rounded-xl font-bold hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all">
-          Manage Lineup
+    <div className="space-y-12">
+      <div className="flex justify-between items-end">
+        <div>
+          <h3 className="text-4xl font-black tracking-tighter uppercase italic mb-2">
+            Squad <span className="text-accent">Selection</span>
+          </h3>
+          <p className="text-ink/40 font-mono uppercase tracking-widest text-xs">
+            Confirm Final XI ({playingXI.length}/11)
+          </p>
+        </div>
+        <button 
+          onClick={handleConfirm}
+          className="bg-accent text-bg px-10 py-4 rounded-2xl font-black uppercase tracking-tighter hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] transition-all flex items-center gap-2"
+        >
+          <Check size={20} />
+          Confirm Selection
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {players.map(player => (
-          <PlayerCard key={player.id} player={player} />
-        ))}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-4">
+            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-ink/40">Batting Order</h4>
+            <div className="text-[10px] font-bold text-accent uppercase tracking-widest bg-accent/10 px-3 py-1 rounded-full">
+              Drag to Reorder
+            </div>
+          </div>
+          
+          <Reorder.Group axis="y" values={playingXI} onReorder={setPlayingXI} className="space-y-3">
+            {playingXI.map((player, index) => (
+              <Reorder.Item
+                key={player.id}
+                value={player}
+                className="bg-card-bg border border-border p-4 rounded-2xl flex items-center gap-4 group cursor-grab active:cursor-grabbing hover:border-accent/30 transition-colors"
+              >
+                <div className="text-ink/20 group-hover:text-accent transition-colors">
+                  <GripVertical size={20} />
+                </div>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${
+                  player.role === 'Batsman' ? 'bg-blue-500/20 text-blue-500' :
+                  player.role === 'Bowler' ? 'bg-red-500/20 text-red-500' :
+                  'bg-accent/20 text-accent'
+                }`}>
+                  {player.role === 'Batsman' ? 'BT' : player.role === 'Bowler' ? 'BL' : 'AR'}
+                </div>
+                <div className="font-mono text-sm text-ink/40 w-6">{index + 1}</div>
+                <div className="font-bold flex-1">{player.name}</div>
+                <button 
+                  onClick={() => togglePlayer(player)}
+                  className="text-ink/20 hover:text-red-500 transition-colors"
+                >
+                  <Shield size={18} />
+                </button>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
+
+        <div className="space-y-8">
+          <div className="bg-card-bg border border-border rounded-[32px] p-8 shadow-sm">
+            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-ink/40 mb-6">Player Roles</h4>
+            <div className="space-y-4">
+              {playingXI.slice(0, 5).map(player => (
+                <div key={player.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${
+                      player.role === 'Batsman' ? 'bg-blue-500/20 text-blue-500' : 'bg-accent/20 text-accent'
+                    }`}>
+                      {player.role === 'Batsman' ? 'BT' : 'AR'}
+                    </div>
+                    <div className="font-bold text-sm">{player.name}</div>
+                  </div>
+                  <ChevronDown size={16} className="text-ink/20" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-card-bg border border-border rounded-[32px] p-8 shadow-sm">
+            <h4 className="text-sm font-black uppercase tracking-[0.2em] text-ink/40 mb-6">Reserves</h4>
+            <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              {reserves.map(player => (
+                <div 
+                  key={player.id}
+                  onClick={() => togglePlayer(player)}
+                  className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-4 cursor-pointer hover:border-accent/30 transition-colors group"
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${
+                    player.role === 'Batsman' ? 'bg-blue-500/20 text-blue-500' :
+                    player.role === 'Bowler' ? 'bg-red-500/20 text-red-500' :
+                    'bg-accent/20 text-accent'
+                  }`}>
+                    {player.role === 'Batsman' ? 'BT' : player.role === 'Bowler' ? 'BL' : 'AR'}
+                  </div>
+                  <div className="font-bold flex-1">{player.name}</div>
+                  <div className="text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Zap size={18} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
