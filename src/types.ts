@@ -1,5 +1,18 @@
 export type PlayerRole = 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicketkeeper';
 
+export interface PlayerAvatar {
+  faceShape: number;
+  skinColor: string;
+  hairStyle: number;
+  hairColor: string;
+  facialHair: number;
+  eyeColor: string;
+  eyeShape: number;
+  noseShape: number;
+  earShape: number;
+  customPhoto?: string; // Base64 or local URL
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -9,8 +22,7 @@ export interface Player {
   fitness: number;
   form: number;
   value: number;
-  teamId?: string;
-  isAuctioned?: boolean;
+  avatar: PlayerAvatar;
   stats: {
     matches: number;
     runs: number;
@@ -27,7 +39,6 @@ export interface Team {
   logo: string;
   color: string;
   squad: Player[];
-  playingXIIds: string[];
   budget: number;
   points: number;
   played: number;
@@ -45,14 +56,7 @@ export interface Match {
   status: 'Upcoming' | 'Live' | 'Completed';
   result?: string;
   score?: {
-    home: { runs: number; wickets: number; overs: number; balls: number };
-    away: { runs: number; wickets: number; overs: number; balls: number };
+    home: { runs: number; wickets: number; overs: number };
+    away: { runs: number; wickets: number; overs: number };
   };
-}
-
-export interface AuctionState {
-  currentPool: Player[];
-  currentIndex: number;
-  soldPlayers: { playerId: string; teamId: string; price: number }[];
-  skippedPlayerIds: string[];
 }

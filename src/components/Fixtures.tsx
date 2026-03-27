@@ -2,80 +2,70 @@ import React from 'react';
 import { Match, Team } from '../types';
 import { MapPin, Clock, Trophy } from 'lucide-react';
 
-const MatchCard = ({ match, teams, onPlay, onSimulate }: { match: Match, teams: Team[], onPlay?: (m: Match) => void, onSimulate?: (m: Match) => void }) => {
+const MatchCard = ({ match, teams }: { match: Match, teams: Team[] }) => {
   const homeTeam = teams.find(t => t.id === match.homeTeamId);
   const awayTeam = teams.find(t => t.id === match.awayTeamId);
 
   if (!homeTeam || !awayTeam) return null;
 
   return (
-    <div className="bg-card-bg border border-border rounded-3xl p-8 hover:border-accent/30 transition-all flex flex-col">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-3 text-xs text-ink/40 font-mono uppercase tracking-widest">
-          <Clock size={14} /> {new Date(match.date).toLocaleDateString()} • {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+    <div className="bg-card-bg/40 border border-border rounded-[32px] p-8 hover:border-teal/30 transition-all group relative overflow-hidden">
+      <div className="flex justify-between items-center mb-8 relative z-10">
+        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-ink/40">
+          <Clock size={14} className="text-teal" /> 
+          {new Date(match.date).toLocaleDateString()} • {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
-        <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
+        <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
           match.status === 'Live' ? 'bg-red-500 text-white animate-pulse' : 
-          match.status === 'Completed' ? 'bg-white/10 text-ink/60' : 'bg-accent/20 text-accent'
+          match.status === 'Completed' ? 'bg-white/10 text-ink/40' : 'bg-teal/20 text-teal'
         }`}>
           {match.status}
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-8 mb-8 flex-1">
-        <div className="flex-1 text-center">
-          <img 
-            src={homeTeam.logo} 
-            alt={homeTeam.name} 
-            className="w-20 h-20 mx-auto mb-4 rounded-2xl border border-border"
-            referrerPolicy="no-referrer"
-          />
-          <div className="font-bold text-lg">{homeTeam.shortName}</div>
+      <div className="flex items-center justify-between gap-8 mb-8 relative z-10">
+        <div className="flex-1 text-center space-y-4">
+          <div className="w-24 h-24 mx-auto rounded-[32px] bg-bg border border-border flex items-center justify-center overflow-hidden shadow-xl group-hover:scale-110 transition-transform">
+            <img 
+              src={homeTeam.logo} 
+              alt={homeTeam.name} 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="font-display text-xl tracking-tight">{homeTeam.shortName}</div>
         </div>
 
         <div className="flex flex-col items-center gap-2">
           {match.status === 'Completed' ? (
-            <div className="text-4xl font-black tracking-tighter">
-              {match.score?.home.runs}/{match.score?.home.wickets} <span className="text-ink/20 mx-2">VS</span> {match.score?.away.runs}/{match.score?.away.wickets}
+            <div className="text-3xl font-display tracking-tighter">
+              {match.score?.home.runs}/{match.score?.home.wickets} <span className="text-ink/10 mx-2">VS</span> {match.score?.away.runs}/{match.score?.away.wickets}
             </div>
           ) : (
-            <div className="text-4xl font-black text-ink/10 italic tracking-tighter">VS</div>
+            <div className="text-5xl font-display text-ink/5 italic tracking-tighter">VS</div>
           )}
         </div>
 
-        <div className="flex-1 text-center">
-          <img 
-            src={awayTeam.logo} 
-            alt={awayTeam.name} 
-            className="w-20 h-20 mx-auto mb-4 rounded-2xl border border-border"
-            referrerPolicy="no-referrer"
-          />
-          <div className="font-bold text-lg">{awayTeam.shortName}</div>
+        <div className="flex-1 text-center space-y-4">
+          <div className="w-24 h-24 mx-auto rounded-[32px] bg-bg border border-border flex items-center justify-center overflow-hidden shadow-xl group-hover:scale-110 transition-transform">
+            <img 
+              src={awayTeam.logo} 
+              alt={awayTeam.name} 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="font-display text-xl tracking-tight">{awayTeam.shortName}</div>
         </div>
       </div>
 
-      <div className="flex justify-between items-center pt-6 border-t border-border mt-auto">
-        <div className="flex items-center gap-2 text-sm text-ink/40">
-          <MapPin size={14} /> {match.venue}
+      <div className="flex justify-between items-center pt-8 border-t border-border/50 relative z-10">
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ink/40">
+          <MapPin size={14} className="text-teal" /> {match.venue}
         </div>
-        {match.result ? (
-          <div className="flex items-center gap-2 text-sm font-bold text-accent">
+        {match.result && (
+          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-teal">
             <Trophy size={14} /> {match.result}
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <button 
-              onClick={() => onSimulate?.(match)}
-              className="px-4 py-2 rounded-xl bg-white/5 text-ink/60 text-xs font-bold hover:bg-white/10 transition-colors"
-            >
-              Quick Simulate
-            </button>
-            <button 
-              onClick={() => onPlay?.(match)}
-              className="px-4 py-2 rounded-xl bg-accent text-bg text-xs font-bold hover:shadow-[0_0_15px_rgba(0,255,136,0.3)] transition-all"
-            >
-              Play Match
-            </button>
           </div>
         )}
       </div>
@@ -83,36 +73,16 @@ const MatchCard = ({ match, teams, onPlay, onSimulate }: { match: Match, teams: 
   );
 };
 
-export default function Fixtures({ matches, teams, onPlay, onSimulate }: { matches: Match[], teams: Team[], onPlay: (m: Match) => void, onSimulate: (m: Match) => void }) {
-  const [filter, setFilter] = React.useState<'Upcoming' | 'Completed'>('Upcoming');
-
-  const filteredMatches = matches.filter(m => m.status === filter);
-
+export default function Fixtures({ matches, teams }: { matches: Match[], teams: Team[] }) {
   return (
-    <div className="space-y-8">
-      <div className="flex gap-4 mb-8">
-        <button 
-          onClick={() => setFilter('Upcoming')}
-          className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === 'Upcoming' ? 'bg-accent text-bg' : 'bg-white/5 text-ink/60 hover:bg-white/10'}`}
-        >
-          Upcoming
-        </button>
-        <button 
-          onClick={() => setFilter('Completed')}
-          className={`px-6 py-2 rounded-xl font-bold transition-all ${filter === 'Completed' ? 'bg-accent text-bg' : 'bg-white/5 text-ink/60 hover:bg-white/10'}`}
-        >
-          Results
-        </button>
+    <div className="p-6 space-y-12">
+      <div className="flex gap-4">
+        <button className="bg-teal text-bg px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg glow-teal">Upcoming</button>
+        <button className="bg-card-bg border border-border text-ink/40 px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-white/5 transition-colors">Results</button>
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {filteredMatches.map(match => (
-          <MatchCard 
-            key={match.id} 
-            match={match} 
-            teams={teams} 
-            onPlay={onPlay}
-            onSimulate={onSimulate}
-          />
+        {matches.map(match => (
+          <MatchCard key={match.id} match={match} teams={teams} />
         ))}
       </div>
     </div>

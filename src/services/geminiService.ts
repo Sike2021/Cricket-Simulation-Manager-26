@@ -13,22 +13,24 @@ export interface BallResult {
   commentary: string;
 }
 
-export interface MatchResult {
-  homeScore: { runs: number, wickets: number, overs: number, balls: number };
-  awayScore: { runs: number, wickets: number, overs: number, balls: number };
-  result: string;
-}
-
-export async function simulateMatchInnings(battingTeam: Team, bowlingTeam: Team, aggression: number, intensity: number): Promise<BallResult[]> {
+export async function simulateMatchInnings(
+  battingTeam: Team, 
+  bowlingTeam: Team, 
+  options: { aggression: number; intensity: number; battingOrder: Player[] }
+): Promise<BallResult[]> {
   const prompt = `
     Simulate a T20 cricket innings between ${battingTeam.name} and ${bowlingTeam.name}.
-    Batting Team Squad: ${battingTeam.squad.map(p => p.name).join(', ')}
+    
+    TACTICAL CONTEXT:
+    - Batting Aggression: ${options.aggression}/100 (Higher means more boundaries but higher wicket risk)
+    - Bowling Intensity: ${options.intensity}/100 (Higher means more pressure and wickets but risk of extras)
+    - Batting Order: ${options.battingOrder.map(p => p.name).join(', ')}
+    
     Bowling Team Squad: ${bowlingTeam.squad.map(p => p.name).join(', ')}
     
-    Batting Aggression: ${aggression}/100
-    Bowling Intensity: ${intensity}/100
-
-    Provide a ball-by-ball summary for the first 5 overs only for brevity.
+    Provide a ball-by-ball summary for exactly 5 overs (30 balls).
+    The simulation should reflect the tactical aggression and intensity.
+    
     Return the result as a JSON array of objects with the following structure:
     {
       "over": number,
@@ -50,43 +52,25 @@ export async function simulateMatchInnings(battingTeam: Team, bowlingTeam: Team,
       }
     });
 
-    return JSON.parse(response.text || "[]");
+    const text = response.text;
+    if (!text) {
+      console.warn("Empty response from AI");
+      return [];
+    }
+
+    try {
+      const data = JSON.parse(text);
+      if (Array.isArray(data)) {
+        return data as BallResult[];
+      }
+      console.error("AI response is not an array:", data);
+      return [];
+    } catch (parseError) {
+      console.error("Error parsing AI response:", parseError, text);
+      return [];
+    }
   } catch (error) {
     console.error("Error simulating match:", error);
     return [];
-  }
-}
-
-export async function quickSimulateMatch(homeTeam: Team, awayTeam: Team): Promise<MatchResult> {
-  const prompt = `
-    Quickly simulate a T20 cricket match between ${homeTeam.name} and ${awayTeam.name}.
-    Home Team Squad: ${homeTeam.squad.map(p => p.name).join(', ')}
-    Away Team Squad: ${awayTeam.squad.map(p => p.name).join(', ')}
-    
-    Return the final score and result as a JSON object:
-    {
-      "homeScore": { "runs": number, "wickets": number, "overs": number, "balls": number },
-      "awayScore": { "runs": number, "wickets": number, "overs": number, "balls": number },
-      "result": "string describing who won and by how much"
-    }
-  `;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json"
-      }
-    });
-
-    return JSON.parse(response.text || "{}");
-  } catch (error) {
-    console.error("Error quick simulating match:", error);
-    return {
-      homeScore: { runs: 0, wickets: 0, overs: 0, balls: 0 },
-      awayScore: { runs: 0, wickets: 0, overs: 0, balls: 0 },
-      result: "Match abandoned due to technical issues"
-    };
   }
 }

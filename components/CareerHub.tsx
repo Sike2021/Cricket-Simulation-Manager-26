@@ -30,6 +30,7 @@ import AuctionRoom from './AuctionRoom';
 import PlayerDatabase from './PlayerDatabase';
 import SeasonSummary from './SeasonSummary';
 import ModernRatingBoard from './ModernRatingBoard';
+import GameplayView from './GameplayView';
 
 interface CareerHubProps {
     gameData: GameData;
@@ -45,33 +46,32 @@ interface CareerHubProps {
 const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen, setScreen: (screen: CareerScreen) => void }) => {
     const navItems = [
         { name: 'HOME', screen: 'DASHBOARD' as CareerScreen, icon: Home },
+        { name: 'TACTICS', screen: 'GAMEPLAY_TACTICS' as CareerScreen, icon: LayoutGrid },
         { name: 'STANDINGS', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
         { name: 'RATINGS', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
         { name: 'STATS', screen: 'STATS' as CareerScreen, icon: BarChart3 },
-        { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
     return (
-        <nav className="bg-[#050808]/80 border-t border-white/5 flex justify-around items-center h-[90px] pb-8 backdrop-blur-3xl sticky bottom-0 z-50 px-4">
-            <div className="absolute inset-0 bg-gradient-to-t from-teal-500/5 to-transparent pointer-events-none" />
+        <nav className="bg-[#0A0F0F]/80 border-t border-white/5 flex justify-around items-center h-[85px] pb-6 backdrop-blur-2xl sticky bottom-0 z-50">
             {navItems.map(item => {
                 const isActive = activeScreen === item.screen;
                 return (
                     <button
                         key={item.name}
                         onClick={() => setScreen(item.screen)}
-                        className={`relative flex flex-col items-center justify-center space-y-1.5 w-1/5 pt-4 transition-all duration-500 group ${isActive ? 'text-teal-400' : 'text-white/20 hover:text-white/50'}`}
+                        className={`relative flex flex-col items-center justify-center space-y-1.5 w-1/5 pt-3 transition-all duration-500 ${isActive ? 'text-teal-400' : 'text-white/40 hover:text-white/70'}`}
                     >
                         {isActive && (
                             <motion.div 
                                 layoutId="nav-active"
-                                className="absolute -top-[1px] w-12 h-0.5 bg-gradient-to-r from-teal-500 via-blue-500 to-teal-500 rounded-full shadow-[0_0_20px_rgba(20,184,166,0.6)]"
-                                transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                                className="absolute -top-3 w-14 h-1 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full shadow-[0_0_15px_rgba(20,184,166,0.5)]"
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                             />
                         )}
-                        <div className={`p-2.5 rounded-2xl transition-all duration-500 ${isActive ? 'bg-teal-500/10 scale-110' : 'bg-transparent group-hover:scale-105'}`}>
-                            <item.icon size={18} strokeWidth={isActive ? 2.5 : 1.5} className={isActive ? 'drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]' : ''} />
+                        <div className={`p-2 rounded-xl transition-all duration-500 ${isActive ? 'bg-teal-500/10' : 'bg-transparent'}`}>
+                            <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.5} />
                         </div>
-                        <span className={`text-[7px] font-black tracking-[0.3em] uppercase transition-all duration-500 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-0.5'}`}>{item.name}</span>
+                        <span className={`text-[9px] font-black tracking-[0.2em] uppercase transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-60'}`}>{item.name}</span>
                     </button>
                 );
             })}
@@ -542,6 +542,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             }} />;
             case 'SEASON_SUMMARY': return <SeasonSummary gameData={gameData} onContinue={handleSeasonSummaryComplete} />;
             case 'RATING_BOARD': return <ModernRatingBoard players={gameData.allPlayers} currentFormat={gameData.currentFormat} />;
+            case 'GAMEPLAY_TACTICS': return <GameplayView gameData={gameData} setGameData={setGameData} onBack={() => setScreen('DASHBOARD')} />;
             case 'LIVE_MATCH': {
                 const schedule = gameData.schedule[gameData.currentFormat];
                 const currentMatchIndex = gameData.currentMatchIndex[gameData.currentFormat];
@@ -572,18 +573,15 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
     }
 
     return (
-        <div className="flex flex-col h-full bg-[#050808] text-[#E4E3E0] font-sans selection:bg-teal-500/30 selection:text-teal-200">
-            <main className="flex-grow overflow-y-auto relative custom-scrollbar">
+        <div className="flex flex-col h-full bg-slate-50 dark:bg-[#050808] text-slate-900 dark:text-slate-100">
+            <main className="flex-grow overflow-y-auto relative">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={screen}
-                        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 1.02, y: -10 }}
-                        transition={{ 
-                            duration: 0.3, 
-                            ease: [0.23, 1, 0.32, 1] // Custom cubic-bezier for "slam" effect
-                        }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                         className="h-full"
                     >
                         {renderScreen()}

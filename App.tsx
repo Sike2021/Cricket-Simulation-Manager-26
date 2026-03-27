@@ -12,6 +12,8 @@ import AuctionRoom from './components/AuctionRoom';
 import Lineups from './components/Lineups';
 import Editor from './components/Editor';
 
+import GameInterfaceV2 from './components/GameInterfaceV2';
+
 export const MAX_SQUAD_SIZE = 16;
 export const MIN_SQUAD_SIZE = 16;
 export const MAX_FOREIGN_PLAYERS = 3;
@@ -73,10 +75,10 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB' | 'EDITOR';
+export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB' | 'EDITOR' | 'GAME_V2';
 
 export const App = () => {
-  const [appState, setAppState] = useState<AppState>('MAIN_MENU');
+  const [appState, setAppState] = useState<AppState>('GAME_V2');
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
@@ -304,6 +306,7 @@ export const App = () => {
     }
     switch(appState) {
         case 'MAIN_MENU': return <MainMenu onStartNewGame={handleStartNewGame} onResumeGame={resumeGame} onOpenEditor={handleOpenEditor} hasSaveData={hasSaveData} />;
+        case 'GAME_V2': return <GameInterfaceV2 />;
         case 'TEAM_SELECTION': return <TeamSelection onTeamSelected={initializeNewGame} theme={theme} />;
         case 'AUCTION': return gameData ? <AuctionRoom gameData={gameData} onAuctionComplete={handleAuctionComplete} /> : null;
         case 'CAREER_HUB': return gameData ? <CareerHub gameData={gameData} setGameData={setGameData} onResetGame={resetGame} theme={theme} setTheme={setTheme} saveGame={saveGame} loadGame={loadGame} showFeedback={showFeedback} /> : null;
