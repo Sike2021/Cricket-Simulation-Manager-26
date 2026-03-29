@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { GameData, Team, MatchResult, Format, Match } from '../types';
 import { Category, getFormatsForCategory, resolveMatch } from '../utils';
 import { CategoryTabs, FormatDropdown } from './SharedUI';
+import { Icons } from './Icons';
 
 interface ScheduleProps {
     gameData: GameData;

@@ -132,7 +132,7 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
             if (p.displayStats.runs >= 1000) results.push({ player: p, type: '1000 Runs', value: p.displayStats.runs, teamName: p.teamName });
             if (p.displayStats.wickets >= 50) results.push({ player: p, type: '50 Wickets', value: p.displayStats.wickets, teamName: p.teamName });
             if (p.displayStats.hundreds >= 1) results.push({ player: p, type: 'Century', value: p.displayStats.hundreds, teamName: p.teamName });
-            if (p.displayStats.fiveWickets >= 1) results.push({ player: p, type: '5-Wkt Haul', value: p.displayStats.fiveWickets, teamName: p.teamName });
+            if (p.displayStats.fiveWicketHauls >= 1) results.push({ player: p, type: '5-Wkt Haul', value: p.displayStats.fiveWicketHauls, teamName: p.teamName });
         });
         return results.sort((a, b) => b.value - a.value);
     }, [allPlayersWithStats]);

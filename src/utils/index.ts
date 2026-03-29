@@ -1,69 +1,15 @@
+
 import React from 'react';
-import { Format, Player, PlayerRole, Team, Match, PlayerStats, Sponsorship, MatchResult, NewsArticle, GameData, Standing } from './types';
-import { BRANDS, SPONSOR_THRESHOLDS, generateSingleFormatInitialStats, TV_CHANNELS, TOURNAMENT_LOGOS } from './data';
-
-export const AVATAR_OPTIONS = {
-    faceShapes: ['round', 'oval', 'square', 'heart'],
-    skinColors: ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642'],
-    hairStyles: ['short', 'long', 'bald', 'spiky', 'curly', 'fade'],
-    hairColors: ['#090806', '#2C222B', '#71635A', '#B7A69E', '#D6C4C2', '#CABFB1', '#FFF5E1'],
-    facialHairs: ['none', 'beard', 'mustache', 'stubble', 'goatee']
-};
-
-export const generateRandomAvatar = () => {
-    return {
-        faceShape: AVATAR_OPTIONS.faceShapes[Math.floor(Math.random() * AVATAR_OPTIONS.faceShapes.length)],
-        skinColor: AVATAR_OPTIONS.skinColors[Math.floor(Math.random() * AVATAR_OPTIONS.skinColors.length)],
-        hairStyle: AVATAR_OPTIONS.hairStyles[Math.floor(Math.random() * AVATAR_OPTIONS.hairStyles.length)],
-        hairColor: AVATAR_OPTIONS.hairColors[Math.floor(Math.random() * AVATAR_OPTIONS.hairColors.length)],
-        facialHair: AVATAR_OPTIONS.facialHairs[Math.floor(Math.random() * AVATAR_OPTIONS.facialHairs.length)],
-    };
-};
-
-export type Category = 'T20' | 'List A' | 'First Class';
-
-export const getFormatsForCategory = (cat: Category): Format[] => {
-    switch(cat) {
-        case 'T20': return [Format.T20];
-        case 'List A': return [Format.ODI];
-        case 'First Class': return [Format.SHIELD];
-        default: return [Format.T20];
-    }
-};
-
-export const resolveMatch = (match: Match, gameData: GameData, format: Format) => {
-    let resolvedMatch = { ...match };
-    if (resolvedMatch.group !== 'Round-Robin') {
-        const standings = gameData.standings[format] || [];
-        const getTeamName = (pos: number) => standings.length >= pos ? standings[pos - 1]?.teamName : `TBD`;
-        
-        const resolvePlaceholder = (placeholder: string) => {
-            if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) {
-                return getTeamName(parseInt(placeholder[0], 10));
-            }
-            if (placeholder.startsWith('SF')) {
-                const sfMatchNumber = placeholder.split(' ')[0];
-                const sfResult = gameData.matchResults[format]?.find(r => r.matchNumber === sfMatchNumber);
-                if (sfResult?.winnerId) {
-                    return gameData.teams.find(t => t.id === sfResult.winnerId)?.name || 'TBD';
-                }
-                return `Winner of ${sfMatchNumber}`;
-            }
-            return placeholder;
-        };
-        resolvedMatch.teamA = resolvePlaceholder(resolvedMatch.teamA);
-        resolvedMatch.teamB = resolvePlaceholder(resolvedMatch.teamB);
-    }
-    return resolvedMatch;
-};
+import { Format, Player, PlayerRole, Team, Match, PlayerStats, Sponsorship, MatchResult, NewsArticle, GameData } from '../types';
+import { BRANDS, SPONSOR_THRESHOLDS, generateSingleFormatInitialStats, TV_CHANNELS, TOURNAMENT_LOGOS } from '../data';
 
 export const PITCH_MODIFIERS = {
-  "Balanced Sporting Pitch": { [Format.T20]: { runRate: 3.85, wicketChance: 1.20 }, [Format.ODI]: { runRate: 2.45, wicketChance: 1.15 }, [Format.SHIELD]: { runRate: 1.0, wicketChance: 1.0 }, paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0.02, unpredictability: 0 },
-  "Dusty Spinner’s Haven": { [Format.T20]: { runRate: 3.10, wicketChance: 1.40 }, [Format.ODI]: { runRate: 2.10, wicketChance: 1.25 }, [Format.SHIELD]: { runRate: 0.9, wicketChance: 1.15 }, paceBonus: -0.05, spinBonus: 0.15, chasePenalty: 0.95, deterioration: 0.1, unpredictability: 0.005 },
-  "Green Top": { [Format.T20]: { runRate: 3.30, wicketChance: 1.45 }, [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, [Format.SHIELD]: { runRate: 0.85, wicketChance: 1.2 }, paceBonus: 0.15, spinBonus: -0.05, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 },
-  "Batting Paradise": { [Format.T20]: { runRate: 4.40, wicketChance: 1.0 }, [Format.ODI]: { runRate: 2.85, wicketChance: 1.0 }, [Format.SHIELD]: { runRate: 1.2, wicketChance: 0.85 }, paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0, unpredictability: 0 },
-  "Dead Slow Track": { [Format.T20]: { runRate: 2.75, wicketChance: 1.30 }, [Format.ODI]: { runRate: 2.0, wicketChance: 1.20 }, [Format.SHIELD]: { runRate: 0.8, wicketChance: 1.1 }, paceBonus: -0.05, spinBonus: 0.1, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 },
-  "Cracked Worn Surface": { [Format.T20]: { runRate: 3.30, wicketChance: 1.40 }, [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, [Format.SHIELD]: { runRate: 0.75, wicketChance: 1.25 }, paceBonus: 0.05, spinBonus: 0.1, chasePenalty: 0.98, deterioration: 0.15, unpredictability: 0.015 },
+  "Balanced Sporting Pitch": { [Format.T20]: { runRate: 3.85, wicketChance: 1.20 }, [Format.ODI]: { runRate: 2.45, wicketChance: 1.15 }, [Format.FIRST_CLASS]: { runRate: 1.0, wicketChance: 1.0 }, paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0.02, unpredictability: 0 },
+  "Dusty Spinner’s Haven": { [Format.T20]: { runRate: 3.10, wicketChance: 1.40 }, [Format.ODI]: { runRate: 2.10, wicketChance: 1.25 }, [Format.FIRST_CLASS]: { runRate: 0.9, wicketChance: 1.15 }, paceBonus: -0.05, spinBonus: 0.15, chasePenalty: 0.95, deterioration: 0.1, unpredictability: 0.005 },
+  "Green Top": { [Format.T20]: { runRate: 3.30, wicketChance: 1.45 }, [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, [Format.FIRST_CLASS]: { runRate: 0.85, wicketChance: 1.2 }, paceBonus: 0.15, spinBonus: -0.05, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 },
+  "Batting Paradise": { [Format.T20]: { runRate: 4.40, wicketChance: 1.0 }, [Format.ODI]: { runRate: 2.85, wicketChance: 1.0 }, [Format.FIRST_CLASS]: { runRate: 1.2, wicketChance: 0.85 }, paceBonus: 0, spinBonus: 0, chasePenalty: 1.0, deterioration: 0, unpredictability: 0 },
+  "Dead Slow Track": { [Format.T20]: { runRate: 2.75, wicketChance: 1.30 }, [Format.ODI]: { runRate: 2.0, wicketChance: 1.20 }, [Format.FIRST_CLASS]: { runRate: 0.8, wicketChance: 1.1 }, paceBonus: -0.05, spinBonus: 0.1, chasePenalty: 1.0, deterioration: 0.05, unpredictability: 0 },
+  "Cracked Worn Surface": { [Format.T20]: { runRate: 3.30, wicketChance: 1.40 }, [Format.ODI]: { runRate: 2.20, wicketChance: 1.30 }, [Format.FIRST_CLASS]: { runRate: 0.75, wicketChance: 1.25 }, paceBonus: 0.05, spinBonus: 0.1, chasePenalty: 0.98, deterioration: 0.15, unpredictability: 0.015 },
 };
 
 export const COMMENTARY_TEMPLATES = {
@@ -143,14 +89,14 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const xi: Player[] = [];
     const selectedIds = new Set<string>();
     
-    // Strict rule: No foreign players in ODI and SHIELD (First Class)
-    const isDomesticOnly = [Format.ODI, Format.SHIELD].includes(format);
-    const MAX_FOREIGN_IN_XI = isDomesticOnly ? 0 : 4; 
+    // Limits for Playing XI: Min 2, Max 4 foreign
     let foreignInXI = 0;
+    const sortedSquad = [...squad].sort((a,b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill));
 
     const addPlayer = (p: Player) => {
         if (selectedIds.has(p.id)) return false;
-        if (p.isForeign && foreignInXI >= MAX_FOREIGN_IN_XI) return false;
+        // Check foreign constraints
+        if (p.isForeign && foreignInXI >= 4) return false;
         
         xi.push(p);
         selectedIds.add(p.id);
@@ -158,113 +104,37 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
         return true;
     };
 
-    // Sort squad by overall quality for the format
-    const sortedSquad = [...squad].sort((a, b) => {
-        const scoreA = Math.max(a.battingSkill, a.secondarySkill);
-        const scoreB = Math.max(b.battingSkill, b.secondarySkill);
-        return scoreB - scoreA;
-    });
-
-    // 1. Must have exactly 1 Wicket Keeper (Best batting keeper)
-    const keepers = sortedSquad.filter(p => p.role === PlayerRole.WICKET_KEEPER);
-    if (keepers.length > 0) addPlayer(keepers[0]);
-
-    // 2. Ensure at least one Emerging Player (if available)
-    const emerging = sortedSquad.filter(p => p.isEmerging);
-    if (emerging.length > 0) {
-        addPlayer(emerging[0]);
+    // 1. Ensure at least 2 foreign if available
+    const foreignPool = sortedSquad.filter(p => p.isForeign);
+    if (foreignPool.length >= 2) {
+        addPlayer(foreignPool[0]);
+        addPlayer(foreignPool[1]);
+    } else {
+        foreignPool.forEach(p => addPlayer(p));
     }
 
-    // 3. Must have 5 Batters (Best available)
-    const batters = sortedSquad.filter(p => p.role === PlayerRole.BATSMAN);
-    let bCount = 0;
-    for (const p of batters) {
-        if (bCount < 5) {
-            if (addPlayer(p)) bCount++;
-        } else break;
+    // 2. Must have a Wicket Keeper
+    const keeper = sortedSquad.find(p => p.role === PlayerRole.WICKET_KEEPER && !selectedIds.has(p.id));
+    if (keeper) addPlayer(keeper);
+
+    // 3. Fill the rest with best remaining available following limits
+    for (const p of sortedSquad) {
+        if (xi.length >= 11) break;
+        addPlayer(p);
     }
 
-    // 3. Must have 1 or 2 All-Rounders
-    const allRounders = sortedSquad.filter(p => p.role === PlayerRole.ALL_ROUNDER);
-    let arCount = 0;
-    for (const p of allRounders) {
-        if (xi.length < 11 && arCount < 2) {
-            if (addPlayer(p)) arCount++;
-        } else break;
-    }
-
-    // 4. Must have 3 or 4 Bowlers (Fast or Spin)
-    const bowlers = sortedSquad.filter(p => 
-        [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER].includes(p.role)
-    );
-    let bowlingCount = 0;
-    for (const p of bowlers) {
-        if (xi.length < 11 && bowlingCount < 4) {
-            if (addPlayer(p)) bowlingCount++;
-        } else break;
-    }
-
-    // 5. Emergency fill if rules were too strict or squad is small
-    const remainingBest = sortedSquad.filter(p => !selectedIds.has(p.id));
-    for (const p of remainingBest) {
-        if (xi.length < 11) {
-            addPlayer(p);
-        } else break;
-    }
-
-    // Sort XI for a realistic batting order: Openers -> Batters -> ARs -> Bowlers
-    return xi.sort((a, b) => {
-        const roleOrder = {
-            [PlayerRole.BATSMAN]: 1,
-            [PlayerRole.WICKET_KEEPER]: 2,
-            [PlayerRole.ALL_ROUNDER]: 3,
-            [PlayerRole.SPIN_BOWLER]: 4,
-            [PlayerRole.FAST_BOWLER]: 5,
-        };
-        // Openers first
-        if (a.isOpener && !b.isOpener) return -1;
-        if (!a.isOpener && b.isOpener) return 1;
-        
-        // Then by role order
-        if (roleOrder[a.role] !== roleOrder[b.role]) {
-            return roleOrder[a.role] - roleOrder[b.role];
+    // 4. Final emergency fill (ignores foreign limit if squad is somehow depleted)
+    if (xi.length < 11) {
+        for (const p of sortedSquad) {
+            if (xi.length >= 11) break;
+            if (!selectedIds.has(p.id)) {
+                xi.push(p);
+                selectedIds.add(p.id);
+            }
         }
-        
-        // Then by batting skill
-        return b.battingSkill - a.battingSkill;
-    }).slice(0, 11);
-};
+    }
 
-export const calculateTeamRatings = (squad: Player[]) => {
-    if (squad.length === 0) return { strength: 0, batting: 0, bowling: 0, starPlayers: 0 };
-    
-    const top11 = [...squad].sort((a, b) => Math.max(b.battingSkill, b.secondarySkill) - Math.max(a.battingSkill, a.secondarySkill)).slice(0, 11);
-    
-    const battingAvg = top11.reduce((sum, p) => sum + p.battingSkill, 0) / 11;
-    const bowlingAvg = top11.reduce((sum, p) => sum + p.secondarySkill, 0) / 11;
-    const strength = (battingAvg * 0.5) + (bowlingAvg * 0.5);
-    const starPlayers = squad.filter(p => Math.max(p.battingSkill, p.secondarySkill) >= 80).length;
-    
-    return {
-        strength: Math.round(strength),
-        batting: Math.round(battingAvg),
-        bowling: Math.round(bowlingAvg),
-        starPlayers
-    };
-};
-
-export const getTeamHighlights = (squad: Player[]) => {
-    if (squad.length === 0) return null;
-    
-    const bestBatter = [...squad].sort((a, b) => b.battingSkill - a.battingSkill)[0];
-    const bestBowler = [...squad].sort((a, b) => b.secondarySkill - a.secondarySkill)[0];
-    const mostComplete = [...squad].sort((a, b) => (b.battingSkill + b.secondarySkill) - (a.battingSkill + a.secondarySkill))[0];
-    
-    return {
-        bestBatter,
-        bestBowler,
-        mostComplete
-    };
+    return xi.slice(0, 11);
 };
 
 export const getBatterTier = (battingSkill: number) => {
@@ -300,7 +170,7 @@ const FC_PROFILES = {
 export const BATTING_PROFILES = {
   [Format.T20]: T20_PROFILES,
   [Format.ODI]: ODI_PROFILES,
-  [Format.SHIELD]: FC_PROFILES,
+  [Format.FIRST_CLASS]: FC_PROFILES,
 };
 
 export const LoadingSpinner = () => (
@@ -360,7 +230,6 @@ export const generateLeagueSchedule = (teams: Team[], format: Format, doubleRoun
     const matches: Match[] = [];
     if (teams.length < 2) return [];
 
-    // Basic round-robin pairs
     const pairs: [Team, Team][] = [];
     for(let i=0; i<teams.length; i++) {
         for(let j=i+1; j<teams.length; j++) {
@@ -368,7 +237,6 @@ export const generateLeagueSchedule = (teams: Team[], format: Format, doubleRoun
         }
     }
 
-    // Add matches
     let matchCounter = 1;
     pairs.forEach(([tA, tB]) => {
         matches.push({ matchNumber: matchCounter++, teamA: tA.name, teamAId: tA.id, vs: 'vs', teamB: tB.name, teamBId: tB.id, date: `Match Day ${matchCounter}`, group: 'Round-Robin' });
@@ -380,14 +248,9 @@ export const generateLeagueSchedule = (teams: Team[], format: Format, doubleRoun
         });
     }
 
-    // Add knockouts
-    if (teams.length >= 4) {
-        matches.push({ matchNumber: 'SF1', teamA: '1st', vs: 'vs', teamB: '4th', date: 'Semi-Final Day', group: 'Semi-Finals' });
-        matches.push({ matchNumber: 'SF2', teamA: '2nd', vs: 'vs', teamB: '3rd', date: 'Semi-Final Day', group: 'Semi-Finals' });
-        matches.push({ matchNumber: 'Final', teamA: 'SF1 Winner', vs: 'vs', teamB: 'SF2 Winner', date: 'Finals Day', group: 'Final' });
-    } else if (teams.length >= 2) {
-        matches.push({ matchNumber: 'Final', teamA: '1st', vs: 'vs', teamB: '2nd', date: 'Finals Day', group: 'Final' });
-    }
+    matches.push({ matchNumber: 'SF1', teamA: '1st', vs: 'vs', teamB: '4th', date: 'Semi-Final Day', group: 'Semi-Finals' });
+    matches.push({ matchNumber: 'SF2', teamA: '2nd', vs: 'vs', teamB: '3rd', date: 'Semi-Final Day', group: 'Semi-Finals' });
+    matches.push({ matchNumber: 'Final', teamA: 'SF1 Winner', vs: 'vs', teamB: 'SF2 Winner', date: 'Finals Day', group: 'Final' });
 
     return matches;
 };
@@ -418,3 +281,7 @@ export const calculatePlayerRankings = (players: Player[], format: Format, teams
     const scoredPlayers = players.map(p => ({ player: p, points: p.stats[format]?.runs || 0, teamName: "Team" }));
     return { batters: scoredPlayers, bowlers: scoredPlayers, allRounders: scoredPlayers };
 };
+
+// Re-export from other utility files for convenience
+export * from './avatarUtils';
+export * from './simulationLogic';

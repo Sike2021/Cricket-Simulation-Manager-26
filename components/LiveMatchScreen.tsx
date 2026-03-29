@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { Match, GameData, MatchResult, Strategy, LiveMatchState, Player, Ground, Message, Format } from '../types';
+import { motion, AnimatePresence } from 'motion/react';
+import { Match, GameData, MatchResult, Strategy, LiveMatchState, Player, Ground, Message, Format } from '@/types';
 import { useLiveMatch } from '../hooks/useLiveMatch';
 import { Icons } from './Icons';
 import { TV_CHANNELS, INITIAL_SPONSORSHIPS, TOURNAMENT_LOGOS } from '../data';
@@ -34,11 +35,14 @@ const StrategyToggle = ({ label, value, onChange }: { label: string, value: Stra
     </div>
 );
 
-const PreMatchPanel = ({ match, gameData, onStart }: { match: Match, gameData: GameData, onStart: () => void }) => {
+const PreMatchPanel = ({ match, gameData, onStart, state, setBattingStrategy, setBowlingStrategy, setBattingIntensity, setBowlingIntensity }: { match: Match, gameData: GameData, onStart: () => void, state: LiveMatchState, setBattingStrategy: (s: Strategy) => void, setBowlingStrategy: (s: Strategy) => void, setBattingIntensity: (v: number) => void, setBowlingIntensity: (v: number) => void }) => {
     const sponsorship = gameData.sponsorships?.[gameData.currentFormat] || INITIAL_SPONSORSHIPS[gameData.currentFormat];
     const teamA = gameData.teams.find(t => t.name === match.teamA);
     const teamB = gameData.teams.find(t => t.name === match.teamB);
     const ground = gameData.grounds.find(g => g.code === (gameData.allTeamsData.find(t => t.name === match.teamA)?.homeGround || 'KCG'));
+    
+    const tossWinner = gameData.teams.find(t => t.id === state.tossWinnerId);
+    const decision = state.tossDecision;
     
     const getWeatherIcon = (w?: string) => {
         switch(w) {
@@ -64,7 +68,7 @@ const PreMatchPanel = ({ match, gameData, onStart }: { match: Match, gameData: G
                 <div className={`w-20 h-12 opacity-60`} dangerouslySetInnerHTML={{__html: sponsorship.tvLogo || ''}}></div>
             </header>
 
-            <div className="flex-grow flex flex-col justify-center space-y-16 py-8">
+            <div className="flex-grow flex flex-col justify-center space-y-12 py-8">
                 <div className="flex items-center justify-between px-4 max-w-4xl mx-auto w-full">
                     <motion.div 
                         initial={{ x: -100, opacity: 0 }}
@@ -108,26 +112,98 @@ const PreMatchPanel = ({ match, gameData, onStart }: { match: Match, gameData: G
                     </motion.div>
                 </div>
 
-                <div className="glass-card p-8 mx-auto w-full max-w-2xl relative overflow-hidden">
+                <div className="glass-card p-8 mx-auto w-full max-w-3xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500/0 via-teal-500 to-teal-500/0 opacity-50" />
-                    <div className="flex justify-between items-center mb-8">
-                        <span className="v2-label tracking-[0.3em]">VENUE_CONDITIONS // {ground?.name || 'STADIUM'}</span>
-                        <div className="flex gap-2">
-                            {[1,2,3].map(i => <div key={i} className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />)}
+                    
+                    <div className="grid grid-cols-2 gap-8">
+                        {/* Left Column: Venue & Toss */}
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                <span className="v2-label tracking-[0.3em]">VENUE_CONDITIONS // {ground?.name || 'STADIUM'}</span>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                        <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Pitch</p>
+                                        <p className="text-sm font-bold text-teal-400 italic">{ground?.pitch}</p>
+                                    </div>
+                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                        <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Weather</p>
+                                        <p className="text-sm font-bold text-white italic flex items-center gap-2">
+                                            {getWeatherIcon(ground?.weather)} {ground?.weather || 'Clear'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-teal-500/5 p-6 rounded-3xl border border-teal-500/20">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <Icons.Coins className="text-teal-400" size={16} />
+                                    <p className="v2-label text-teal-400 tracking-[0.2em] text-[10px]">TOSS_RESULT</p>
+                                </div>
+                                <p className="text-lg font-black italic text-white uppercase tracking-tighter">
+                                    {tossWinner?.name} won the toss and elected to {decision} first.
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="bg-white/5 p-6 rounded-3xl border border-white/5 hover:border-teal-500/30 transition-colors group">
-                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2 group-hover:text-teal-400/50 transition-colors">Pitch Report</p>
-                            <p className="text-xl font-bold text-teal-400 italic tracking-tight">{ground?.pitch}</p>
-                            <p className="text-[11px] text-white/20 mt-2 uppercase tracking-tighter">Favors {ground?.pitch.includes('Spin') ? 'Spin' : ground?.pitch.includes('Green') ? 'Pace' : 'Batting'}</p>
-                        </div>
-                        <div className="bg-white/5 p-6 rounded-3xl border border-white/5 hover:border-teal-500/30 transition-colors group">
-                            <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2 group-hover:text-teal-400/50 transition-colors">Weather</p>
-                            <p className="text-xl font-bold flex items-center gap-3 text-white italic tracking-tight">
-                                <span className="text-2xl">{getWeatherIcon(ground?.weather)}</span> {ground?.weather || 'Clear'}
-                            </p>
-                            <p className="text-[11px] text-white/20 mt-2 uppercase tracking-tighter">{ground?.outfieldSpeed || 'Medium'} Outfield Speed</p>
+
+                        {/* Right Column: Initial Tactics */}
+                        <div className="space-y-6">
+                            <span className="v2-label tracking-[0.3em]">INITIAL_TACTICS // STRATEGY</span>
+                            
+                            <div className="space-y-6">
+                                {/* Batting Tactics */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Batting Approach</p>
+                                        <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">{state.battingIntensity}%</span>
+                                    </div>
+                                    <div className="flex bg-white/5 rounded-xl p-1 gap-1 border border-white/10 mb-2">
+                                        {(['defensive', 'balanced', 'attacking'] as Strategy[]).map(s => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setBattingStrategy(s)}
+                                                className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${state.strategies.batting === s ? 'bg-teal-500 text-black' : 'text-slate-500 hover:text-white'}`}
+                                            >
+                                                {s.slice(0,3)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="1" 
+                                        max="100" 
+                                        value={state.battingIntensity} 
+                                        onChange={(e) => setBattingIntensity(parseInt(e.target.value))}
+                                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                                    />
+                                </div>
+
+                                {/* Bowling Tactics */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Bowling Approach</p>
+                                        <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">{state.bowlingIntensity}%</span>
+                                    </div>
+                                    <div className="flex bg-white/5 rounded-xl p-1 gap-1 border border-white/10 mb-2">
+                                        {(['defensive', 'balanced', 'attacking'] as Strategy[]).map(s => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setBowlingStrategy(s)}
+                                                className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${state.strategies.bowling === s ? 'bg-teal-500 text-black' : 'text-slate-500 hover:text-white'}`}
+                                            >
+                                                {s.slice(0,3)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="1" 
+                                        max="100" 
+                                        value={state.bowlingIntensity} 
+                                        onChange={(e) => setBowlingIntensity(parseInt(e.target.value))}
+                                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -249,7 +325,7 @@ const MatchChat = ({ gameData, onClose }: { gameData: GameData, onClose: () => v
 };
 
 const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMatchComplete, onExit, savedState }) => {
-    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay } = useLiveMatch(match, gameData, onMatchComplete, savedState);
+    const { state, playBall, playOver, autoSimulate, simulateInning, simulateMatch, setBattingStrategy, setBowlingStrategy, setBattingIntensity, setBowlingIntensity, selectOpeners, selectNextBatter, selectNextBowler, startMatch, beginMatch, declareInning, stopAutoPlay } = useLiveMatch(match, gameData, onMatchComplete, savedState);
     const commentaryRef = useRef<HTMLDivElement>(null);
     const [lastBallSpeed, setLastBallSpeed] = useState<string>("-");
     
@@ -462,7 +538,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
     };
 
     if (showPreMatch && state.status === 'ready') {
-        return <PreMatchPanel match={match} gameData={gameData} onStart={() => { setShowPreMatch(false); beginMatch(); }} />;
+        return <PreMatchPanel match={match} gameData={gameData} onStart={() => { setShowPreMatch(false); beginMatch(); }} state={state} setBattingStrategy={setBattingStrategy} setBowlingStrategy={setBowlingStrategy} setBattingIntensity={setBattingIntensity} setBowlingIntensity={setBowlingIntensity} />;
     }
 
     if (state.status === 'toss') {
@@ -669,7 +745,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                         <div className="w-32 h-1 bg-white/5 rounded-full mt-1 overflow-hidden">
                             <div 
                                 className="h-full bg-teal-500 transition-all duration-1000" 
-                                style={{ width: `${(ballsBowled / totalBalls) * 100}%` }}
+                                style={{ width: `${((state.innings[state.currentInningIndex]?.ballsBowled || 0) / (state.match.totalBalls || 300)) * 100}%` }}
                             />
                         </div>
                     </div>
@@ -688,7 +764,7 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                     <Icons.MapPin size={16} className="text-teal-400" />
                     <div className="flex flex-col">
                         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Venue</span>
-                        <span className="text-[11px] font-black text-white uppercase tracking-tighter">{gameData.venue}</span>
+                        <span className="text-[11px] font-black text-white uppercase tracking-tighter">{state.match.venue || 'Neutral Ground'}</span>
                     </div>
                 </div>
                 <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center gap-3">
@@ -702,7 +778,9 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                     <Icons.Coins size={16} className="text-yellow-400" />
                     <div className="flex flex-col">
                         <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Toss</span>
-                        <span className="text-[11px] font-black text-white uppercase tracking-tighter">{gameData.tossWinner} chose to {gameData.tossDecision}</span>
+                        <span className="text-[11px] font-black text-white uppercase tracking-tighter">
+                            {gameData.teams.find(t => t.id === state.tossWinnerId)?.name || 'Toss'} chose to {state.tossDecision || 'bat'}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -1131,6 +1209,44 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                                             {s.slice(0,3)}
                                         </button>
                                     ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">BATTING_INTENSITY</span>
+                                    <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">{state.battingIntensity}%</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max="100" 
+                                    value={state.battingIntensity} 
+                                    onChange={(e) => setBattingIntensity(parseInt(e.target.value))}
+                                    className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                                />
+                                <div className="flex justify-between text-[8px] text-slate-600 font-bold uppercase tracking-widest">
+                                    <span>Defensive</span>
+                                    <span>Aggressive</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">BOWLING_INTENSITY</span>
+                                    <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">{state.bowlingIntensity}%</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max="100" 
+                                    value={state.bowlingIntensity} 
+                                    onChange={(e) => setBowlingIntensity(parseInt(e.target.value))}
+                                    className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                                />
+                                <div className="flex justify-between text-[8px] text-slate-600 font-bold uppercase tracking-widest">
+                                    <span>Containment</span>
+                                    <span>Wicket-Taking</span>
                                 </div>
                             </div>
 

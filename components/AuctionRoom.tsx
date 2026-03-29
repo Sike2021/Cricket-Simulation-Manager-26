@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Player, Team, GameData, PlayerRole, Format } from '../types';
 import { getRoleColor, getRoleFullName, aggregateStats } from '../utils';
 import { Icons } from './Icons';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../src/context/AppContext';
 
 const STARTING_PURSE = 100.0;
 const MAX_FOREIGN_LIMIT = 3; 

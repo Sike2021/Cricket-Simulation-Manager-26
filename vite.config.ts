@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
         tailwindcss(),
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+          includeAssets: [],
           manifest: {
             name: 'Cricket Manager 26',
             short_name: 'CM26',

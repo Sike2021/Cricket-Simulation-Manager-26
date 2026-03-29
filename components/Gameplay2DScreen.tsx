@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Info, Zap, Target, ChevronRight, Users } from 'lucide-react';
 import { Match, GameData, MatchResult, Team, Player, Inning, BattingPerformance, BowlingPerformance } from '../types';
 import { getPlayerById, formatOvers } from '../utils';
 
@@ -550,7 +552,7 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
                         <div className="h-8 w-px bg-white/10" />
                         <div className="flex flex-col text-right">
                             <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">MATCH_ID</span>
-                            <span className="text-[10px] font-black text-white/60 uppercase tracking-tighter italic">#{match.id.slice(0, 8)}</span>
+                            <span className="text-[10px] font-black text-white/60 uppercase tracking-tighter italic">#{String(match.matchNumber).slice(0, 8)}</span>
                         </div>
                      </div>
                 </div>

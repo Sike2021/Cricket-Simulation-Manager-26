@@ -15,6 +15,7 @@ export default function App() {
   const [userTeam, setUserTeam] = useState<Team>(TEAMS[0]);
   const [opponentTeam, setOpponentTeam] = useState<Team>(TEAMS[1]);
   const [gameStarted, setGameStarted] = useState(false);
+  const [showTeamSelect, setShowTeamSelect] = useState(false);
 
   const handleUpdatePlayer = (updatedPlayer: Player) => {
     setUserTeam(prev => ({
@@ -23,9 +24,14 @@ export default function App() {
     }));
   };
 
-  const startNewGame = () => {
+  const startNewGame = (selectedTeam: Team) => {
+    setUserTeam(selectedTeam);
+    // Pick a random opponent that isn't the user team
+    const otherTeams = TEAMS.filter(t => t.id !== selectedTeam.id);
+    setOpponentTeam(otherTeams[Math.floor(Math.random() * otherTeams.length)]);
     setGameStarted(true);
     setActiveTab('MATCH');
+    setShowTeamSelect(false);
   };
 
   return (
@@ -75,6 +81,13 @@ export default function App() {
             <div className="text-[10px] font-black uppercase tracking-widest text-ink/40">Active Team</div>
             <div className="text-sm font-bold">{userTeam.name}</div>
           </div>
+          <button 
+            onClick={() => setShowTeamSelect(true)}
+            className="p-3 bg-teal text-bg rounded-2xl hover:scale-105 transition-all shadow-lg glow-teal"
+            title="New Game"
+          >
+            <PlayCircle size={20} />
+          </button>
           <button className="p-3 bg-white/5 border border-border rounded-2xl hover:bg-white/10 transition-all">
             <Settings size={20} />
           </button>
@@ -131,6 +144,58 @@ export default function App() {
         </AnimatePresence>
       </main>
 
+      {/* Team Selection Modal */}
+      <AnimatePresence>
+        {showTeamSelect && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-bg/95 backdrop-blur-2xl p-6"
+          >
+            <div className="max-w-2xl w-full space-y-12">
+              <div className="text-center space-y-4">
+                <h2 className="text-6xl font-display tracking-tighter">Choose Your Side</h2>
+                <p className="text-ink/40 font-black uppercase tracking-widest text-xs">Select a team to begin your management career</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {TEAMS.map((team) => (
+                  <button
+                    key={team.id}
+                    onClick={() => startNewGame(team)}
+                    className="group relative bg-card-bg border border-border rounded-[40px] p-10 hover:border-teal transition-all hover:scale-105 text-left overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <Trophy size={120} />
+                    </div>
+                    <div className="relative z-10 space-y-6">
+                      <div className="w-20 h-20 bg-bg border border-border rounded-3xl flex items-center justify-center overflow-hidden shadow-2xl">
+                        <img src={team.logo} alt={team.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      </div>
+                      <div>
+                        <h4 className="text-3xl font-display tracking-tight leading-none mb-2">{team.name}</h4>
+                        <div className="flex gap-4">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-teal">Budget: ${(team.budget / 1000000).toFixed(1)}M</div>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-ink/40">Squad: {team.squad.length} Players</div>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => setShowTeamSelect(false)}
+                className="w-full py-4 text-ink/40 font-black uppercase tracking-widest text-xs hover:text-ink transition-colors"
+              >
+                Cancel Selection
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* New Game Overlay if not started */}
       {!gameStarted && activeTab === 'MATCH' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/90 backdrop-blur-xl p-6">
@@ -143,7 +208,7 @@ export default function App() {
               <p className="text-ink/60 font-medium">Your squad is prepared. Tactical settings are locked. Let's hit the field.</p>
             </div>
             <button 
-              onClick={startNewGame}
+              onClick={() => setShowTeamSelect(true)}
               className="w-full bg-teal text-bg py-6 rounded-[32px] font-black text-xl uppercase tracking-tighter shadow-2xl hover:scale-105 transition-all active:scale-95"
             >
               Start New Match

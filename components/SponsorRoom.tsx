@@ -272,16 +272,16 @@ const SponsorRoom: React.FC<SponsorRoomProps> = ({ gameData, setGameData }) => {
                                     <div>
                                         <label className="text-[10px] font-black opacity-40 uppercase tracking-widest mb-4 block">BRAND_IDENTITY_LOGO</label>
                                         <div className="flex flex-wrap gap-4">
-                                            {TOURNAMENT_LOGOS.map((logo, idx) => (
+                                            {TOURNAMENT_LOGOS.map((logoObj, idx) => (
                                                 <button
                                                     key={idx}
-                                                    onClick={() => handleSelectTournamentLogo(logo)}
+                                                    onClick={() => handleSelectTournamentLogo(logoObj.svg)}
                                                     className={`w-16 h-16 rounded-2xl border transition-all flex items-center justify-center p-3 ${
-                                                        sponsorship.tournamentLogo === logo 
+                                                        sponsorship.tournamentLogo === logoObj.svg 
                                                         ? 'border-teal-500 bg-teal-500/10' 
                                                         : 'border-white/5 bg-white/5 hover:border-white/20'
                                                     }`}
-                                                    dangerouslySetInnerHTML={{ __html: logo }}
+                                                    dangerouslySetInnerHTML={{ __html: logoObj.svg }}
                                                 />
                                             ))}
                                         </div>
@@ -293,7 +293,7 @@ const SponsorRoom: React.FC<SponsorRoomProps> = ({ gameData, setGameData }) => {
                                     <p className="text-[10px] font-mono text-white/20 uppercase tracking-[0.4em] mb-8 relative z-10">BROADCAST_PREVIEW</p>
                                     
                                     <div className="relative z-10 flex flex-col items-center text-center">
-                                        <div className="w-32 h-32 mb-8 drop-shadow-[0_0_30px_rgba(45,212,191,0.3)] transition-transform duration-700 group-hover:scale-110" dangerouslySetInnerHTML={{ __html: sponsorship.tournamentLogo }} />
+                                        <div className="w-32 h-32 mb-8 drop-shadow-[0_0_30px_rgba(45,212,191,0.3)] transition-transform duration-700 group-hover:scale-110" dangerouslySetInnerHTML={{ __html: sponsorship.tournamentLogo || '' }} />
                                         <h4 className="text-4xl font-black italic uppercase tracking-tighter leading-none mb-2">{sponsorship.tournamentName}</h4>
                                         <div className="flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
                                             <span className="text-[9px] font-black uppercase tracking-widest text-white/40">PRESENTED_BY</span>

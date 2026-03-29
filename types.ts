@@ -16,7 +16,7 @@ export enum PlayerRole {
 export type BattingStyle = 'A' | 'D' | 'N' | 'NA';
 export type Strategy = 'defensive' | 'balanced' | 'attacking';
 export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB';
-export type CareerScreen = 'DASHBOARD' | 'LEAGUES' | 'LINEUPS' | 'EDITOR' | 'NEWS' | 'STATS' | 'SETTINGS' | 'PLAYER_PROFILE' | 'MATCH_RESULT' | 'FORWARD_RESULTS' | 'AWARDS_RECORDS' | 'TRANSFERS' | 'END_OF_FORMAT' | 'COMPARISON' | 'SCHEDULE' | 'LIVE_MATCH' | 'SPONSOR_ROOM' | 'CUSTOMIZATION' | 'SELECT_PLAYER_FOR_COMPARISON_SLOT_1' | 'SELECT_PLAYER_FOR_COMPARISON_SLOT_2' | 'AUCTION_ROOM' | 'RETENTION' | 'PLAYER_DATABASE' | 'SEASON_SUMMARY' | 'RATING_BOARD' | 'GAMEPLAY_TACTICS';
+export type CareerScreen = 'DASHBOARD' | 'LEAGUES' | 'LINEUPS' | 'EDITOR' | 'NEWS' | 'STATS' | 'SETTINGS' | 'PLAYER_PROFILE' | 'MATCH_RESULT' | 'FORWARD_RESULTS' | 'AWARDS_RECORDS' | 'TRANSFERS' | 'END_OF_FORMAT' | 'COMPARISON' | 'SCHEDULE' | 'LIVE_MATCH' | 'SPONSOR_ROOM' | 'CUSTOMIZATION' | 'SELECT_PLAYER_FOR_COMPARISON_SLOT_1' | 'SELECT_PLAYER_FOR_COMPARISON_SLOT_2' | 'AUCTION_ROOM' | 'RETENTION' | 'PLAYER_DATABASE' | 'SEASON_SUMMARY' | 'RATING_BOARD';
 
 export interface PlayerStats {
     matches: number; runs: number; highestScore: number; average: number; strikeRate: number; ballsFaced: number; dismissals: number;
@@ -32,6 +32,15 @@ export interface PlayerPerformanceSummary {
     matchId: string;
 }
 
+export interface PlayerAvatar {
+    faceShape: string;
+    skinColor: string;
+    hairStyle: string;
+    hairColor: string;
+    facialHair: string;
+    photoUrl?: string;
+}
+
 export interface Player {
     id: string; name: string; nationality: string; role: PlayerRole; battingSkill: number; secondarySkill: number;
     style: BattingStyle; isOpener: boolean; isForeign: boolean; teamName?: string;
@@ -42,6 +51,7 @@ export interface Player {
     customProfiles?: { [key in Format]?: { avg: number; sr: number } };
     stats: Record<Format, PlayerStats>;
     recentPerformances: PlayerPerformanceSummary[];
+    avatar?: PlayerAvatar;
 }
 
 export interface Team {

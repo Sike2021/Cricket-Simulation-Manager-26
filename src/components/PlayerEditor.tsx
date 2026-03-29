@@ -100,35 +100,30 @@ export default function PlayerEditor({ player, onSave, onClose }: Props) {
               </div>
             </div>
 
-            <div className="space-y-4 pt-4">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold uppercase tracking-widest text-ink/40">Hair Style</span>
-                <div className="flex gap-2">
-                  {[0, 1, 2, 3, 4].map(i => (
-                    <button 
-                      key={i}
-                      onClick={() => setAvatar({ ...avatar, hairStyle: i, customPhoto: undefined })}
-                      className={`w-8 h-8 rounded-lg border ${avatar.hairStyle === i ? 'border-teal bg-teal/10' : 'border-border'}`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
+            <div className="space-y-4 pt-4 h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              {[
+                { label: 'Hair Style', key: 'hairStyle', range: [0, 1, 2, 3, 4] },
+                { label: 'Facial Hair', key: 'facialHair', range: [0, 1, 2, 3, 4] },
+                { label: 'Face Shape', key: 'faceShape', range: [0, 1, 2, 3, 4] },
+                { label: 'Eye Shape', key: 'eyeShape', range: [0, 1, 2, 3, 4] },
+                { label: 'Nose Shape', key: 'noseShape', range: [0, 1, 2, 3, 4] },
+                { label: 'Ear Shape', key: 'earShape', range: [0, 1, 2, 3, 4] },
+              ].map((item) => (
+                <div key={item.key} className="flex justify-between items-center">
+                  <span className="text-xs font-bold uppercase tracking-widest text-ink/40">{item.label}</span>
+                  <div className="flex gap-2">
+                    {item.range.map(i => (
+                      <button 
+                        key={i}
+                        onClick={() => setAvatar({ ...avatar, [item.key]: i, customPhoto: undefined })}
+                        className={`w-8 h-8 rounded-lg border text-[10px] font-bold ${avatar[item.key as keyof AvatarType] === i ? 'border-teal bg-teal/10 text-teal' : 'border-border text-ink/40'}`}
+                      >
+                        {i}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold uppercase tracking-widest text-ink/40">Facial Hair</span>
-                <div className="flex gap-2">
-                  {[0, 1, 2, 3, 4].map(i => (
-                    <button 
-                      key={i}
-                      onClick={() => setAvatar({ ...avatar, facialHair: i, customPhoto: undefined })}
-                      className={`w-8 h-8 rounded-lg border ${avatar.facialHair === i ? 'border-teal bg-teal/10' : 'border-border'}`}
-                    >
-                      {i}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

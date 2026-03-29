@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
     ArrowRightLeft, Users, User, Shield, Zap, Target, 
     Trophy, Activity, TrendingUp, ChevronRight, X, 
-    Search, Filter, BarChart3, Scale
+    Search, Filter, BarChart3, Scale, Info
 } from 'lucide-react';
 import { GameData, Format, Player, Team } from '../types';
 

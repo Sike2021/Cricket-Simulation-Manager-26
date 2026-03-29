@@ -5,7 +5,7 @@ import {
     ChevronRight, Check, Lock, Zap,
     Shield, BarChart3, History, Calendar,
     TrendingUp, DollarSign, Briefcase,
-    Info, AlertCircle, UserPlus, UserMinus
+    Info, AlertCircle, UserPlus, UserMinus, Globe
 } from 'lucide-react';
 import { GameData, Format, Player, Team } from '../types';
 import { getRoleFullName, getRoleColor } from '../utils';

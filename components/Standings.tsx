@@ -233,7 +233,7 @@ const Standings: React.FC<StandingsProps> = ({ gameData }) => {
                                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
                             >
                                 {schedule.map((match, idx) => {
-                                    const resolved = resolveMatch(match, gameData.teams);
+                                    const resolved = resolveMatch(match, gameData, selectedFormat);
                                     const result = gameData.matchResults[selectedFormat]?.find(r => r.matchNumber === match.matchNumber);
                                     return (
                                         <FixtureItem key={idx} match={match} resolved={resolved} result={result} />
