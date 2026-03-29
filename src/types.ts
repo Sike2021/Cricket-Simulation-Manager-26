@@ -9,6 +9,16 @@ export interface Player {
   fitness: number;
   form: number;
   value: number;
+  avatar?: {
+    type: 'svg' | 'photo';
+    url?: string; // For photo
+    svgConfig?: {
+      faceShape: string;
+      skinColor: string;
+      hairStyle: string;
+      facialHair: string;
+    };
+  };
   stats: {
     matches: number;
     runs: number;

@@ -1,60 +1,246 @@
-import { Team, Player, Match } from './types';
+import { Team, Player, Match, PlayerAvatar, PlayerRole, PlayerStats } from './types';
+
+export const generateSingleFormatInitialStats = (): PlayerStats => ({
+  matches: 0,
+  runs: 0,
+  ballsFaced: 0,
+  dismissals: 0,
+  highestScore: 0,
+  hundreds: 0,
+  fifties: 0,
+  thirties: 0,
+  fours: 0,
+  sixes: 0,
+  fastestFifty: 0,
+  fastestHundred: 0,
+  wickets: 0,
+  ballsBowled: 0,
+  runsConceded: 0,
+  threeWicketHauls: 0,
+  fiveWicketHauls: 0,
+  catches: 0,
+  runOuts: 0,
+  manOfTheMatchAwards: 0,
+  bestBowlingWickets: 0,
+  bestBowlingRuns: 0,
+  bestBowling: '0/0',
+  average: 0,
+  strikeRate: 0,
+  bowlingAverage: 0,
+  economy: 0,
+});
+
+export const BRANDS = [
+  { name: 'Nike', logo: '' },
+  { name: 'Adidas', logo: '' },
+  { name: 'Puma', logo: '' },
+];
+
+export const SPONSOR_THRESHOLDS = [100, 500, 1000];
+
+export const TV_CHANNELS = [
+  { name: 'Sky Sports', logo: 'Sky' },
+  { name: 'Star Sports', logo: 'Star' },
+];
+
+export const TOURNAMENT_LOGOS = [
+  { name: 'Default', svg: '<svg></svg>' },
+];
+
+const createRandomAvatar = (): PlayerAvatar => ({
+  faceShape: Math.floor(Math.random() * 5),
+  skinColor: ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642'][Math.floor(Math.random() * 5)],
+  hairStyle: Math.floor(Math.random() * 10),
+  hairColor: ['#000000', '#4B2C20', '#7B3F00', '#D4AF37'][Math.floor(Math.random() * 4)],
+  facialHair: Math.floor(Math.random() * 5),
+  eyeColor: ['#000000', '#4B2C20', '#0000FF', '#008000'][Math.floor(Math.random() * 4)],
+  eyeShape: Math.floor(Math.random() * 3),
+  noseShape: Math.floor(Math.random() * 3),
+  earShape: Math.floor(Math.random() * 3),
+});
+
+const generateEmptyStats = () => ({
+  matches: 0,
+  runs: 0,
+  wickets: 0,
+  average: 0,
+  strikeRate: 0,
+  formats: {},
+});
+
+export const GROUNDS = [
+  { id: 'g1', name: 'Wankhede Stadium', city: 'Mumbai', capacity: 33000, pitchType: 'Batting Paradise' },
+  { id: 'g2', name: 'Lord\'s Cricket Ground', city: 'London', capacity: 30000, pitchType: 'Green Top' },
+];
+
+export const INITIAL_SPONSORSHIPS = {};
+export const INITIAL_NEWS = [];
 
 export const PLAYERS: Player[] = [
   {
     id: 'p1',
     name: 'Virat Kohli',
-    role: 'Batsman',
+    role: PlayerRole.BATSMAN,
     batting: 95,
     bowling: 20,
     fitness: 98,
     form: 88,
     value: 15000000,
-    stats: { matches: 250, runs: 12000, wickets: 4, average: 58.5, strikeRate: 138.2 }
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 95,
+    secondarySkill: 20,
+    isForeign: false,
   },
   {
     id: 'p2',
     name: 'Jasprit Bumrah',
-    role: 'Bowler',
+    role: PlayerRole.BOWLER,
     batting: 15,
     bowling: 96,
     fitness: 92,
     form: 94,
     value: 12000000,
-    stats: { matches: 120, runs: 200, wickets: 250, average: 22.1, strikeRate: 18.5 }
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 15,
+    secondarySkill: 96,
+    isForeign: false,
   },
   {
     id: 'p3',
     name: 'Ben Stokes',
-    role: 'All-rounder',
+    role: PlayerRole.ALL_ROUNDER,
     batting: 88,
     bowling: 85,
     fitness: 85,
     form: 82,
     value: 14000000,
-    stats: { matches: 180, runs: 5000, wickets: 150, average: 35.2, strikeRate: 142.5 }
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 88,
+    secondarySkill: 85,
+    isForeign: true,
   },
   {
     id: 'p4',
     name: 'Rashid Khan',
-    role: 'Bowler',
+    role: PlayerRole.BOWLER,
     batting: 45,
     bowling: 94,
     fitness: 95,
     form: 90,
     value: 11000000,
-    stats: { matches: 150, runs: 800, wickets: 300, average: 18.2, strikeRate: 16.4 }
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 45,
+    secondarySkill: 94,
+    isForeign: true,
   },
   {
     id: 'p5',
     name: 'Jos Buttler',
-    role: 'Wicketkeeper',
+    role: PlayerRole.WICKET_KEEPER,
     batting: 92,
     bowling: 0,
     fitness: 90,
     form: 85,
     value: 13000000,
-    stats: { matches: 160, runs: 6000, wickets: 0, average: 42.5, strikeRate: 155.2 }
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 92,
+    secondarySkill: 0,
+    isForeign: true,
+  },
+  {
+    id: 'p6',
+    name: 'Nasir Jamshed',
+    role: PlayerRole.BATSMAN,
+    batting: 78,
+    bowling: 10,
+    fitness: 80,
+    form: 75,
+    value: 5000000,
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 78,
+    secondarySkill: 10,
+    isForeign: true,
+  },
+  {
+    id: 'p7',
+    name: 'Musa Khan',
+    role: PlayerRole.BOWLER,
+    batting: 20,
+    bowling: 82,
+    fitness: 88,
+    form: 80,
+    value: 4000000,
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 20,
+    secondarySkill: 82,
+    isForeign: false,
+  },
+  {
+    id: 'p8',
+    name: 'Brad Haddin',
+    role: PlayerRole.WICKET_KEEPER,
+    batting: 84,
+    bowling: 0,
+    fitness: 85,
+    form: 82,
+    value: 7000000,
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 84,
+    secondarySkill: 0,
+    isForeign: true,
+  },
+  {
+    id: 'p9',
+    name: 'Kane Williamson',
+    role: PlayerRole.BATSMAN,
+    batting: 91,
+    bowling: 15,
+    fitness: 94,
+    form: 86,
+    value: 11000000,
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 91,
+    secondarySkill: 15,
+    isForeign: true,
+  },
+  {
+    id: 'p10',
+    name: 'Trent Boult',
+    role: PlayerRole.BOWLER,
+    batting: 12,
+    bowling: 93,
+    fitness: 90,
+    form: 88,
+    value: 9500000,
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 12,
+    secondarySkill: 93,
+    isForeign: true,
+  },
+  {
+    id: 'p11',
+    name: 'Glenn Maxwell',
+    role: PlayerRole.ALL_ROUNDER,
+    batting: 87,
+    bowling: 78,
+    fitness: 92,
+    form: 84,
+    value: 12500000,
+    avatar: createRandomAvatar(),
+    stats: generateEmptyStats(),
+    battingSkill: 87,
+    secondarySkill: 78,
+    isForeign: true,
   }
 ];
 
@@ -65,13 +251,15 @@ export const TEAMS: Team[] = [
     shortName: 'MUM',
     logo: 'https://picsum.photos/seed/mumbai/100/100',
     color: '#004BA0',
-    squad: PLAYERS.slice(0, 3),
+    squad: [PLAYERS[0], PLAYERS[1], PLAYERS[2], PLAYERS[5], PLAYERS[6], PLAYERS[7], PLAYERS[8], PLAYERS[9], PLAYERS[10]],
     budget: 50000000,
     points: 12,
     played: 8,
     won: 6,
     lost: 2,
-    nrr: 1.25
+    nrr: 1.25,
+    purse: 50000000,
+    captains: {},
   },
   {
     id: 't2',
@@ -79,13 +267,15 @@ export const TEAMS: Team[] = [
     shortName: 'LDN',
     logo: 'https://picsum.photos/seed/london/100/100',
     color: '#D71920',
-    squad: PLAYERS.slice(3, 5),
+    squad: [PLAYERS[3], PLAYERS[4]],
     budget: 45000000,
     points: 10,
     played: 8,
     won: 5,
     lost: 3,
-    nrr: 0.85
+    nrr: 0.85,
+    purse: 45000000,
+    captains: {},
   }
 ];
 

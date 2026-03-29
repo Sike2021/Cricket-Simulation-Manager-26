@@ -1,15 +1,16 @@
 import React from 'react';
-import { Player } from '../types';
+import { Player, PlayerRole } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import PlayerAvatar from './PlayerAvatar';
 
 export default function Stats({ players }: { players: Player[] }) {
   const battingData = players
-    .filter(p => p.role !== 'Bowler')
+    .filter(p => p.role !== PlayerRole.BOWLER)
     .map(p => ({ name: p.name, runs: p.stats.runs }))
     .sort((a, b) => b.runs - a.runs);
 
   const bowlingData = players
-    .filter(p => p.role !== 'Batsman')
+    .filter(p => p.role !== PlayerRole.BATSMAN)
     .map(p => ({ name: p.name, wickets: p.stats.wickets }))
     .sort((a, b) => b.wickets - a.wickets);
 
@@ -96,8 +97,13 @@ export default function Stats({ players }: { players: Player[] }) {
             {players.map(player => (
               <tr key={player.id} className="group hover:bg-white/5 transition-colors">
                 <td className="py-4">
-                  <div className="font-bold">{player.name}</div>
-                  <div className="text-xs text-ink/40">{player.role}</div>
+                  <div className="flex items-center gap-4">
+                    <PlayerAvatar avatar={player.avatar} size="md" />
+                    <div>
+                      <div className="font-bold">{player.name}</div>
+                      <div className="text-xs text-ink/40">{player.role}</div>
+                    </div>
+                  </div>
                 </td>
                 <td className="py-4 font-mono">{player.stats.matches}</td>
                 <td className="py-4 font-mono">{player.stats.runs}</td>

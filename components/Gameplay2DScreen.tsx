@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Info, Zap, Target, ChevronRight, Users } from 'lucide-react';
 import { Match, GameData, MatchResult, Team, Player, Inning, BattingPerformance, BowlingPerformance } from '../types';
 import { getPlayerById, formatOvers } from '../utils';
 
@@ -421,87 +423,99 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
     const projScore = currentInning ? Math.round(currentInning.score + (currentInning.score / (parseFloat(currentInning.overs) || 1)) * (20 - parseFloat(currentInning.overs))) : 0;
 
     return (
-        <div className="flex flex-col h-full bg-black text-white select-none overflow-hidden relative font-sans italic tracking-tighter">
+        <div className="flex flex-col h-full bg-[#050808] text-[#E4E3E0] select-none overflow-hidden relative font-sans italic tracking-tighter">
             <style>{`
                 .slanted-box { clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 0% 100%); }
                 .slanted-divider { clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%); }
-                .over-history-dot { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; }
-                .scorebar-gradient { background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(20,20,20,1) 100%); }
-                .team-bg-pink { background: linear-gradient(135deg, #f13b5e 0%, #c02444 100%); }
+                .over-history-dot { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; font-family: monospace; }
+                .scorebar-gradient { background: linear-gradient(180deg, rgba(10,15,15,0.95) 0%, rgba(5,8,8,1) 100%); }
+                .team-bg-broadcast { background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%); }
+                .glass-scorebar { background: rgba(10, 15, 15, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
             `}</style>
 
             {/* Field View (Video Content Emulation) */}
-            <div className="flex-1 relative bg-[#1c2e17] flex justify-center">
-                <canvas ref={canvasRef} width={FIELD_WIDTH} height={FIELD_HEIGHT} className="h-full w-auto object-contain cursor-crosshair touch-none"
+            <div className="flex-1 relative bg-[#0a0f0a] flex justify-center overflow-hidden">
+                {/* Ambient Glows */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-teal-500/5 to-transparent pointer-events-none" />
+                
+                <canvas ref={canvasRef} width={FIELD_WIDTH} height={FIELD_HEIGHT} className="h-full w-auto object-contain cursor-crosshair touch-none relative z-10"
                     onMouseDown={handleDrag} onMouseMove={handleDrag} onMouseUp={() => game.current.draggedFielder = null}
                     onTouchStart={handleDrag} onTouchMove={handleDrag} onTouchEnd={() => game.current.draggedFielder = null}
                 />
                 
                 {/* Score Overlays (SIX, FOUR, OUT) */}
-                {ballPhase === 'boundary' && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-ping z-50">
-                        <div className="bg-pink-600 text-white font-black text-7xl px-12 py-6 border-8 border-white skew-x-[-12deg] shadow-[0_0_40px_rgba(241,59,94,0.8)]">
-                            {commentary[0]?.startsWith('SIX') ? 'SIX!' : 'FOUR!'}
-                        </div>
-                    </div>
-                )}
+                <AnimatePresence>
+                    {ballPhase === 'boundary' && (
+                        <motion.div 
+                            initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                            animate={{ scale: 1, opacity: 1, rotate: -5 }}
+                            exit={{ scale: 1.5, opacity: 0 }}
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
+                        >
+                            <div className="bg-teal-500 text-black font-black text-8xl px-16 py-8 border-8 border-white italic uppercase tracking-tighter shadow-[0_0_60px_rgba(45,212,191,0.6)] transform -skew-x-12">
+                                {commentary[0]?.startsWith('SIX') ? 'SIX!' : 'FOUR!'}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                {/* BROADCAST SCOREBAR (BOTTOM LEFT) */}
-                <div className="absolute bottom-10 left-0 w-full px-4 flex justify-start pointer-events-none z-40">
-                    <div className="flex items-end drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+                {/* BROADCAST SCOREBAR (BOTTOM LEFT) - V2.0 Style */}
+                <div className="absolute bottom-8 left-0 w-full px-8 flex justify-start pointer-events-none z-40">
+                    <div className="flex items-end drop-shadow-[0_8px_24px_rgba(0,0,0,0.8)]">
                         {/* Team Indicator & Main Score */}
                         <div className="flex flex-col">
-                            <div className="team-bg-pink slanted-box h-12 flex flex-col justify-center px-4 pr-10 min-w-[140px]">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-5 h-5 bg-white/20 rounded p-0.5" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === battingTeam?.id)?.logo || ''}}></div>
-                                    <span className="text-3xl font-black text-white italic leading-none">{currentInning?.score} {'-'} {currentInning?.wickets}</span>
+                            <div className="team-bg-broadcast slanted-box h-14 flex flex-col justify-center px-6 pr-12 min-w-[160px] relative overflow-hidden">
+                                <div className="absolute inset-0 bg-white/10 animate-pulse opacity-20" />
+                                <div className="flex items-center gap-3 relative z-10">
+                                    <div className="w-6 h-6 bg-black/20 rounded-lg p-1 border border-white/10" dangerouslySetInnerHTML={{__html: gameData.allTeamsData.find(t => t.id === battingTeam?.id)?.logo || ''}}></div>
+                                    <span className="text-4xl font-black text-black italic leading-none tracking-tighter">{currentInning?.score} <span className="text-black/40">-</span> {currentInning?.wickets}</span>
                                 </div>
                             </div>
-                            <div className="bg-black/90 slanted-box h-6 flex items-center px-3 pr-8 border-l-4 border-pink-500 mt-[-4px]">
-                                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mr-2">OVERS</span>
-                                <span className="text-xs font-black text-white">{currentInning?.overs}</span>
+                            <div className="bg-black/95 slanted-box h-7 flex items-center px-4 pr-10 border-l-4 border-teal-500 mt-[-4px]">
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mr-3">OVERS</span>
+                                <span className="text-sm font-black text-white font-mono italic">{currentInning?.overs}</span>
                             </div>
                         </div>
 
                         {/* Player Pods (Joined) */}
-                        <div className="flex scorebar-gradient h-12 ml-[-12px] border-b-4 border-pink-600">
+                        <div className="flex glass-scorebar h-14 ml-[-16px] border-b-4 border-teal-500/50 rounded-tr-2xl">
                             {/* Striker Pod */}
-                            <div className="flex flex-col justify-center px-6 min-w-[130px] border-r border-white/10">
-                                <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">{striker?.playerName.split(' ').pop()}</span>
-                                <div className="flex items-center gap-2 mt-[-2px]">
-                                    <span className="text-xl font-black text-pink-500 italic leading-none">{striker?.runs}</span>
-                                    <span className="text-[11px] font-bold text-zinc-400 mt-1">{striker?.balls}</span>
+                            <div className="flex flex-col justify-center px-8 min-w-[150px] border-r border-white/5 relative">
+                                <div className="absolute top-0 left-0 w-full h-0.5 bg-teal-500/30" />
+                                <span className="text-[10px] font-black text-white/40 uppercase italic tracking-widest mb-0.5">{striker?.playerName.split(' ').pop()}</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-2xl font-black text-teal-400 italic leading-none tracking-tighter">{striker?.runs}</span>
+                                    <span className="text-xs font-bold text-white/20 font-mono mt-1">({striker?.balls})</span>
                                 </div>
                             </div>
                             {/* Non-Striker Pod */}
-                            <div className="flex flex-col justify-center px-6 min-w-[130px] border-r border-white/10 opacity-60">
-                                <span className="text-[11px] font-black text-white uppercase italic tracking-tighter">{nonStriker?.playerName.split(' ').pop()}</span>
-                                <div className="flex items-center gap-2 mt-[-2px]">
-                                    <span className="text-xl font-black text-white italic leading-none">{nonStriker?.runs}</span>
-                                    <span className="text-[11px] font-bold text-zinc-400 mt-1">{nonStriker?.balls}</span>
+                            <div className="flex flex-col justify-center px-8 min-w-[150px] border-r border-white/5 opacity-40">
+                                <span className="text-[10px] font-black text-white/40 uppercase italic tracking-widest mb-0.5">{nonStriker?.playerName.split(' ').pop()}</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-2xl font-black text-white italic leading-none tracking-tighter">{nonStriker?.runs}</span>
+                                    <span className="text-xs font-bold text-white/20 font-mono mt-1">({nonStriker?.balls})</span>
                                 </div>
                             </div>
                             {/* Bowler Pod */}
-                            <div className="flex flex-col justify-center px-6 min-w-[130px] bg-pink-900/10">
-                                <span className="text-[11px] font-black text-pink-400 uppercase italic tracking-tighter">BOWLING</span>
-                                <div className="flex items-center gap-2 mt-[-2px]">
-                                    <span className="text-xl font-black text-white italic leading-none">{bowler?.wickets} {'-'} {bowler?.runsConceded}</span>
-                                    <span className="text-[10px] font-bold text-zinc-400 mt-1">({bowler?.overs})</span>
+                            <div className="flex flex-col justify-center px-8 min-w-[150px] bg-teal-500/5">
+                                <span className="text-[10px] font-black text-teal-500/60 uppercase italic tracking-widest mb-0.5">BOWLING</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-2xl font-black text-white italic leading-none tracking-tighter">{bowler?.wickets} <span className="text-white/20">-</span> {bowler?.runsConceded}</span>
+                                    <span className="text-[10px] font-bold text-white/20 font-mono mt-1">({bowler?.overs})</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Projection & History Pod */}
-                        <div className="flex bg-black/95 h-10 items-center px-6 ml-[-4px] self-end mb-[-4px]">
-                            <div className="flex flex-col mr-6">
-                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-tighter leading-none">PROJECTED</span>
-                                <span className="text-xs font-black text-white leading-none mt-0.5">CURRENT {projScore}</span>
+                        <div className="flex bg-black/95 h-12 items-center px-8 ml-[-4px] self-end mb-[-4px] rounded-tr-3xl border-t border-white/5">
+                            <div className="flex flex-col mr-8">
+                                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">PROJECTED</span>
+                                <span className="text-xs font-black text-teal-500 leading-none font-mono italic">{projScore}</span>
                             </div>
-                            <div className="flex gap-1.5 items-center">
-                                {/* Fix: Safe access to recentBalls which is now on Inning type */}
+                            <div className="flex gap-2 items-center">
                                 {[...currentInning?.recentBalls || []].slice(0, 6).reverse().map((b, i) => (
-                                    <div key={i} className={`over-history-dot ${b === '4' ? 'border-green-500 text-green-500' : b === '6' ? 'border-pink-500 text-pink-500' : b === 'W' ? 'bg-red-600 border-red-600 text-white' : 'text-zinc-300'}`}>
-                                        {b === '0' ? '●' : b}
+                                    <div key={i} className={`over-history-dot ${b === '4' ? 'border-orange-500 text-orange-500 bg-orange-500/10' : b === '6' ? 'border-teal-500 text-teal-500 bg-teal-500/10' : b === 'W' ? 'bg-red-600 border-red-600 text-white shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'text-white/40 bg-white/5'}`}>
+                                        {b === '0' ? '•' : b}
                                     </div>
                                 ))}
                             </div>
@@ -510,59 +524,143 @@ export const Gameplay2DScreen: React.FC<Gameplay2DScreenProps> = ({ match, gameD
                 </div>
             </div>
 
-            {/* Interaction Layer */}
-            <div className="bg-zinc-950 p-4 border-t border-white/5">
-                <div className="flex items-center justify-between mb-4">
-                     <div className="flex gap-2">
+            {/* Interaction Layer - V2.0 Style */}
+            <div className="bg-[#0a0f0f] p-6 border-t border-white/10 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                
+                <div className="flex items-center justify-between mb-6">
+                     <div className="flex gap-3">
                         {battingTeam?.id === gameData.userTeamId ? (
                             (['Defensive', 'Balanced', 'Attacking'] as Aggression[]).map(agg => (
-                                <button key={agg} onClick={() => setAggression(agg)} className={`px-4 py-1.5 text-[10px] font-black rounded-full uppercase transition-all ${aggression === agg ? 'bg-pink-600 text-white shadow-[0_0_15px_rgba(241,59,94,0.4)]' : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'}`}>{agg}</button>
+                                <button 
+                                    key={agg} 
+                                    onClick={() => setAggression(agg)} 
+                                    className={`px-6 py-2 text-[10px] font-black rounded-xl uppercase tracking-widest transition-all duration-300 ${aggression === agg ? 'bg-teal-500 text-black shadow-lg shadow-teal-500/20' : 'bg-white/5 text-white/40 hover:text-white/60 border border-white/5'}`}
+                                >
+                                    {agg}
+                                </button>
                             ))
-                        ) : <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-4">DRAG FIELDERS TO ADJUST POSITION</span>}
+                        ) : (
+                            <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/5">
+                                <Info className="w-3 h-3 text-teal-500" />
+                                <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">DRAG_FIELDERS_TO_ADJUST_POSITION</span>
+                            </div>
+                        )}
+                     </div>
+
+                     <div className="flex items-center gap-4">
+                        <div className="h-8 w-px bg-white/10" />
+                        <div className="flex flex-col text-right">
+                            <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest">MATCH_ID</span>
+                            <span className="text-[10px] font-black text-white/60 uppercase tracking-tighter italic">#{String(match.matchNumber).slice(0, 8)}</span>
+                        </div>
                      </div>
                 </div>
 
-                <div className="flex gap-3 h-16">
+                <div className="flex gap-4 h-20">
                     {ballPhase === 'dead' && !gameOver && !modalType && (
-                        <button onClick={startBall} className="flex-[3] bg-pink-600 hover:bg-pink-500 rounded-2xl font-black text-2xl italic tracking-tighter shadow-2xl transition-transform active:scale-95 animate-pulse flex items-center justify-center gap-2">
-                            {battingTeam?.id === gameData.userTeamId ? "PLAY BALL" : "BOWL OVER"}
+                        <button 
+                            onClick={startBall} 
+                            className="flex-[4] bg-teal-500 hover:bg-teal-400 rounded-[24px] font-black text-3xl italic tracking-tighter text-black shadow-2xl shadow-teal-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-4 group"
+                        >
+                            {battingTeam?.id === gameData.userTeamId ? (
+                                <>
+                                    <Zap className="w-6 h-6 fill-current" />
+                                    PLAY_BALL
+                                </>
+                            ) : (
+                                <>
+                                    <Target className="w-6 h-6" />
+                                    BOWL_OVER
+                                </>
+                            )}
+                            <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                         </button>
                     )}
-                    <button onClick={onExit} className="flex-1 bg-zinc-800 hover:bg-red-950 rounded-2xl font-black text-xs text-zinc-400 transition-colors uppercase tracking-widest">Quit</button>
+                    <button 
+                        onClick={onExit} 
+                        className="flex-1 bg-white/5 hover:bg-red-500/10 border border-white/5 hover:border-red-500/30 rounded-[24px] font-black text-[10px] text-white/40 hover:text-red-500 transition-all uppercase tracking-[0.3em]"
+                    >
+                        ABANDON
+                    </button>
                 </div>
             </div>
 
-            {/* Professional Styled Selection Modals */}
-            {modalType && (
-                <div className="absolute inset-0 bg-black/95 z-[100] flex items-center justify-center p-8 backdrop-blur-md">
-                    <div className="w-full max-w-sm bg-zinc-900 p-8 rounded-[40px] border-2 border-pink-500/20 shadow-[0_0_60px_rgba(241,59,94,0.15)]">
-                        <h3 className="text-2xl font-black text-center mb-8 text-white uppercase italic tracking-tighter leading-none border-b border-white/5 pb-4">
-                            {modalType === 'openers' ? 'SELECT OPENING DUO' : modalType === 'batter' ? 'NEW BATTER' : 'CHANGE BOWLER'}
-                        </h3>
-                        <div className="space-y-4">
-                            <select className="w-full p-4 bg-zinc-800 rounded-2xl border-none text-white font-bold text-sm focus:ring-2 focus:ring-pink-500 appearance-none" value={selectedModalId} onChange={e => setSelectedModalId(e.target.value)}>
-                                <option value="">{modalType === 'bowler' ? 'CHOOSE BOWLER' : 'CHOOSE BATSMAN'}</option>
-                                {modalType === 'bowler' ? 
-                                    inningsState[currentInningIndex].bowling.filter(p => p.playerId !== bowlerId).map(p => <option key={p.playerId} value={p.playerId}>{p.playerName.toUpperCase()} ({p.overs})</option>) :
-                                    inningsState[currentInningIndex].batting.filter(p => !p.isOut && p.playerId !== nonStrikerId).map(p => <option key={p.playerId} value={p.playerId}>{p.playerName.toUpperCase()}</option>)
-                                }
-                            </select>
-                            {modalType === 'openers' && (
-                                <select className="w-full p-4 bg-zinc-800 rounded-2xl border-none text-white font-bold text-sm focus:ring-2 focus:ring-pink-500 appearance-none" value={selectedModalId2} onChange={e => setSelectedModalId2(e.target.value)}>
-                                    <option value="">NON-STRIKER</option>
-                                    {inningsState[currentInningIndex].batting.filter(p => !p.isOut && p.playerId !== selectedModalId).map(p => <option key={p.playerId} value={p.playerId}>{p.playerName.toUpperCase()}</option>)}
-                                </select>
-                            )}
-                            <button disabled={!selectedModalId || (modalType === 'openers' && !selectedModalId2)} onClick={() => {
-                                if (modalType === 'openers') confirmOpeners();
-                                else if (modalType === 'batter') { setStrikerId(selectedModalId); setModalType(null); }
-                                else { setBowlerId(selectedModalId); setModalType(null); }
-                                setSelectedModalId(''); setSelectedModalId2('');
-                            }} className="w-full bg-pink-600 hover:bg-pink-500 py-5 rounded-2xl font-black text-white shadow-xl disabled:opacity-10 uppercase italic tracking-widest text-lg transition-all mt-6">Ready to Play</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* V2.0 Selection Modals */}
+            <AnimatePresence>
+                {modalType && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 bg-black/95 z-[100] flex items-center justify-center p-8 backdrop-blur-xl"
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="w-full max-w-md glass-card p-10 rounded-[48px] border-teal-500/20 shadow-[0_0_80px_rgba(45,212,191,0.1)] relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1 bg-teal-500" />
+                            
+                            <div className="flex flex-col items-center text-center mb-10">
+                                <div className="w-16 h-16 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-6">
+                                    <Users className="w-8 h-8 text-teal-500" />
+                                </div>
+                                <h3 className="text-3xl font-black italic uppercase tracking-tighter leading-none mb-2">
+                                    {modalType === 'openers' ? 'SELECT_OPENERS' : modalType === 'batter' ? 'NEW_BATTER' : 'CHANGE_BOWLER'}
+                                </h3>
+                                <p className="text-[10px] font-mono text-white/20 uppercase tracking-[0.4em]">TACTICAL_DECISION_REQUIRED</p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black text-white/20 uppercase tracking-widest ml-4">PRIMARY_SELECTION</label>
+                                    <select 
+                                        className="w-full p-5 bg-white/5 border border-white/10 rounded-2xl text-white font-black italic uppercase tracking-tighter text-lg focus:outline-none focus:border-teal-500/50 appearance-none transition-all" 
+                                        value={selectedModalId} 
+                                        onChange={e => setSelectedModalId(e.target.value)}
+                                    >
+                                        <option value="" className="bg-[#0a0f0f]">{modalType === 'bowler' ? 'CHOOSE_BOWLER' : 'CHOOSE_BATSMAN'}</option>
+                                        {modalType === 'bowler' ? 
+                                            inningsState[currentInningIndex].bowling.filter(p => p.playerId !== bowlerId).map(p => <option key={p.playerId} value={p.playerId} className="bg-[#0a0f0f]">{p.playerName.toUpperCase()} ({p.overs})</option>) :
+                                            inningsState[currentInningIndex].batting.filter(p => !p.isOut && p.playerId !== nonStrikerId).map(p => <option key={p.playerId} value={p.playerId} className="bg-[#0a0f0f]">{p.playerName.toUpperCase()}</option>)
+                                        }
+                                    </select>
+                                </div>
+
+                                {modalType === 'openers' && (
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-white/20 uppercase tracking-widest ml-4">SECONDARY_SELECTION</label>
+                                        <select 
+                                            className="w-full p-5 bg-white/5 border border-white/10 rounded-2xl text-white font-black italic uppercase tracking-tighter text-lg focus:outline-none focus:border-teal-500/50 appearance-none transition-all" 
+                                            value={selectedModalId2} 
+                                            onChange={e => setSelectedModalId2(e.target.value)}
+                                        >
+                                            <option value="" className="bg-[#0a0f0f]">NON-STRIKER</option>
+                                            {inningsState[currentInningIndex].batting.filter(p => !p.isOut && p.playerId !== selectedModalId).map(p => <option key={p.playerId} value={p.playerId} className="bg-[#0a0f0f]">{p.playerName.toUpperCase()}</option>)}
+                                        </select>
+                                    </div>
+                                )}
+
+                                <button 
+                                    disabled={!selectedModalId || (modalType === 'openers' && !selectedModalId2)} 
+                                    onClick={() => {
+                                        if (modalType === 'openers') confirmOpeners();
+                                        else if (modalType === 'batter') { setStrikerId(selectedModalId); setModalType(null); }
+                                        else { setBowlerId(selectedModalId); setModalType(null); }
+                                        setSelectedModalId(''); setSelectedModalId2('');
+                                    }} 
+                                    className="w-full bg-teal-500 hover:bg-teal-400 py-6 rounded-2xl font-black text-black shadow-xl disabled:opacity-10 uppercase italic tracking-widest text-lg transition-all mt-8 flex items-center justify-center gap-3 group"
+                                >
+                                    CONFIRM_SELECTION
+                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

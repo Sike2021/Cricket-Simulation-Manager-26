@@ -72,6 +72,12 @@
   }
 }
 
+@layer utilities {
+  .glow-teal {
+    box-shadow: 0 0 40px -10px rgba(20, 184, 166, 0.3);
+  }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;

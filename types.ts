@@ -32,6 +32,15 @@ export interface PlayerPerformanceSummary {
     matchId: string;
 }
 
+export interface PlayerAvatar {
+    faceShape: string;
+    skinColor: string;
+    hairStyle: string;
+    hairColor: string;
+    facialHair: string;
+    photoUrl?: string;
+}
+
 export interface Player {
     id: string; name: string; nationality: string; role: PlayerRole; battingSkill: number; secondarySkill: number;
     style: BattingStyle; isOpener: boolean; isForeign: boolean; teamName?: string;
@@ -42,6 +51,7 @@ export interface Player {
     customProfiles?: { [key in Format]?: { avg: number; sr: number } };
     stats: Record<Format, PlayerStats>;
     recentPerformances: PlayerPerformanceSummary[];
+    avatar?: PlayerAvatar;
 }
 
 export interface Team {

@@ -2,16 +2,11 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Player, Team, GameData, PlayerRole, Format } from '../types';
 import { getRoleColor, getRoleFullName, aggregateStats } from '../utils';
 import { Icons } from './Icons';
-
-interface AuctionRoomProps {
-    gameData: GameData;
-    onAuctionComplete: (updatedTeams: Team[]) => void;
-}
+import { useApp } from '../src/context/AppContext';
 
 const STARTING_PURSE = 100.0;
 const MAX_FOREIGN_LIMIT = 3; 
 const MAX_EMERGING_LIMIT = 3;
-const MIN_EMERGING_LIMIT = 3;
 const MAX_SQUAD_SIZE = 16;
 const MIN_SQUAD_SIZE = 16;
 const DOMESTIC_LIMIT = 10;
@@ -34,32 +29,33 @@ const shuffle = <T,>(array: T[]): T[] => {
     return newArr;
 };
 
+interface AuctionRoomProps {
+    gameData: GameData;
+    onAuctionComplete: (updatedTeams: Team[]) => void;
+}
+
 const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }) => {
+    const { 
+        setGameData, 
+        budget, setBudget, 
+        squad, setSquad,
+        auctionPlayers, setAuctionPlayers,
+        currentAuctionIndex, setCurrentAuctionIndex
+    } = useApp();
+
     const mainTeamIds = useMemo(() => 
         gameData.allTeamsData.filter(td => !td.isYouthTeam).map(td => td.id), 
     [gameData.allTeamsData]);
 
     const [teams, setTeams] = useState<Team[]>(() => 
-        gameData.teams.map(t => ({ ...t, squad: t.squad || [], purse: t.purse || STARTING_PURSE }))
+        gameData.teams.map(t => ({ 
+            ...t, 
+            squad: t.id === gameData.userTeamId ? squad : (t.squad || []), 
+            purse: t.id === gameData.userTeamId ? budget : (t.purse || STARTING_PURSE) 
+        }))
     );
 
     const [activeOverlay, setActiveOverlay] = useState<'none' | 'franchises' | 'pool'>('none');
-
-    // Sorted Pool with deep randomness for auto-auction
-    const sortedPool = useMemo(() => {
-        const retainedPlayerIds = new Set(teams.flatMap(t => t.squad.map(p => p.id)));
-        return gameData.allPlayers
-            .filter(pl => !retainedPlayerIds.has(pl.id))
-            .sort((a, b) => {
-                // Base sorting on skill but with high variance for "randomness"
-                const skillA = Math.max(a.battingSkill, a.secondarySkill);
-                const skillB = Math.max(b.battingSkill, b.secondarySkill);
-                const jitter = (Math.random() * 20) - 10;
-                return (skillB + jitter) - (skillA + jitter);
-            });
-    }, [gameData.allPlayers, teams]);
-
-    const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0);
     const [currentBid, setCurrentBid] = useState(0);
     const [highestBidderId, setHighestBidderId] = useState<string | null>(null);
     const [isAuctioning, setIsAuctioning] = useState(false);
@@ -67,15 +63,13 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     const [auctionFinished, setAuctionFinished] = useState(false);
     const [currentLotBids, setCurrentLotBids] = useState<{teamName: string, bid: number}[]>([]);
 
-    const currentPlayer = sortedPool[currentPlayerIdx] || null;
+    const currentPlayer = auctionPlayers[currentAuctionIndex] || null;
     const userTeam = teams.find(t => t.id === gameData.userTeamId);
 
     const getBasePrice = (player: Player) => {
-        // Use custom base price if defined (convert Lacs to Crore)
         if (player.basePrice !== undefined) {
             return player.basePrice / 100;
         }
-
         const attr = Math.max(player.battingSkill, player.secondarySkill);
         if (attr > 70) return 2.0;
         if (attr >= 61) return 1.0; 
@@ -93,14 +87,14 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     const startNextPlayer = useCallback(() => {
         if (auctionFinished) return;
 
-        if (currentPlayerIdx >= sortedPool.length) {
+        if (currentAuctionIndex >= auctionPlayers.length) {
             setAuctionFinished(true);
             return;
         }
 
-        const player = sortedPool[currentPlayerIdx];
+        const player = auctionPlayers[currentAuctionIndex];
         if (!player) {
-            setCurrentPlayerIdx(prev => prev + 1);
+            setCurrentAuctionIndex(currentAuctionIndex + 1);
             return;
         }
 
@@ -109,8 +103,8 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         setHighestBidderId(null);
         setIsAuctioning(true);
         setCurrentLotBids([]);
-        setBiddingLog(prev => [`Lot #${currentPlayerIdx + 1}: ${player.name} (${getRoleFullName(player.role)}) up for ${bp.toFixed(2)} Cr`, ...prev.slice(0, 5)]);
-    }, [currentPlayerIdx, sortedPool, auctionFinished]);
+        setBiddingLog(prev => [`Lot #${currentAuctionIndex + 1}: ${player.name} (${getRoleFullName(player.role)}) up for ${bp.toFixed(2)} Cr`, ...prev.slice(0, 5)]);
+    }, [currentAuctionIndex, auctionPlayers, auctionFinished, setCurrentAuctionIndex]);
 
     const handleUserBid = (multiplier: number = 1) => {
         if (!userTeam || !isAuctioning || !currentPlayer) return;
@@ -122,6 +116,11 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
 
         if (currentPlayer.isEmerging && userTeam.squad.filter(p => p.isEmerging).length >= MAX_EMERGING_LIMIT) {
             setBiddingLog(prev => [`Emerging limit reached!`, ...prev.slice(0, 5)]);
+            return;
+        }
+
+        if (userTeam.squad.length >= MAX_SQUAD_SIZE) {
+            setBiddingLog(prev => [`Squad full!`, ...prev.slice(0, 5)]);
             return;
         }
 
@@ -139,15 +138,13 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         if (!currentPlayer || !isAuctioning) return;
         setIsAuctioning(false);
 
-        // Safety: don't skip if already processing next
         const eligibleTeams = teams.filter(t => 
             mainTeamIds.includes(t.id) &&
             t.id !== gameData.userTeamId &&
             t.purse >= (getBasePrice(currentPlayer) + 0.2) &&
             t.squad.length < MAX_SQUAD_SIZE &&
             (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
-            (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT) &&
-            (!(!currentPlayer.isForeign && !currentPlayer.isEmerging) || t.squad.filter(p => !p.isForeign && !p.isEmerging).length < DOMESTIC_LIMIT)
+            (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT)
         );
 
         if (eligibleTeams.length > 0) {
@@ -164,7 +161,9 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             setBiddingLog(prev => [`Unsold: ${currentPlayer.name}`, ...prev]);
         }
         
-        setTimeout(() => setCurrentPlayerIdx(prev => prev + 1), 200);
+        setTimeout(() => {
+            setCurrentAuctionIndex(currentAuctionIndex + 1);
+        }, 200);
     };
 
     const autoAuctionRemaining = () => {
@@ -184,8 +183,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 t.purse >= (currentBid + increment) &&
                 t.squad.length < MAX_SQUAD_SIZE &&
                 (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
-                (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT) &&
-                (currentPlayer.isForeign || currentPlayer.isEmerging || t.squad.filter(p => !p.isForeign && !p.isEmerging).length < DOMESTIC_LIMIT)
+                (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT)
             );
 
             if (eligibleTeams.length > 0) {
@@ -194,11 +192,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 const biddingTeam = eligibleTeams.find(t => {
                     if (t.id === gameData.userTeamId) return false;
                     
-                    // Improved AI Valuation Logic
-                    // Non-linear scaling: Elite players are worth much more
                     let baseValuation = Math.pow(rating / 50, 3.5) * 1.2;
-
-                    // Adjust based on team needs
                     const squad = t.squad;
                     const roleCount = squad.filter(p => p.role === currentPlayer.role).length;
                     
@@ -210,21 +204,14 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     if (currentPlayer.role === PlayerRole.FAST_BOWLER) targetCount = TARGET_FAST;
 
                     let needFactor = 1.0;
-                    if (roleCount >= targetCount) {
-                        needFactor = 0.4; // Already have enough
-                    } else if (roleCount < targetCount / 2) {
-                        needFactor = 1.6; // Desperate for this role
-                    }
+                    if (roleCount >= targetCount) needFactor = 0.4;
+                    else if (roleCount < targetCount / 2) needFactor = 1.6;
 
-                    // Foreign player penalty if close to limit
                     if (currentPlayer.isForeign) {
                         const foreignCount = squad.filter(p => p.isForeign).length;
-                        if (foreignCount >= MAX_FOREIGN_LIMIT - 1) {
-                            needFactor *= 0.2;
-                        }
+                        if (foreignCount >= MAX_FOREIGN_LIMIT - 1) needFactor *= 0.2;
                     }
 
-                    // Personality jitter
                     const personalityJitter = 0.7 + (Math.random() * 0.6);
                     const finalValuation = baseValuation * needFactor * personalityJitter;
 
@@ -247,7 +234,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             } else {
                 unsoldPlayer();
             }
-        }, 800 + Math.random() * 700); // Slightly slower AI for better UX
+        }, 800 + Math.random() * 700);
 
         return () => clearTimeout(timer);
     }, [isAuctioning, currentBid, highestBidderId, currentPlayer, gameData.userTeamId, mainTeamIds, teams, auctionFinished]);
@@ -257,10 +244,16 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         if (winner && currentPlayer) {
             setTeams(prev => prev.map(t => {
                 if (t.id === winner.id) {
+                    const newSquad = [...t.squad, currentPlayer];
+                    const newPurse = Number((t.purse - currentBid).toFixed(2));
+                    if (t.id === gameData.userTeamId) {
+                        setSquad(newSquad);
+                        setBudget(newPurse);
+                    }
                     return {
                         ...t,
-                        purse: Number((t.purse - currentBid).toFixed(2)),
-                        squad: [...t.squad, currentPlayer]
+                        purse: newPurse,
+                        squad: newSquad
                     };
                 }
                 return t;
@@ -268,20 +261,20 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             setBiddingLog(prev => [`SOLD! ${currentPlayer.name} to ${winner.name}`, ...prev]);
         }
         setIsAuctioning(false);
-        setCurrentPlayerIdx(prev => prev + 1);
+        setCurrentAuctionIndex(currentAuctionIndex + 1);
     };
 
     const unsoldPlayer = () => {
         setBiddingLog(prev => [`UNSOLD: ${currentPlayer.name}`, ...prev]);
         setIsAuctioning(false);
-        setCurrentPlayerIdx(prev => prev + 1);
+        setCurrentAuctionIndex(currentAuctionIndex + 1);
     };
 
     useEffect(() => {
         if (!isAuctioning && !auctionFinished) {
             startNextPlayer();
         }
-    }, [currentPlayerIdx, sortedPool, isAuctioning, auctionFinished, startNextPlayer]);
+    }, [currentAuctionIndex, isAuctioning, auctionFinished, startNextPlayer]);
 
     const finishAuction = () => {
         const soldPlayerIds = new Set(teams.flatMap(t => t.squad.map(p => p.id)));
@@ -301,7 +294,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 if (type === 'EMERGING') existing = squad.filter(p => p.isEmerging).length;
                 if (type === 'DOMESTIC') existing = squad.filter(p => !p.isForeign && !p.isEmerging).length;
                 
-                while (existing < count && pool.length > 0) {
+                while (existing < count && pool.length > 0 && squad.length < targetTotalSize) {
                     const choices = pool.filter(p => {
                         if (type === 'FOREIGN') return p.isForeign;
                         if (type === 'EMERGING') return p.isEmerging;
@@ -320,10 +313,14 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 }
             };
 
-            // Strict enforcement of 16 players: 3 Foreign, 3 Emerging, 10 Domestic
             fillNeeded('FOREIGN', MAX_FOREIGN_LIMIT);
             fillNeeded('EMERGING', MAX_EMERGING_LIMIT);
             fillNeeded('DOMESTIC', DOMESTIC_LIMIT);
+
+            if (team.id === gameData.userTeamId) {
+                setSquad(squad);
+                setBudget(purse);
+            }
 
             return { ...team, squad, purse };
         });
@@ -348,7 +345,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                     <div className="flex justify-between mb-4 border-b border-[#E4E3E0]/10 pb-2 items-end">
                                         <div>
                                             <h4 className="font-black uppercase tracking-tighter text-xl leading-none">{team.name} {isDev ? '(DEV)' : ''}</h4>
-                                            <p className="text-[10px] font-mono font-bold opacity-50 mt-1 uppercase tracking-widest">{team.squad.length} / {isDev ? 14 : 22} SIGNED</p>
+                                            <p className="text-[10px] font-mono font-bold opacity-50 mt-1 uppercase tracking-widest">{team.squad.length} / {MAX_SQUAD_SIZE} SIGNED</p>
                                         </div>
                                         <span className="text-lg font-black font-mono text-teal-400">{team.purse.toFixed(2)} Cr</span>
                                     </div>
@@ -373,7 +370,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2 mb-1">
                             <div className="bg-teal-500 text-[#0A0F0F] px-2 py-0.5 font-black text-[10px] uppercase tracking-widest">LIVE AUCTION</div>
-                            <span className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest">SESSION 01 // LOT {currentPlayerIdx + 1}</span>
+                            <span className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest">SESSION 01 // LOT {currentAuctionIndex + 1}</span>
                         </div>
                         <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none">MARKET BOARD</h1>
                     </div>
@@ -480,7 +477,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                     <div className="mt-auto pt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <button 
                                             onClick={() => handleUserBid(1)}
-                                            disabled={!isAuctioning || (highestBidderId === userTeam?.id) || (userTeam?.purse || 0) < (currentBid + getBidIncrement(currentBid))}
+                                            disabled={!isAuctioning || (highestBidderId === userTeam?.id) || (userTeam?.purse || 0) < (currentBid + getBidIncrement(currentBid)) || (userTeam?.squad.length || 0) >= MAX_SQUAD_SIZE}
                                             className={`py-6 px-8 font-black text-3xl italic uppercase tracking-tighter transition-all transform active:scale-95 flex items-center justify-center gap-4 ${
                                                 highestBidderId === userTeam?.id 
                                                 ? 'bg-teal-500 text-[#0A0F0F]' 
