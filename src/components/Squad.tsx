@@ -1,88 +1,75 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Player } from '../types';
-import { UserPlus, Shield, Zap, Edit2 } from 'lucide-react';
-import PlayerAvatar from './PlayerAvatar';
-import PlayerEditor from './PlayerEditor';
+import { Activity, Shield, Zap, Heart } from 'lucide-react';
 
-interface Props {
-  players: Player[];
-  onUpdatePlayer: (player: Player) => void;
-}
+const PlayerCard = ({ player }: { player: Player }) => (
+  <div className="bg-card-bg border border-border rounded-2xl p-6 hover:border-accent/50 transition-all group">
+    <div className="flex justify-between items-start mb-6">
+      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl font-black text-accent/20 group-hover:text-accent transition-colors">
+        {player.name.split(' ').map(n => n[0]).join('')}
+      </div>
+      <div className="text-right">
+        <div className="text-xs text-ink/40 uppercase tracking-widest mb-1">{player.role}</div>
+        <div className="text-xl font-bold">{player.name}</div>
+      </div>
+    </div>
 
-export default function Squad({ players, onUpdatePlayer }: Props) {
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const squadLimit = 16;
-  const currentSquadSize = players.length;
-
-  return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-border pb-8">
-        <div>
-          <h2 className="text-4xl font-display tracking-tighter mb-2">Your Squad</h2>
-          <p className="text-ink/40 text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-            <Shield size={14} className="text-teal" />
-            Team Management
-          </p>
+    <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
+          <Zap size={12} /> Batting
         </div>
-        <div className="bg-card-bg border border-border px-6 py-3 rounded-2xl flex items-center gap-4 glow-teal">
-          <div className="text-right">
-            <div className="text-[10px] font-black uppercase tracking-widest text-ink/40">Squad Size</div>
-            <div className="text-2xl font-display">
-              {currentSquadSize}<span className="text-teal">/</span>{squadLimit}
-            </div>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-teal/10 flex items-center justify-center">
-            <UserPlus size={24} className="text-teal" />
-          </div>
+        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full bg-accent" style={{ width: `${player.batting}%` }} />
         </div>
       </div>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
+          <Shield size={12} /> Bowling
+        </div>
+        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full bg-blue-500" style={{ width: `${player.bowling}%` }} />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
+          <Heart size={12} /> Fitness
+        </div>
+        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full bg-red-500" style={{ width: `${player.fitness}%` }} />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs text-ink/40 uppercase tracking-wider">
+          <Activity size={12} /> Form
+        </div>
+        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full bg-yellow-500" style={{ width: `${player.form}%` }} />
+        </div>
+      </div>
+    </div>
 
+    <div className="flex justify-between items-center pt-4 border-t border-border">
+      <div className="text-sm font-mono text-ink/60">VALUE</div>
+      <div className="text-lg font-bold text-accent">${(player.value / 1000000).toFixed(1)}M</div>
+    </div>
+  </div>
+);
+
+export default function Squad({ players }: { players: Player[] }) {
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-bold">Active Squad ({players.length})</h3>
+        <button className="bg-accent text-bg px-6 py-2 rounded-xl font-bold hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all">
+          Manage Lineup
+        </button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {players.map((player) => (
-          <div 
-            key={player.id}
-            className="group bg-card-bg border border-border rounded-3xl p-6 hover:border-teal/50 transition-all hover:translate-y-[-4px] relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button 
-                onClick={() => setEditingPlayer(player)}
-                className="p-2 bg-teal text-bg rounded-xl shadow-lg hover:scale-110 transition-transform"
-              >
-                <Edit2 size={16} />
-              </button>
-            </div>
-
-            <div className="flex gap-6 items-start">
-              <PlayerAvatar avatar={player.avatar} size={80} className="shadow-xl" />
-              <div className="flex-1 space-y-1">
-                <h4 className="text-xl font-display leading-none">{player.name}</h4>
-                <p className="text-xs font-bold uppercase tracking-widest text-teal">{player.role}</p>
-                <div className="flex gap-4 mt-4">
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest text-ink/20">Batting</div>
-                    <div className="text-lg font-display">{player.batting}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest text-ink/20">Bowling</div>
-                    <div className="text-lg font-display">{player.bowling}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {players.map(player => (
+          <PlayerCard key={player.id} player={player} />
         ))}
       </div>
-
-      {editingPlayer && (
-        <PlayerEditor 
-          player={editingPlayer}
-          onClose={() => setEditingPlayer(null)}
-          onSave={(updated) => {
-            onUpdatePlayer(updated);
-            setEditingPlayer(null);
-          }}
-        />
-      )}
     </div>
   );
 }

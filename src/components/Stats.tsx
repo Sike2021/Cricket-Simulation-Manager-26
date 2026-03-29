@@ -1,7 +1,6 @@
 import React from 'react';
 import { Player } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import PlayerAvatar from './PlayerAvatar';
 
 export default function Stats({ players }: { players: Player[] }) {
   const battingData = players
@@ -97,13 +96,8 @@ export default function Stats({ players }: { players: Player[] }) {
             {players.map(player => (
               <tr key={player.id} className="group hover:bg-white/5 transition-colors">
                 <td className="py-4">
-                  <div className="flex items-center gap-4">
-                    <PlayerAvatar avatar={player.avatar} size={40} />
-                    <div>
-                      <div className="font-bold">{player.name}</div>
-                      <div className="text-xs text-ink/40">{player.role}</div>
-                    </div>
-                  </div>
+                  <div className="font-bold">{player.name}</div>
+                  <div className="text-xs text-ink/40">{player.role}</div>
                 </td>
                 <td className="py-4 font-mono">{player.stats.matches}</td>
                 <td className="py-4 font-mono">{player.stats.runs}</td>

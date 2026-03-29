@@ -1,18 +1,5 @@
 export type PlayerRole = 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicketkeeper';
 
-export interface PlayerAvatar {
-  faceShape: number;
-  skinColor: string;
-  hairStyle: number;
-  hairColor: string;
-  facialHair: number;
-  eyeColor: string;
-  eyeShape: number;
-  noseShape: number;
-  earShape: number;
-  customPhoto?: string; // Base64 or local URL
-}
-
 export interface Player {
   id: string;
   name: string;
@@ -22,7 +9,6 @@ export interface Player {
   fitness: number;
   form: number;
   value: number;
-  avatar: PlayerAvatar;
   stats: {
     matches: number;
     runs: number;

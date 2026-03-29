@@ -189,22 +189,14 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
         <div className="p-2 h-[calc(100vh-90px)] flex flex-col overflow-y-auto">
             <h2 className="text-xl font-bold text-center mb-2">Team Showcase</h2>
             
-            <div className="mb-4 flex items-center justify-between">
-                <div className="flex-grow mr-4">
-                    <select 
-                        value={selectedTeamId} 
-                        onChange={(e) => setSelectedTeamId(e.target.value)}
-                        className="w-full p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 font-bold"
-                    >
-                        {gameData.teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
-                    </select>
-                </div>
-                <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl flex flex-col items-center justify-center min-w-[80px]">
-                    <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Squad</span>
-                    <span className={`text-lg font-display italic leading-none ${selectedTeam.squad.length > 16 ? 'text-red-500' : 'text-teal-500'}`}>
-                        {selectedTeam.squad.length}<span className="text-white/20 text-xs not-italic">/16</span>
-                    </span>
-                </div>
+            <div className="mb-4">
+                <select 
+                    value={selectedTeamId} 
+                    onChange={(e) => setSelectedTeamId(e.target.value)}
+                    className="w-full p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 font-bold"
+                >
+                    {gameData.teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
+                </select>
             </div>
 
             {/* Team Board Ratings */}
