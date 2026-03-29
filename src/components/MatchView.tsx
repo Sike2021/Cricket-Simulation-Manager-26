@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSimulation } from '../hooks/useSimulation';
 import { Team } from '../types';
-import { motion, AnimatePresence, Reorder } from 'motion/react';
-import { Activity, Shield, Zap, Info, GripVertical, Play, Pause, RotateCcw } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Activity, Shield, Zap, Info, Play, Pause, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function MatchView({ battingTeam, bowlingTeam, onComplete }: { battingTeam: Team, bowlingTeam: Team, onComplete: () => void }) {
   const { 
@@ -24,6 +24,18 @@ export default function MatchView({ battingTeam, bowlingTeam, onComplete }: { ba
   } = useSimulation(battingTeam, bowlingTeam);
 
   const recentBalls = balls.slice(-6);
+
+  const movePlayer = (index: number, direction: 'up' | 'down') => {
+    if (
+      (direction === 'up' && index === 0) || 
+      (direction === 'down' && index === battingOrder.length - 1)
+    ) return;
+
+    const newOrder = [...battingOrder];
+    const swapIndex = direction === 'up' ? index - 1 : index + 1;
+    [newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]];
+    setBattingOrder(newOrder);
+  };
 
   return (
     <div className="space-y-8">
@@ -172,22 +184,37 @@ export default function MatchView({ battingTeam, bowlingTeam, onComplete }: { ba
           </div>
         </div>
 
-        {/* Draggable Batting Order */}
+        {/* Batting Order */}
         <div className="bg-card-bg border border-border rounded-3xl p-6">
           <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
             <Activity size={18} className="text-accent" />
             Batting Order
           </h3>
-          <Reorder.Group axis="y" values={battingOrder} onReorder={setBattingOrder} className="space-y-2 max-h-64 overflow-y-auto pr-2">
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
             {battingOrder.map((player, index) => (
-              <Reorder.Item key={player.id} value={player} className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl cursor-grab active:cursor-grabbing">
-                <GripVertical size={16} className="text-ink/20" />
+              <div key={player.id} className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl">
+                <div className="flex flex-col gap-1">
+                  <button 
+                    onClick={() => movePlayer(index, 'up')}
+                    disabled={index === 0}
+                    className="text-ink/40 hover:text-accent disabled:opacity-30 disabled:hover:text-ink/40"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
+                  <button 
+                    onClick={() => movePlayer(index, 'down')}
+                    disabled={index === battingOrder.length - 1}
+                    className="text-ink/40 hover:text-accent disabled:opacity-30 disabled:hover:text-ink/40"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
                 <div className="w-6 text-xs font-mono text-ink/40">{index + 1}</div>
                 <div className="font-medium text-sm">{player.name}</div>
                 <div className="ml-auto text-xs text-ink/40">{player.role}</div>
-              </Reorder.Item>
+              </div>
             ))}
-          </Reorder.Group>
+          </div>
         </div>
 
         {/* Live Commentary */}
