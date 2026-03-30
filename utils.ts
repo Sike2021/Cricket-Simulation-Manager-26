@@ -2,24 +2,6 @@ import React from 'react';
 import { Format, Player, PlayerRole, Team, Match, PlayerStats, Sponsorship, MatchResult, NewsArticle, GameData, Standing } from './types';
 import { BRANDS, SPONSOR_THRESHOLDS, generateSingleFormatInitialStats, TV_CHANNELS, TOURNAMENT_LOGOS } from './data';
 
-export const AVATAR_OPTIONS = {
-    faceShapes: ['round', 'oval', 'square', 'heart'],
-    skinColors: ['#FFDBAC', '#F1C27D', '#E0AC69', '#8D5524', '#C68642'],
-    hairStyles: ['short', 'long', 'bald', 'spiky', 'curly', 'fade'],
-    hairColors: ['#090806', '#2C222B', '#71635A', '#B7A69E', '#D6C4C2', '#CABFB1', '#FFF5E1'],
-    facialHairs: ['none', 'beard', 'mustache', 'stubble', 'goatee']
-};
-
-export const generateRandomAvatar = () => {
-    return {
-        faceShape: AVATAR_OPTIONS.faceShapes[Math.floor(Math.random() * AVATAR_OPTIONS.faceShapes.length)],
-        skinColor: AVATAR_OPTIONS.skinColors[Math.floor(Math.random() * AVATAR_OPTIONS.skinColors.length)],
-        hairStyle: AVATAR_OPTIONS.hairStyles[Math.floor(Math.random() * AVATAR_OPTIONS.hairStyles.length)],
-        hairColor: AVATAR_OPTIONS.hairColors[Math.floor(Math.random() * AVATAR_OPTIONS.hairColors.length)],
-        facialHair: AVATAR_OPTIONS.facialHairs[Math.floor(Math.random() * AVATAR_OPTIONS.facialHairs.length)],
-    };
-};
-
 export type Category = 'T20' | 'List A' | 'First Class';
 
 export const getFormatsForCategory = (cat: Category): Format[] => {
@@ -143,9 +125,7 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const xi: Player[] = [];
     const selectedIds = new Set<string>();
     
-    // Strict rule: No foreign players in ODI and SHIELD (First Class)
-    const isDomesticOnly = [Format.ODI, Format.SHIELD].includes(format);
-    const MAX_FOREIGN_IN_XI = isDomesticOnly ? 0 : 4; 
+    const MAX_FOREIGN_IN_XI = 4; 
     let foreignInXI = 0;
 
     const addPlayer = (p: Player) => {

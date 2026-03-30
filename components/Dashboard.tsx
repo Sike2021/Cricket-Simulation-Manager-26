@@ -11,10 +11,9 @@ interface DashboardProps {
     setScreen: (screen: CareerScreen) => void;
     handlePlayMatch: () => void;
     handleForwardDay: () => void;
-    onNewGame: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, handlePlayMatch, handleForwardDay, onNewGame }) => {
+const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, handlePlayMatch, handleForwardDay }) => {
     const currentSchedule = gameData.schedule[gameData.currentFormat];
     const matchIndex = gameData.currentMatchIndex[gameData.currentFormat];
     const sponsorship = gameData.sponsorships?.[gameData.currentFormat];
@@ -86,13 +85,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                         <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none">{gameData.currentFormat}</h1>
                     )}
                 </div>
-                <div className="text-right flex flex-col items-end">
-                    <button 
-                        onClick={onNewGame}
-                        className="mb-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[8px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors"
-                    >
-                        New Game
-                    </button>
+                <div className="text-right">
                     <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Manager_ID</p>
                     <p className="text-xs font-black uppercase tracking-tight text-white/80">{userTeam?.name || 'N/A'}</p>
                 </div>
@@ -182,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                     { screen: 'LINEUPS', icon: <Icons.Lineups />, label: 'Lineups' },
                     { screen: 'TRANSFERS', icon: <Icons.Transfers />, label: 'Transfers' },
                     { screen: 'PLAYER_DATABASE', icon: <Icons.Database />, label: 'Database' },
-                    { screen: 'NEWS', icon: <Icons.Newspaper />, label: 'News Feed' },
+                    { screen: 'NEWS', icon: <Icons.Podium />, label: 'News Feed' },
                 ].map((item) => (
                     <button 
                         key={item.screen}

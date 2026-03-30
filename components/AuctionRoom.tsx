@@ -2,14 +2,18 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Player, Team, GameData, PlayerRole, Format } from '../types';
 import { getRoleColor, getRoleFullName, aggregateStats } from '../utils';
 import { Icons } from './Icons';
-import { useApp } from '../src/context/AppContext';
+
+interface AuctionRoomProps {
+    gameData: GameData;
+    onAuctionComplete: (updatedTeams: Team[]) => void;
+}
 
 const STARTING_PURSE = 100.0;
-const MAX_FOREIGN_LIMIT = 3; 
+const MAX_FOREIGN_LIMIT = 3; // Match App.tsx
 const MAX_EMERGING_LIMIT = 3;
+const MIN_EMERGING_LIMIT = 3;
 const MAX_SQUAD_SIZE = 16;
 const MIN_SQUAD_SIZE = 16;
-const DOMESTIC_LIMIT = 10;
 
 // Targeted Balanced Squad Ratios
 const TARGET_OPENERS = 4;
@@ -29,33 +33,32 @@ const shuffle = <T,>(array: T[]): T[] => {
     return newArr;
 };
 
-interface AuctionRoomProps {
-    gameData: GameData;
-    onAuctionComplete: (updatedTeams: Team[]) => void;
-}
-
 const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }) => {
-    const { 
-        setGameData, 
-        budget, setBudget, 
-        squad, setSquad,
-        auctionPlayers, setAuctionPlayers,
-        currentAuctionIndex, setCurrentAuctionIndex
-    } = useApp();
-
     const mainTeamIds = useMemo(() => 
         gameData.allTeamsData.filter(td => !td.isYouthTeam).map(td => td.id), 
     [gameData.allTeamsData]);
 
     const [teams, setTeams] = useState<Team[]>(() => 
-        gameData.teams.map(t => ({ 
-            ...t, 
-            squad: t.id === gameData.userTeamId ? squad : (t.squad || []), 
-            purse: t.id === gameData.userTeamId ? budget : (t.purse || STARTING_PURSE) 
-        }))
+        gameData.teams.map(t => ({ ...t, squad: t.squad || [], purse: t.purse || STARTING_PURSE }))
     );
 
     const [activeOverlay, setActiveOverlay] = useState<'none' | 'franchises' | 'pool'>('none');
+
+    // Sorted Pool with deep randomness for auto-auction
+    const sortedPool = useMemo(() => {
+        const retainedPlayerIds = new Set(teams.flatMap(t => t.squad.map(p => p.id)));
+        return gameData.allPlayers
+            .filter(pl => !retainedPlayerIds.has(pl.id))
+            .sort((a, b) => {
+                // Base sorting on skill but with high variance for "randomness"
+                const skillA = Math.max(a.battingSkill, a.secondarySkill);
+                const skillB = Math.max(b.battingSkill, b.secondarySkill);
+                const jitter = (Math.random() * 20) - 10;
+                return (skillB + jitter) - (skillA + jitter);
+            });
+    }, [gameData.allPlayers, teams]);
+
+    const [currentPlayerIdx, setCurrentPlayerIdx] = useState(0);
     const [currentBid, setCurrentBid] = useState(0);
     const [highestBidderId, setHighestBidderId] = useState<string | null>(null);
     const [isAuctioning, setIsAuctioning] = useState(false);
@@ -63,13 +66,15 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     const [auctionFinished, setAuctionFinished] = useState(false);
     const [currentLotBids, setCurrentLotBids] = useState<{teamName: string, bid: number}[]>([]);
 
-    const currentPlayer = auctionPlayers[currentAuctionIndex] || null;
+    const currentPlayer = sortedPool[currentPlayerIdx] || null;
     const userTeam = teams.find(t => t.id === gameData.userTeamId);
 
     const getBasePrice = (player: Player) => {
+        // Use custom base price if defined (convert Lacs to Crore)
         if (player.basePrice !== undefined) {
             return player.basePrice / 100;
         }
+
         const attr = Math.max(player.battingSkill, player.secondarySkill);
         if (attr > 70) return 2.0;
         if (attr >= 61) return 1.0; 
@@ -87,14 +92,14 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
     const startNextPlayer = useCallback(() => {
         if (auctionFinished) return;
 
-        if (currentAuctionIndex >= auctionPlayers.length) {
+        if (currentPlayerIdx >= sortedPool.length) {
             setAuctionFinished(true);
             return;
         }
 
-        const player = auctionPlayers[currentAuctionIndex];
+        const player = sortedPool[currentPlayerIdx];
         if (!player) {
-            setCurrentAuctionIndex(currentAuctionIndex + 1);
+            setCurrentPlayerIdx(prev => prev + 1);
             return;
         }
 
@@ -103,8 +108,8 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
         setHighestBidderId(null);
         setIsAuctioning(true);
         setCurrentLotBids([]);
-        setBiddingLog(prev => [`Lot #${currentAuctionIndex + 1}: ${player.name} (${getRoleFullName(player.role)}) up for ${bp.toFixed(2)} Cr`, ...prev.slice(0, 5)]);
-    }, [currentAuctionIndex, auctionPlayers, auctionFinished, setCurrentAuctionIndex]);
+        setBiddingLog(prev => [`Lot #${currentPlayerIdx + 1}: ${player.name} (${getRoleFullName(player.role)}) up for ${bp.toFixed(2)} Cr`, ...prev.slice(0, 5)]);
+    }, [currentPlayerIdx, sortedPool, auctionFinished]);
 
     const handleUserBid = (multiplier: number = 1) => {
         if (!userTeam || !isAuctioning || !currentPlayer) return;
@@ -116,11 +121,6 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
 
         if (currentPlayer.isEmerging && userTeam.squad.filter(p => p.isEmerging).length >= MAX_EMERGING_LIMIT) {
             setBiddingLog(prev => [`Emerging limit reached!`, ...prev.slice(0, 5)]);
-            return;
-        }
-
-        if (userTeam.squad.length >= MAX_SQUAD_SIZE) {
-            setBiddingLog(prev => [`Squad full!`, ...prev.slice(0, 5)]);
             return;
         }
 
@@ -161,9 +161,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             setBiddingLog(prev => [`Unsold: ${currentPlayer.name}`, ...prev]);
         }
         
-        setTimeout(() => {
-            setCurrentAuctionIndex(currentAuctionIndex + 1);
-        }, 200);
+        setTimeout(() => setCurrentPlayerIdx(prev => prev + 1), 200);
     };
 
     const autoAuctionRemaining = () => {
@@ -183,7 +181,8 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 t.purse >= (currentBid + increment) &&
                 t.squad.length < MAX_SQUAD_SIZE &&
                 (!currentPlayer.isForeign || t.squad.filter(p => p.isForeign).length < MAX_FOREIGN_LIMIT) &&
-                (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT)
+                (!currentPlayer.isEmerging || t.squad.filter(p => p.isEmerging).length < MAX_EMERGING_LIMIT) &&
+                (!(!currentPlayer.isForeign && !currentPlayer.isEmerging) || t.squad.filter(p => !p.isForeign && !p.isEmerging).length < 10)
             );
 
             if (eligibleTeams.length > 0) {
@@ -192,7 +191,11 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 const biddingTeam = eligibleTeams.find(t => {
                     if (t.id === gameData.userTeamId) return false;
                     
+                    // Improved AI Valuation Logic
+                    // Non-linear scaling: Elite players are worth much more
                     let baseValuation = Math.pow(rating / 50, 3.5) * 1.2;
+
+                    // Adjust based on team needs
                     const squad = t.squad;
                     const roleCount = squad.filter(p => p.role === currentPlayer.role).length;
                     
@@ -204,14 +207,21 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     if (currentPlayer.role === PlayerRole.FAST_BOWLER) targetCount = TARGET_FAST;
 
                     let needFactor = 1.0;
-                    if (roleCount >= targetCount) needFactor = 0.4;
-                    else if (roleCount < targetCount / 2) needFactor = 1.6;
-
-                    if (currentPlayer.isForeign) {
-                        const foreignCount = squad.filter(p => p.isForeign).length;
-                        if (foreignCount >= MAX_FOREIGN_LIMIT - 1) needFactor *= 0.2;
+                    if (roleCount >= targetCount) {
+                        needFactor = 0.4; // Already have enough
+                    } else if (roleCount < targetCount / 2) {
+                        needFactor = 1.6; // Desperate for this role
                     }
 
+                    // Foreign player penalty if close to limit
+                    if (currentPlayer.isForeign) {
+                        const foreignCount = squad.filter(p => p.isForeign).length;
+                        if (foreignCount >= MAX_FOREIGN_LIMIT - 1) {
+                            needFactor *= 0.2;
+                        }
+                    }
+
+                    // Personality jitter
                     const personalityJitter = 0.7 + (Math.random() * 0.6);
                     const finalValuation = baseValuation * needFactor * personalityJitter;
 
@@ -234,26 +244,20 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             } else {
                 unsoldPlayer();
             }
-        }, 800 + Math.random() * 700);
+        }, 500 + Math.random() * 500);
 
         return () => clearTimeout(timer);
-    }, [isAuctioning, currentBid, highestBidderId, currentPlayer, gameData.userTeamId, mainTeamIds, teams, auctionFinished]);
+    }, [isAuctioning, currentBid, highestBidderId, currentPlayer, gameData.userTeamId, mainTeamIds, teams]);
 
     const sellPlayer = () => {
         const winner = teams.find(t => t.id === highestBidderId);
         if (winner && currentPlayer) {
             setTeams(prev => prev.map(t => {
                 if (t.id === winner.id) {
-                    const newSquad = [...t.squad, currentPlayer];
-                    const newPurse = Number((t.purse - currentBid).toFixed(2));
-                    if (t.id === gameData.userTeamId) {
-                        setSquad(newSquad);
-                        setBudget(newPurse);
-                    }
                     return {
                         ...t,
-                        purse: newPurse,
-                        squad: newSquad
+                        purse: Number((t.purse - currentBid).toFixed(2)),
+                        squad: [...t.squad, currentPlayer]
                     };
                 }
                 return t;
@@ -261,45 +265,45 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             setBiddingLog(prev => [`SOLD! ${currentPlayer.name} to ${winner.name}`, ...prev]);
         }
         setIsAuctioning(false);
-        setCurrentAuctionIndex(currentAuctionIndex + 1);
+        setCurrentPlayerIdx(prev => prev + 1);
     };
 
     const unsoldPlayer = () => {
         setBiddingLog(prev => [`UNSOLD: ${currentPlayer.name}`, ...prev]);
         setIsAuctioning(false);
-        setCurrentAuctionIndex(currentAuctionIndex + 1);
+        setCurrentPlayerIdx(prev => prev + 1);
     };
 
     useEffect(() => {
         if (!isAuctioning && !auctionFinished) {
             startNextPlayer();
         }
-    }, [currentAuctionIndex, isAuctioning, auctionFinished, startNextPlayer]);
+    }, [currentPlayerIdx, sortedPool, isAuctioning, auctionFinished, startNextPlayer]);
 
     const finishAuction = () => {
         const soldPlayerIds = new Set(teams.flatMap(t => t.squad.map(p => p.id)));
         const unauctioned = gameData.allPlayers.filter(p => !soldPlayerIds.has(p.id));
+        // Shuffle the pool for true randomness in AI squads
         let pool = shuffle([...unauctioned]);
 
+        // 1. Fill minimum squad size (15) and minimum emerging players (2)
         const finalTeams = teams.map(team => {
             const isDev = gameData.allTeamsData.find(td => td.id === team.id)?.isYouthTeam;
-            const targetTotalSize = 16;
+            const targetTotalSize = isDev ? 14 : 20;
             
             let squad = [...team.squad];
             let purse = team.purse;
 
-            const fillNeeded = (type: 'FOREIGN' | 'EMERGING' | 'DOMESTIC', count: number) => {
-                let existing = 0;
-                if (type === 'FOREIGN') existing = squad.filter(p => p.isForeign).length;
-                if (type === 'EMERGING') existing = squad.filter(p => p.isEmerging).length;
-                if (type === 'DOMESTIC') existing = squad.filter(p => !p.isForeign && !p.isEmerging).length;
+            const fillNeeded = (role: PlayerRole | 'EMERGING', count: number, foreignOk: boolean = true) => {
+                let existing = role === 'EMERGING' 
+                    ? squad.filter(p => p.isEmerging).length
+                    : squad.filter(p => p.role === role).length;
                 
-                while (existing < count && pool.length > 0 && squad.length < targetTotalSize) {
-                    const choices = pool.filter(p => {
-                        if (type === 'FOREIGN') return p.isForeign;
-                        if (type === 'EMERGING') return p.isEmerging;
-                        return !p.isForeign && !p.isEmerging;
-                    }).slice(0, 20);
+                while (existing < count && pool.length > 0) {
+                    const choices = pool.filter(p => 
+                        (role === 'EMERGING' ? p.isEmerging : p.role === role) && 
+                        (foreignOk || !p.isForeign)
+                    ).slice(0, 10);
                     
                     if (choices.length > 0) {
                         choices.sort((a, b) => Math.max(b.battingSkill, b.secondarySkill) - Math.max(a.battingSkill, a.secondarySkill));
@@ -313,13 +317,24 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                 }
             };
 
-            fillNeeded('FOREIGN', MAX_FOREIGN_LIMIT);
-            fillNeeded('EMERGING', MAX_EMERGING_LIMIT);
-            fillNeeded('DOMESTIC', DOMESTIC_LIMIT);
+            if (squad.length < targetTotalSize) {
+                fillNeeded('EMERGING', MIN_EMERGING_LIMIT);
+                fillNeeded(PlayerRole.WICKET_KEEPER, TARGET_KEEPERS);
+                fillNeeded(PlayerRole.ALL_ROUNDER, TARGET_ALL_ROUNDERS);
+                fillNeeded(PlayerRole.SPIN_BOWLER, 2);
+                fillNeeded(PlayerRole.FAST_BOWLER, 3);
+            }
 
-            if (team.id === gameData.userTeamId) {
-                setSquad(squad);
-                setBudget(purse);
+            // Final fill to squad size
+            while (squad.length < targetTotalSize && pool.length > 0) {
+                const choices = pool.slice(0, 10);
+                // Sort by skill to pick better players during final auto-draft fill
+                choices.sort((a, b) => Math.max(b.battingSkill, b.secondarySkill) - Math.max(a.battingSkill, a.secondarySkill));
+                const p = choices[0];
+                const poolIdx = pool.findIndex(pl => pl.id === p.id);
+                pool.splice(poolIdx, 1);
+                squad.push(p);
+                if (!isDev) purse = Math.max(0, purse - 0.2);
             }
 
             return { ...team, squad, purse };
@@ -345,7 +360,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                     <div className="flex justify-between mb-4 border-b border-[#E4E3E0]/10 pb-2 items-end">
                                         <div>
                                             <h4 className="font-black uppercase tracking-tighter text-xl leading-none">{team.name} {isDev ? '(DEV)' : ''}</h4>
-                                            <p className="text-[10px] font-mono font-bold opacity-50 mt-1 uppercase tracking-widest">{team.squad.length} / {MAX_SQUAD_SIZE} SIGNED</p>
+                                            <p className="text-[10px] font-mono font-bold opacity-50 mt-1 uppercase tracking-widest">{team.squad.length} / {isDev ? 14 : 22} SIGNED</p>
                                         </div>
                                         <span className="text-lg font-black font-mono text-teal-400">{team.purse.toFixed(2)} Cr</span>
                                     </div>
@@ -370,7 +385,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2 mb-1">
                             <div className="bg-teal-500 text-[#0A0F0F] px-2 py-0.5 font-black text-[10px] uppercase tracking-widest">LIVE AUCTION</div>
-                            <span className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest">SESSION 01 // LOT {currentAuctionIndex + 1}</span>
+                            <span className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest">SESSION 01 // LOT {currentPlayerIdx + 1}</span>
                         </div>
                         <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none">MARKET BOARD</h1>
                     </div>
@@ -415,69 +430,42 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                                 <p className="text-xl font-black font-mono">{getBasePrice(currentPlayer).toFixed(2)} Cr</p>
                                             </div>
                                         </div>
-
-                                        {/* Detailed Stats Section */}
-                                        <div className="mt-8 pt-6 border-t border-[#E4E3E0]/10">
-                                            <p className="text-[10px] font-mono font-bold opacity-50 uppercase tracking-widest mb-4">CAREER STATISTICS (ALL FORMATS)</p>
-                                            {(() => {
-                                                const stats = aggregateStats(currentPlayer, [Format.T20, Format.ODI, Format.SHIELD]);
-                                                const isBatter = [PlayerRole.BATSMAN, PlayerRole.WICKET_KEEPER, PlayerRole.ALL_ROUNDER].includes(currentPlayer.role);
-                                                const isBowler = [PlayerRole.FAST_BOWLER, PlayerRole.SPIN_BOWLER, PlayerRole.ALL_ROUNDER].includes(currentPlayer.role);
-
-                                                return (
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
-                                                        {(isBatter || currentPlayer.role === PlayerRole.ALL_ROUNDER) && (
-                                                            <>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">Matches</span>
-                                                                    <span className="text-lg font-black font-mono">{stats.matches}</span>
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">Runs</span>
-                                                                    <span className="text-lg font-black font-mono">{stats.runs}</span>
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">Avg</span>
-                                                                    <span className="text-lg font-black font-mono">{stats.average.toFixed(2)}</span>
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-mono opacity-40 uppercase">S/R</span>
-                                                                    <span className="text-lg font-black font-mono">{stats.strikeRate.toFixed(1)}</span>
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                        {(isBowler || currentPlayer.role === PlayerRole.ALL_ROUNDER) && (
-                                                            <>
-                                                                {!(isBatter || currentPlayer.role === PlayerRole.ALL_ROUNDER) && (
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-[9px] font-mono opacity-40 uppercase">Matches</span>
-                                                                        <span className="text-lg font-black font-mono">{stats.matches}</span>
-                                                                    </div>
-                                                                )}
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-mono opacity-40 uppercase text-red-400">Wickets</span>
-                                                                    <span className="text-lg font-black font-mono text-red-400">{stats.wickets}</span>
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-mono opacity-40 uppercase text-red-400">Econ</span>
-                                                                    <span className="text-lg font-black font-mono text-red-400">{stats.economy.toFixed(2)}</span>
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-mono opacity-40 uppercase text-red-400">Bowl Avg</span>
-                                                                    <span className="text-lg font-black font-mono text-red-400">{stats.bowlingAverage.toFixed(2)}</span>
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })()}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-4">
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Matches</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].matches}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Runs</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].runs}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Avg</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].average.toFixed(1)}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">SR</p>
+                                                <p className="text-xl font-black font-mono">{currentPlayer.stats[Format.T20].strikeRate.toFixed(1)}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Wickets</p>
+                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].wickets}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Economy</p>
+                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].economy.toFixed(2)}</p>
+                                            </div>
+                                            <div className="border-l-2 border-[#E4E3E0]/20 pl-4">
+                                                <p className="text-[10px] font-mono opacity-50 uppercase mb-1">Bowl Avg</p>
+                                                <p className="text-xl font-black font-mono text-red-400">{currentPlayer.stats[Format.T20].bowlingAverage.toFixed(1)}</p>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="mt-auto pt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <button 
                                             onClick={() => handleUserBid(1)}
-                                            disabled={!isAuctioning || (highestBidderId === userTeam?.id) || (userTeam?.purse || 0) < (currentBid + getBidIncrement(currentBid)) || (userTeam?.squad.length || 0) >= MAX_SQUAD_SIZE}
+                                            disabled={!isAuctioning || (highestBidderId === userTeam?.id) || (userTeam?.purse || 0) < (currentBid + getBidIncrement(currentBid))}
                                             className={`py-6 px-8 font-black text-3xl italic uppercase tracking-tighter transition-all transform active:scale-95 flex items-center justify-center gap-4 ${
                                                 highestBidderId === userTeam?.id 
                                                 ? 'bg-teal-500 text-[#0A0F0F]' 

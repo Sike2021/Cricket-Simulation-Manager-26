@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameData, Match, Player, Format, Team, Inning, MatchResult, PlayerRole, BattingPerformance, BowlingPerformance, Strategy, LiveMatchState } from '../types';
 import { PITCH_MODIFIERS, formatOvers, getPlayerById, generateAutoXI, getBatterTier, BATTING_PROFILES, getCommentary } from '../utils';
-import { calculateBallResult } from '../src/utils/simulationLogic';
 
 export const useLiveMatch = (
     match: Match,
@@ -116,9 +115,7 @@ export const useLiveMatch = (
             fallOfWickets: [],
             waitingFor: 'openers',
             strategies: { batting: 'balanced', bowling: 'balanced' },
-            battingIntensity: 50,
-            bowlingIntensity: 50,
-            autoPlayType: null, 
+            autoPlayType: null,
             tossWinnerId: null,
             tossDecision: null,
         });
@@ -214,8 +211,6 @@ export const useLiveMatch = (
                 currentBatters: openers,
                 currentBowlerId: bowlerId,
                 waitingFor: waitingFor,
-                battingIntensity: 50,
-                bowlingIntensity: 50,
                 autoPlayType: null, 
                 commentary: [
                     `Match Started!`,
@@ -244,10 +239,11 @@ export const useLiveMatch = (
             }
             
             const newState = JSON.parse(JSON.stringify(prevState)) as LiveMatchState;
-            const { currentInningIndex, innings, battingTeam, bowlingTeam, currentBatters, currentBowlerId, target, battingIntensity, bowlingIntensity } = newState;
+            const { currentInningIndex, innings, battingTeam, bowlingTeam, currentBatters, currentBowlerId, target, strategies } = newState;
             const currentInning = innings[currentInningIndex];
             
             const pitchMods = PITCH_MODIFIERS[groundPitch as keyof typeof PITCH_MODIFIERS] || PITCH_MODIFIERS["Balanced Sporting Pitch"];
+            const formatMods = pitchMods[gameData.currentFormat];
             
             let striker = currentInning.batting.find(b => b.playerId === currentBatters.strikerId);
             let bowler = currentInning.bowling.find(b => b.playerId === currentBowlerId);
@@ -282,20 +278,68 @@ export const useLiveMatch = (
             const strikerDetails = getPlayerById(currentBatters.strikerId, allPlayers);
             const bowlerDetails = getPlayerById(currentBowlerId, allPlayers);
 
-            const result = calculateBallResult(
-                strikerDetails,
-                bowlerDetails,
-                gameData.currentFormat,
-                battingIntensity,
-                bowlingIntensity,
-                pitchMods,
-                target !== null
-            );
+            // AI Strategy
+            const isUserBatting = battingTeam.id === gameData.userTeamId;
+            if (!isUserBatting) {
+                const runsNeeded = target ? target - currentInning.score : 0;
+                const ballsLeft = (gameData.currentFormat.includes('T20') ? 120 : 300) - (currentInning.bowling.reduce((a,b)=>a+b.ballsBowled,0));
+                if (target && (runsNeeded / (ballsLeft/6)) > 8) strategies.batting = 'attacking';
+                else if (target && (runsNeeded / (ballsLeft/6)) < 4) strategies.batting = 'defensive';
+                else strategies.batting = Math.random() > 0.7 ? 'attacking' : 'balanced';
+            }
+            
+            if (battingTeam.id !== gameData.userTeamId && bowlingTeam.id === gameData.userTeamId) {
+                 const recentWickets = newState.fallOfWickets.filter(w => w.score > currentInning.score - 20).length;
+                 if (recentWickets > 0) strategies.bowling = 'attacking';
+                 else if ((currentInning.score / (parseFloat(currentInning.overs)||1)) > 10) strategies.bowling = 'defensive';
+                 else strategies.bowling = 'balanced';
+            }
 
-            const runs = result.runs;
-            const isOut = result.isWicket;
-            const ballLabel = isOut ? "W" : runs.toString();
-            const commentary = result.commentary;
+            let strategyRunMod = 1.0;
+            let strategyWicketMod = 1.0;
+
+            if (strategies.batting === 'attacking') { strategyRunMod *= 1.4; strategyWicketMod *= 1.5; }
+            else if (strategies.batting === 'defensive') { strategyRunMod *= 0.7; strategyWicketMod *= 0.6; }
+
+            if (strategies.bowling === 'attacking') { strategyWicketMod *= 1.2; strategyRunMod *= 1.3; } 
+            else if (strategies.bowling === 'defensive') { strategyWicketMod *= 0.8; strategyRunMod *= 0.8; }
+
+            const batterProfile = getPlayerById(striker.playerId, allPlayers).customProfiles?.[gameData.currentFormat] || BATTING_PROFILES[gameData.currentFormat][getBatterTier(strikerDetails.battingSkill)][strikerDetails.style] || BATTING_PROFILES[gameData.currentFormat]['tier3']['N'];
+            
+            const expectedRunsPerBall = (batterProfile.sr / 100) * (target !== null ? pitchMods.chasePenalty : 1) * strategyRunMod;
+            const baseWicketProb = (batterProfile.avg > 0 ? expectedRunsPerBall / batterProfile.avg : 0.05) * strategyWicketMod;
+            let wicketProbability = baseWicketProb * formatMods.wicketChance;
+            wicketProbability = Math.max(0.005, Math.min(0.5, wicketProbability));
+
+            let runs = 0;
+            let isOut = false;
+            let ballLabel = "";
+            let commentary = "";
+
+            if (Math.random() < wicketProbability) {
+                isOut = true;
+                ballLabel = "W";
+                commentary = getCommentary(0, true, strikerDetails.name, bowlerDetails.name);
+            } else {
+                const rand = Math.random();
+                let p_dot=0.4, p_1=0.35, p_2=0.1, p_3=0.03, p_4=0.08, p_6=0.04;
+                
+                if (strategies.batting === 'attacking') { p_dot=0.3; p_4=0.15; p_6=0.1; }
+                if (strategies.batting === 'defensive') { p_dot=0.6; p_4=0.04; p_6=0.01; }
+
+                const totalP = p_dot+p_1+p_2+p_3+p_4+p_6;
+                const normalizedRand = rand * totalP;
+
+                if (normalizedRand < p_dot) runs = 0;
+                else if (normalizedRand < p_dot+p_1) runs = 1;
+                else if (normalizedRand < p_dot+p_1+p_2) runs = 2;
+                else if (normalizedRand < p_dot+p_1+p_2+p_3) runs = 3;
+                else if (normalizedRand < p_dot+p_1+p_2+p_3+p_4) runs = 4;
+                else runs = 6;
+                
+                ballLabel = runs.toString();
+                commentary = getCommentary(runs, false, strikerDetails.name, bowlerDetails.name);
+            }
 
             currentInning.score += runs;
             bowler.runsConceded += runs;
@@ -389,8 +433,7 @@ export const useLiveMatch = (
                          }
                      }
                 }
-            }
- else if (totalBalls % 6 === 0 && isOut && currentInning.wickets < 10) {
+            } else if (totalBalls % 6 === 0 && isOut && currentInning.wickets < 10) {
                 // Double Event: Wicket on Last Ball
                 const isUserBowlingNow = bowlingTeam.id === gameData.userTeamId;
                 if (isUserBowlingNow && newState.autoPlayType !== 'inning' && newState.autoPlayType !== 'match') {
@@ -618,9 +661,6 @@ export const useLiveMatch = (
         };
     }, []);
 
-    const setBattingIntensity = (val: number) => setState(prev => prev ? { ...prev, battingIntensity: val } : null);
-    const setBowlingIntensity = (val: number) => setState(prev => prev ? { ...prev, bowlingIntensity: val } : null);
-
     const setBattingStrategy = (s: Strategy) => setState(prev => prev ? { ...prev, strategies: { ...prev.strategies, batting: s } } : null);
     const setBowlingStrategy = (s: Strategy) => setState(prev => prev ? { ...prev, strategies: { ...prev.strategies, bowling: s } } : null);
 
@@ -701,10 +741,6 @@ export const useLiveMatch = (
         });
     };
 
-    const beginMatch = () => {
-        setState(prev => prev ? { ...prev, status: 'inprogress' } : null);
-    };
-
     return {
         state,
         playBall,
@@ -714,14 +750,11 @@ export const useLiveMatch = (
         simulateMatch,
         setBattingStrategy,
         setBowlingStrategy,
-        setBattingIntensity,
-        setBowlingIntensity,
         selectOpeners,
         selectNextBatter,
         selectNextBowler,
         declareInning,
         stopAutoPlay,
-        startMatch,
-        beginMatch
+        startMatch
     };
 };

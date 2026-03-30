@@ -189,47 +189,39 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
         <div className="p-2 h-[calc(100vh-90px)] flex flex-col overflow-y-auto">
             <h2 className="text-xl font-bold text-center mb-2">Team Showcase</h2>
             
-            <div className="mb-4 flex items-center justify-between">
-                <div className="flex-grow mr-4">
-                    <select 
-                        value={selectedTeamId} 
-                        onChange={(e) => setSelectedTeamId(e.target.value)}
-                        className="w-full p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 font-bold"
-                    >
-                        {gameData.teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
-                    </select>
-                </div>
-                <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl flex flex-col items-center justify-center min-w-[80px]">
-                    <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Squad</span>
-                    <span className={`text-lg font-display italic leading-none ${selectedTeam.squad.length > 16 ? 'text-red-500' : 'text-teal-500'}`}>
-                        {selectedTeam.squad.length}<span className="text-white/20 text-xs not-italic">/16</span>
-                    </span>
-                </div>
+            <div className="mb-4">
+                <select 
+                    value={selectedTeamId} 
+                    onChange={(e) => setSelectedTeamId(e.target.value)}
+                    className="w-full p-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 font-bold"
+                >
+                    {gameData.teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
+                </select>
             </div>
 
-            {/* Team Board Ratings */}
+            {/* SigNify Board Ratings */}
             {teamRatings && (
-                <div className="glass-card p-6 mb-6">
+                <div className="card-signify p-6 mb-6">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-black italic uppercase tracking-tighter text-xl text-white">Team Board Ratings</h3>
+                        <h3 className="font-black italic uppercase tracking-tighter text-xl text-white">SigNify Board Ratings</h3>
                         <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
                             Season {gameData.currentSeason}
                         </div>
                     </div>
                     <div className="grid grid-cols-4 gap-3">
-                        <div className="subcard-glass p-3 text-center">
+                        <div className="subcard-signify p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Strength</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.strength}</div>
                         </div>
-                        <div className="subcard-glass p-3 text-center">
+                        <div className="subcard-signify p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Bowling</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.bowling}</div>
                         </div>
-                        <div className="subcard-glass p-3 text-center">
+                        <div className="subcard-signify p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Batting</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.batting}</div>
                         </div>
-                        <div className="subcard-glass p-3 text-center">
+                        <div className="subcard-signify p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Stars</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.starPlayers}</div>
                         </div>

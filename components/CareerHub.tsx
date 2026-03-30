@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Home, Trophy, BarChart3, Settings as SettingsIcon, Newspaper, Users, Database, LayoutGrid, ArrowRightLeft, Scale, Wallet, Gavel, Star } from 'lucide-react';
+import { Home, Trophy, BarChart3, Settings as SettingsIcon, Newspaper, Users, Database, LayoutGrid, ArrowRightLeft, Scale, Wallet, Gavel } from 'lucide-react';
 import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle } from '../types';
 import { TEAMS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from '../data';
 import { Icons } from './Icons';
@@ -30,7 +30,6 @@ import AuctionRoom from './AuctionRoom';
 import PlayerDatabase from './PlayerDatabase';
 import SeasonSummary from './SeasonSummary';
 import ModernRatingBoard from './ModernRatingBoard';
-import { NewGameOverlay } from './NewGameOverlay';
 
 interface CareerHubProps {
     gameData: GameData;
@@ -47,7 +46,7 @@ const BottomNavBar = ({ activeScreen, setScreen }: { activeScreen: CareerScreen,
     const navItems = [
         { name: 'HOME', screen: 'DASHBOARD' as CareerScreen, icon: Home },
         { name: 'STANDINGS', screen: 'LEAGUES' as CareerScreen, icon: Trophy },
-        { name: 'RATINGS', screen: 'RATING_BOARD' as CareerScreen, icon: Star },
+        { name: 'FIXTURES', screen: 'SCHEDULE' as CareerScreen, icon: LayoutGrid },
         { name: 'STATS', screen: 'STATS' as CareerScreen, icon: BarChart3 },
         { name: 'SETTINGS', screen: 'SETTINGS' as CareerScreen, icon: SettingsIcon },
     ];
@@ -85,7 +84,6 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
     const [playerProfileFormat, setPlayerProfileFormat] = useState<Format>(gameData.currentFormat);
     const [selectedMatchResult, setSelectedMatchResult] = useState<MatchResult | null>(null);
     const [forwardSimResults, setForwardSimResults] = useState<MatchResult[]>([]);
-    const [showNewGameOverlay, setShowNewGameOverlay] = useState(false);
 
     const { runSimulationForCurrentFormat, updateStatsFromMatch } = useSimulation(gameData, setGameData);
 
@@ -517,22 +515,10 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
         setScreen('AUCTION_ROOM');
     };
 
-    const handleStartNewGame = (teamId: string) => {
-        setGameData(prev => {
-            if (!prev) return null;
-            return {
-                ...prev,
-                userTeamId: teamId
-            };
-        });
-        setShowNewGameOverlay(false);
-        showFeedback("New career initialized!", "success");
-    };
-
     const renderScreen = () => {
         const commonProps = { gameData, userTeam, setGameData, setScreen, showFeedback };
         switch(screen) {
-            case 'DASHBOARD': return <Dashboard {...commonProps} handlePlayMatch={handlePlayMatch} handleForwardDay={handleForwardDay} onNewGame={() => setShowNewGameOverlay(true)} />;
+            case 'DASHBOARD': return <Dashboard {...commonProps} handlePlayMatch={handlePlayMatch} handleForwardDay={handleForwardDay} />;
             case 'LEAGUES': return <Standings gameData={gameData} />; 
             case 'SCHEDULE': return <Schedule gameData={gameData} userTeam={userTeam} viewMatchResult={result => { setSelectedMatchResult(result); setScreen('MATCH_RESULT'); }} />;
             case 'LINEUPS': return <Lineups {...commonProps} handleUpdatePlayingXI={handleUpdatePlayingXI} handleUpdateCaptain={handleUpdateCaptain} />;
@@ -598,16 +584,6 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
                     >
                         {renderScreen()}
                     </motion.div>
-                </AnimatePresence>
-
-                <AnimatePresence>
-                    {showNewGameOverlay && (
-                        <NewGameOverlay 
-                            teams={gameData.allTeamsData} 
-                            onStart={handleStartNewGame} 
-                            onCancel={() => setShowNewGameOverlay(false)} 
-                        />
-                    )}
                 </AnimatePresence>
             </main>
             <BottomNavBar activeScreen={screen} setScreen={setScreen} />

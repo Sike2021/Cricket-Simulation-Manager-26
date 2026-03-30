@@ -1,235 +1,137 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSimulation } from '../hooks/useSimulation';
 import { Team } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Shield, Zap, Info, Play, Pause, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
+import { Activity, Shield, Zap, Info } from 'lucide-react';
 
 export default function MatchView({ battingTeam, bowlingTeam, onComplete }: { battingTeam: Team, bowlingTeam: Team, onComplete: () => void }) {
-  const { 
-    balls, 
-    isSimulating, 
-    score, 
-    startSimulation, 
-    pauseSimulation,
-    resetSimulation,
-    currentBall,
-    battingOrder,
-    setBattingOrder,
-    battingAggression,
-    setBattingAggression,
-    bowlingIntensity,
-    setBowlingIntensity,
-    simSpeed,
-    setSimSpeed
-  } = useSimulation(battingTeam, bowlingTeam);
-
-  const recentBalls = balls.slice(-6);
-
-  const movePlayer = (index: number, direction: 'up' | 'down') => {
-    if (
-      (direction === 'up' && index === 0) || 
-      (direction === 'down' && index === battingOrder.length - 1)
-    ) return;
-
-    const newOrder = [...battingOrder];
-    const swapIndex = direction === 'up' ? index - 1 : index + 1;
-    [newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]];
-    setBattingOrder(newOrder);
-  };
+  const { balls, currentBallIndex, isSimulating, score, startSimulation, currentBall } = useSimulation(battingTeam, bowlingTeam);
 
   return (
-    <div className="space-y-8">
-      {/* Live Stadium Visuals */}
-      <div className="bg-card-bg border border-border rounded-[40px] p-8 relative overflow-hidden glow-teal">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay blur-sm pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] pointer-events-none" />
+    <div className="space-y-12">
+      <div className="bg-card-bg border border-border rounded-[40px] p-12 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border-[40px] border-accent rounded-full" />
+        </div>
 
-        <div className="flex justify-between items-center mb-12 relative z-10">
+        <div className="flex justify-between items-center mb-16 relative z-10">
           <div className="flex items-center gap-6">
-            <img src={battingTeam.logo} alt={battingTeam.name} className="w-20 h-20 rounded-3xl border border-border" referrerPolicy="no-referrer" />
+            <img src={battingTeam.logo} alt={battingTeam.name} className="w-24 h-24 rounded-3xl border border-border" referrerPolicy="no-referrer" />
             <div>
-              <div className="text-3xl font-display uppercase tracking-tighter">{battingTeam.shortName}</div>
-              <div className="text-accent font-mono text-xs uppercase tracking-widest">BATTING</div>
+              <div className="text-4xl font-black tracking-tighter">{battingTeam.shortName}</div>
+              <div className="text-accent font-mono text-sm uppercase tracking-widest">BATTING</div>
             </div>
           </div>
 
           <div className="text-center">
-            <div className="text-6xl font-display tracking-tighter mb-1">
+            <div className="text-7xl font-black tracking-tighter mb-2">
               {score.runs}<span className="text-accent">/</span>{score.wickets}
             </div>
-            <div className="text-lg text-ink/60 font-mono uppercase tracking-widest">
+            <div className="text-xl text-ink/40 font-mono uppercase tracking-widest">
               OVERS: {score.overs}.{score.balls}
             </div>
           </div>
 
           <div className="flex items-center gap-6 text-right">
             <div>
-              <div className="text-3xl font-display uppercase tracking-tighter">{bowlingTeam.shortName}</div>
-              <div className="text-blue-500 font-mono text-xs uppercase tracking-widest">BOWLING</div>
+              <div className="text-4xl font-black tracking-tighter">{bowlingTeam.shortName}</div>
+              <div className="text-blue-500 font-mono text-sm uppercase tracking-widest">BOWLING</div>
             </div>
-            <img src={bowlingTeam.logo} alt={bowlingTeam.name} className="w-20 h-20 rounded-3xl border border-border" referrerPolicy="no-referrer" />
+            <img src={bowlingTeam.logo} alt={bowlingTeam.name} className="w-24 h-24 rounded-3xl border border-border" referrerPolicy="no-referrer" />
           </div>
         </div>
 
-        {/* Recent Over Log */}
-        <div className="flex justify-center gap-2 mb-8 relative z-10">
-          {recentBalls.map((ball, i) => (
-            <div 
-              key={i} 
-              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border ${
-                ball.isWicket 
-                  ? 'bg-red-500/20 border-red-500 text-red-500' 
-                  : ball.runs === 6 
-                    ? 'bg-accent/20 border-accent text-accent' 
-                    : ball.runs === 4 
-                      ? 'bg-blue-500/20 border-blue-500 text-blue-500'
-                      : 'bg-white/5 border-white/10 text-white'
-              }`}
+        {!isSimulating && balls.length === 0 && (
+          <div className="text-center py-20">
+            <button 
+              onClick={startSimulation}
+              className="bg-accent text-bg px-12 py-6 rounded-3xl text-2xl font-black uppercase tracking-tighter hover:shadow-[0_0_50px_rgba(0,255,136,0.5)] transition-all"
             >
-              {ball.isWicket ? 'W' : ball.runs}
-            </div>
-          ))}
-          {Array.from({ length: Math.max(0, 6 - recentBalls.length) }).map((_, i) => (
-            <div key={`empty-${i}`} className="w-10 h-10 rounded-full border border-white/5 bg-white/5" />
-          ))}
-        </div>
-
-        {/* Simulation Controls */}
-        <div className="flex flex-col items-center gap-6 relative z-10">
-          <div className="flex gap-2 p-1 bg-white/5 rounded-2xl border border-white/10">
-            {(['BALL', 'OVER', 'INNING', 'MATCH'] as const).map(speed => (
-              <button
-                key={speed}
-                onClick={() => setSimSpeed(speed)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold tracking-widest uppercase transition-all ${
-                  simSpeed === speed ? 'bg-accent text-bg' : 'text-ink/40 hover:text-ink'
-                }`}
-              >
-                {speed}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex gap-4">
-            {isSimulating ? (
-              <button onClick={pauseSimulation} className="bg-red-500 text-white px-8 py-4 rounded-2xl font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-red-600 transition-colors">
-                <Pause size={20} /> Pause
-              </button>
-            ) : (
-              <button onClick={startSimulation} className="bg-accent text-bg px-8 py-4 rounded-2xl font-bold uppercase tracking-widest flex items-center gap-2 hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] transition-all">
-                <Play size={20} /> Simulate
-              </button>
-            )}
-            <button onClick={resetSimulation} className="bg-white/5 border border-white/10 text-white px-6 py-4 rounded-2xl font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-white/10 transition-colors">
-              <RotateCcw size={20} /> Reset
+              Start Simulation
             </button>
           </div>
-        </div>
+        )}
 
         <AnimatePresence mode="wait">
           {currentBall && (
             <motion.div 
-              key={balls.length}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mt-8 bg-white/5 border border-white/10 rounded-3xl p-6 relative z-10 text-center"
+              key={currentBallIndex}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              className="bg-white/5 border border-white/10 rounded-3xl p-8 relative z-10"
             >
-              <div className="text-lg italic text-ink/80">
-                "{currentBall.commentary}"
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-accent text-bg flex items-center justify-center font-black text-xl">
+                    {currentBall.runs}
+                  </div>
+                  <div>
+                    <div className="font-bold text-lg">{currentBall.batsman}</div>
+                    <div className="text-sm text-ink/40">vs {currentBall.bowler}</div>
+                  </div>
+                </div>
+                {currentBall.isWicket && (
+                  <div className="bg-red-500 text-white px-4 py-2 rounded-xl font-black uppercase tracking-widest animate-bounce">
+                    WICKET!
+                  </div>
+                )}
               </div>
+              <p className="text-xl italic text-ink/80 leading-relaxed">
+                "{currentBall.commentary}"
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Tactical Controls */}
-        <div className="bg-card-bg border border-border rounded-3xl p-6">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <Zap size={18} className="text-accent" />
-            Tactics
+        <div className="lg:col-span-2 bg-card-bg border border-border rounded-3xl p-8">
+          <h3 className="text-xl font-bold mb-8 flex items-center gap-3">
+            <Activity size={20} className="text-accent" />
+            Live Commentary
           </h3>
-          
-          <div className="space-y-6">
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-ink/60">Batting Aggression</span>
-                <span className="font-mono text-accent">{battingAggression}</span>
-              </div>
-              <input 
-                type="range" 
-                min="1" 
-                max="100" 
-                value={battingAggression} 
-                onChange={(e) => setBattingAggression(Number(e.target.value))}
-                className="w-full accent-accent"
-              />
-            </div>
-            
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-ink/60">Bowling Intensity</span>
-                <span className="font-mono text-blue-500">{bowlingIntensity}</span>
-              </div>
-              <input 
-                type="range" 
-                min="1" 
-                max="100" 
-                value={bowlingIntensity} 
-                onChange={(e) => setBowlingIntensity(Number(e.target.value))}
-                className="w-full accent-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Batting Order */}
-        <div className="bg-card-bg border border-border rounded-3xl p-6">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <Activity size={18} className="text-accent" />
-            Batting Order
-          </h3>
-          <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
-            {battingOrder.map((player, index) => (
-              <div key={player.id} className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl">
-                <div className="flex flex-col gap-1">
-                  <button 
-                    onClick={() => movePlayer(index, 'up')}
-                    disabled={index === 0}
-                    className="text-ink/40 hover:text-accent disabled:opacity-30 disabled:hover:text-ink/40"
-                  >
-                    <ChevronUp size={14} />
-                  </button>
-                  <button 
-                    onClick={() => movePlayer(index, 'down')}
-                    disabled={index === battingOrder.length - 1}
-                    className="text-ink/40 hover:text-accent disabled:opacity-30 disabled:hover:text-ink/40"
-                  >
-                    <ChevronDown size={14} />
-                  </button>
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-4">
+            {balls.slice(0, currentBallIndex).reverse().map((ball, i) => (
+              <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                <div className="font-mono font-bold text-accent">{ball.over}.{ball.ball}</div>
+                <div>
+                  <span className="font-bold">{ball.batsman}</span> to <span className="font-bold">{ball.bowler}</span>, {ball.runs} runs. {ball.commentary}
                 </div>
-                <div className="w-6 text-xs font-mono text-ink/40">{index + 1}</div>
-                <div className="font-medium text-sm">{player.name}</div>
-                <div className="ml-auto text-xs text-ink/40">{player.role}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Live Commentary */}
-        <div className="bg-card-bg border border-border rounded-3xl p-6">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <Info size={18} className="text-blue-500" />
-            Commentary
+        <div className="bg-card-bg border border-border rounded-3xl p-8">
+          <h3 className="text-xl font-bold mb-8 flex items-center gap-3">
+            <Info size={20} className="text-blue-500" />
+            Innings Summary
           </h3>
-          <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-            {balls.slice().reverse().map((ball, i) => (
-              <div key={i} className="text-sm border-b border-white/5 pb-3">
-                <div className="font-mono text-accent text-xs mb-1">{ball.over}.{ball.ball}</div>
-                <div><span className="font-bold">{ball.batsman}</span> to <span className="font-bold">{ball.bowler}</span>, {ball.runs} runs.</div>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="text-ink/40 uppercase text-xs tracking-widest">Run Rate</div>
+              <div className="font-mono font-bold text-xl">
+                {score.overs > 0 ? (score.runs / (score.overs + score.balls/6)).toFixed(2) : '0.00'}
               </div>
-            ))}
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="text-ink/40 uppercase text-xs tracking-widest">Projected Score</div>
+              <div className="font-mono font-bold text-xl">
+                {score.overs > 0 ? Math.round((score.runs / (score.overs + score.balls/6)) * 20) : '0'}
+              </div>
+            </div>
+            <div className="pt-6 border-t border-border">
+              <div className="text-xs text-ink/40 uppercase tracking-widest mb-4">Win Probability</div>
+              <div className="h-4 bg-white/5 rounded-full overflow-hidden flex">
+                <div className="h-full bg-accent" style={{ width: '65%' }} />
+                <div className="h-full bg-blue-500" style={{ width: '35%' }} />
+              </div>
+              <div className="flex justify-between mt-2 text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-accent">{battingTeam.shortName} 65%</span>
+                <span className="text-blue-500">{bowlingTeam.shortName} 35%</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
