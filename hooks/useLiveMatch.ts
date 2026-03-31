@@ -741,6 +741,10 @@ export const useLiveMatch = (
         });
     };
 
+    const beginMatch = () => {
+        setState(prev => prev ? { ...prev, status: 'inprogress' } : null);
+    };
+
     return {
         state,
         playBall,
@@ -755,6 +759,7 @@ export const useLiveMatch = (
         selectNextBowler,
         declareInning,
         stopAutoPlay,
-        startMatch
+        startMatch,
+        beginMatch
     };
 };

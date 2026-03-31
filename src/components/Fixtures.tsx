@@ -2,82 +2,53 @@ import React from 'react';
 import { Match, Team } from '../types';
 import { MapPin, Clock, Trophy } from 'lucide-react';
 
-const MatchCard = ({ match, teams }: { match: Match, teams: Team[] }) => {
-  const homeTeam = teams.find(t => t.id === match.homeTeamId);
-  const awayTeam = teams.find(t => t.id === match.awayTeamId);
-
-  if (!homeTeam || !awayTeam) return null;
-
-  return (
-    <div className="bg-card-bg border border-border rounded-3xl p-8 hover:border-accent/30 transition-all">
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-3 text-xs text-ink/40 font-mono uppercase tracking-widest">
-          <Clock size={14} /> {new Date(match.date).toLocaleDateString()} • {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </div>
-        <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-          match.status === 'Live' ? 'bg-red-500 text-white animate-pulse' : 
-          match.status === 'Completed' ? 'bg-white/10 text-ink/60' : 'bg-accent/20 text-accent'
-        }`}>
-          {match.status}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-8 mb-8">
-        <div className="flex-1 text-center">
-          <img 
-            src={homeTeam.logo} 
-            alt={homeTeam.name} 
-            className="w-20 h-20 mx-auto mb-4 rounded-2xl border border-border"
-            referrerPolicy="no-referrer"
-          />
-          <div className="font-bold text-lg">{homeTeam.shortName}</div>
-        </div>
-
-        <div className="flex flex-col items-center gap-2">
-          {match.status === 'Completed' ? (
-            <div className="text-4xl font-black tracking-tighter">
-              {match.score?.home.runs}/{match.score?.home.wickets} <span className="text-ink/20 mx-2">VS</span> {match.score?.away.runs}/{match.score?.away.wickets}
-            </div>
-          ) : (
-            <div className="text-4xl font-black text-ink/10 italic tracking-tighter">VS</div>
-          )}
-        </div>
-
-        <div className="flex-1 text-center">
-          <img 
-            src={awayTeam.logo} 
-            alt={awayTeam.name} 
-            className="w-20 h-20 mx-auto mb-4 rounded-2xl border border-border"
-            referrerPolicy="no-referrer"
-          />
-          <div className="font-bold text-lg">{awayTeam.shortName}</div>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center pt-6 border-t border-border">
-        <div className="flex items-center gap-2 text-sm text-ink/40">
-          <MapPin size={14} /> {match.venue}
-        </div>
-        {match.result && (
-          <div className="flex items-center gap-2 text-sm font-bold text-accent">
-            <Trophy size={14} /> {match.result}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 export default function Fixtures({ matches, teams }: { matches: Match[], teams: Team[] }) {
+  // Group matches by "Match Day" (mocking for UI)
+  const matchDays = [
+    { day: 1, matches: matches.slice(0, 2) },
+    { day: 2, matches: matches.slice(0, 2) },
+    { day: 3, matches: matches.slice(0, 2) },
+    { day: 4, matches: matches.slice(0, 1) },
+    { day: 5, matches: matches.slice(0, 1) },
+  ];
+
   return (
-    <div className="space-y-8">
-      <div className="flex gap-4 mb-8">
-        <button className="bg-accent text-bg px-6 py-2 rounded-xl font-bold">Upcoming</button>
-        <button className="bg-white/5 text-ink/60 px-6 py-2 rounded-xl font-bold hover:bg-white/10 transition-colors">Results</button>
+    <div className="max-w-md mx-auto bg-[#0F171A] min-h-screen text-ink font-sans pb-20 p-6">
+      <div className="mb-8">
+        <h2 className="text-2xl font-black uppercase tracking-tighter italic">T20 League Fixtures</h2>
       </div>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {matches.map(match => (
-          <MatchCard key={match.id} match={match} teams={teams} />
+
+      <div className="space-y-8">
+        {matchDays.map((day) => (
+          <div key={day.day} className="space-y-4">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-ink/40 italic px-2">Match Day {day.day}</h3>
+            <div className="space-y-2">
+              {day.matches.map((match, idx) => {
+                const homeTeam = teams.find(t => t.id === match.homeTeamId);
+                const awayTeam = teams.find(t => t.id === match.awayTeamId);
+                if (!homeTeam || !awayTeam) return null;
+
+                return (
+                  <div key={`${day.day}-${idx}`} className="bg-[#1A262B] border-l-4 border-accent rounded-xl p-4 flex items-center justify-between group hover:bg-[#202E34] transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black italic tracking-tight w-16">{homeTeam.shortName === 'MUM' ? 'KINGS' : homeTeam.shortName}</span>
+                          <img src={homeTeam.logo} className="w-4 h-4 rounded-sm" alt="" />
+                          <span className="text-[10px] font-black text-ink/20 italic">VS</span>
+                          <img src={awayTeam.logo} className="w-4 h-4 rounded-sm" alt="" />
+                          <span className="text-xs font-black italic tracking-tight">{awayTeam.shortName === 'LDN' ? 'SIXERS' : awayTeam.shortName}</span>
+                        </div>
+                        <div className="text-[8px] text-ink/40 font-bold uppercase tracking-widest ml-1">
+                          {idx === 0 ? 'Keenjhur' : 'School Ground'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </div>
     </div>

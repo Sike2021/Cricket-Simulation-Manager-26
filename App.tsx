@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { GameData, Team, Format, MatchResult, Standing, Player, Match } from './types';
 import { PLAYERS, TEAMS, GROUNDS, PRE_BUILT_SQUADS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from './data';
 import { LoadingSpinner, generateLeagueSchedule } from './utils';
+import ConfirmModal from './components/ConfirmModal';
 
 // Components
 import MainMenu from './components/MainMenu';
@@ -83,6 +84,19 @@ export const App = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [hasSaveData, setHasSaveData] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: 'danger' | 'warning' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'warning'
+  });
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('cricketManagerTheme') || 'dark';
@@ -119,33 +133,85 @@ export const App = () => {
     showFeedback("Progress is saved automatically!");
   };
 
+  const validateGameData = (data: any): GameData | null => {
+    if (!data || typeof data !== 'object') return null;
+    
+    // Basic required fields
+    if (!data.teams || !Array.isArray(data.teams)) return null;
+    if (!data.allPlayers || !Array.isArray(data.allPlayers)) return null;
+    if (!data.schedule || typeof data.schedule !== 'object') return null;
+    if (!data.currentMatchIndex || typeof data.currentMatchIndex !== 'object') return null;
+    if (!data.standings || typeof data.standings !== 'object') return null;
+    if (!data.matchResults || typeof data.matchResults !== 'object') return null;
+
+    // Ensure all formats are present in keys
+    const formats = Object.values(Format);
+    formats.forEach(f => {
+        if (!data.schedule[f]) data.schedule[f] = [];
+        if (data.currentMatchIndex[f] === undefined) data.currentMatchIndex[f] = 0;
+        if (!data.standings[f]) data.standings[f] = [];
+        if (!data.matchResults[f]) data.matchResults[f] = [];
+    });
+
+    // Ensure other fields exist
+    if (!data.awardsHistory) data.awardsHistory = [];
+    if (!data.playingXIs) data.playingXIs = {};
+    if (!data.sponsorships) data.sponsorships = INITIAL_SPONSORSHIPS;
+    if (!data.news) data.news = INITIAL_NEWS;
+    if (!data.records) data.records = { batterVsBowler: [], teamVsTeam: [], playerVsTeam: [] };
+    if (!data.currentSeason) data.currentSeason = 1;
+    if (!data.currentFormat) data.currentFormat = Format.T20;
+    if (data.popularity === undefined) data.popularity = 50;
+
+    return data as GameData;
+  };
+
   const loadGame = () => {
-    if (window.confirm("Loading a saved game will overwrite your current unsaved progress. Continue?")) {
-        const savedGame = localStorage.getItem('cricketManagerSave');
-        if (savedGame) {
-            try {
-                setGameData(JSON.parse(savedGame));
-                showFeedback("Game Loaded!", "success");
-                setAppState('CAREER_HUB');
-            } catch (e) {
-                console.error("Failed to parse saved game data during load:", e);
-                localStorage.removeItem('cricketManagerSave');
-                setHasSaveData(false);
-                showFeedback("Failed to load saved game. It may be corrupt.", "error");
+    setConfirmModal({
+        isOpen: true,
+        title: "Load Game",
+        message: "Loading a saved game will overwrite your current unsaved progress. Continue?",
+        type: 'warning',
+        onConfirm: () => {
+            const savedGame = localStorage.getItem('cricketManagerSave');
+            if (savedGame) {
+                try {
+                    const parsed = JSON.parse(savedGame);
+                    const validated = validateGameData(parsed);
+                    if (validated) {
+                        setGameData(validated);
+                        showFeedback("Game Loaded!", "success");
+                        setAppState('CAREER_HUB');
+                    } else {
+                        throw new Error("Invalid game data structure");
+                    }
+                } catch (e) {
+                    console.error("Failed to parse saved game data during load:", e);
+                    localStorage.removeItem('cricketManagerSave');
+                    setHasSaveData(false);
+                    showFeedback("Failed to load saved game. It may be corrupt.", "error");
+                }
+            } else {
+                showFeedback("No saved game found.", "error");
             }
-        } else {
-            showFeedback("No saved game found.", "error");
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
         }
-    }
+    });
   };
 
   const resumeGame = () => {
     const savedGame = localStorage.getItem('cricketManagerSave');
     if (savedGame) {
         try {
-            setGameData(JSON.parse(savedGame));
-            setAppState('CAREER_HUB');
-            showFeedback("Game Resumed!", "success");
+            const parsed = JSON.parse(savedGame);
+            const validated = validateGameData(parsed);
+            if (validated) {
+                setGameData(validated);
+                setAppState('CAREER_HUB');
+                showFeedback("Game Resumed!", "success");
+            } else {
+                throw new Error("Invalid game data structure");
+            }
         } catch(e) {
             console.error("Failed to parse saved game data:", e);
             localStorage.removeItem('cricketManagerSave');
@@ -156,10 +222,20 @@ export const App = () => {
   };
 
   const handleStartNewGame = () => {
-    if (hasSaveData && !window.confirm("Starting a new game will overwrite your saved progress. Are you sure?")) {
-        return;
+    if (hasSaveData) {
+        setConfirmModal({
+            isOpen: true,
+            title: "New Career",
+            message: "Starting a new game will overwrite your saved progress. Are you sure?",
+            type: 'danger',
+            onConfirm: () => {
+                setAppState('TEAM_SELECTION');
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+            }
+        });
+    } else {
+        setAppState('TEAM_SELECTION');
     }
-    setAppState('TEAM_SELECTION');
   };
 
   const handleOpenEditor = () => {
@@ -284,13 +360,20 @@ export const App = () => {
   };
 
   const resetGame = () => {
-      if (window.confirm("Reset all progress?")) {
-          localStorage.removeItem('cricketManagerSave');
-          setGameData(null);
-          setAppState('MAIN_MENU');
-          setHasSaveData(false);
-          showFeedback("Reset successful.", "success");
-      }
+    setConfirmModal({
+        isOpen: true,
+        title: "Reset Progress",
+        message: "Are you sure you want to reset all progress? This cannot be undone.",
+        type: 'danger',
+        onConfirm: () => {
+            localStorage.removeItem('cricketManagerSave');
+            setGameData(null);
+            setAppState('MAIN_MENU');
+            setHasSaveData(false);
+            showFeedback("Reset successful.", "success");
+            setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        }
+    });
   };
 
   const renderContent = () => {
@@ -354,6 +437,14 @@ export const App = () => {
                 {feedbackMessage.text}
             </div>
         )}
+        <ConfirmModal 
+          isOpen={confirmModal.isOpen}
+          title={confirmModal.title}
+          message={confirmModal.message}
+          type={confirmModal.type}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Format, Player, PlayerRole, Team, Match, PlayerStats, Sponsorship, MatchResult, NewsArticle, GameData, Standing } from './types';
+import { Format, Player, PlayerRole, Team, Match, PlayerStats, Sponsorship, MatchResult, NewsArticle, GameData, Standing, PlayerArchetype } from './types';
 import { BRANDS, SPONSOR_THRESHOLDS, generateSingleFormatInitialStats, TV_CHANNELS, TOURNAMENT_LOGOS } from './data';
 
 export type Category = 'T20' | 'List A' | 'First Class';
@@ -125,7 +125,9 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const xi: Player[] = [];
     const selectedIds = new Set<string>();
     
-    const MAX_FOREIGN_IN_XI = 4; 
+    // Strict rule: No foreign players in ODI and SHIELD (First Class)
+    const isDomesticOnly = [Format.ODI, Format.SHIELD].includes(format);
+    const MAX_FOREIGN_IN_XI = isDomesticOnly ? 0 : 4; 
     let foreignInXI = 0;
 
     const addPlayer = (p: Player) => {
@@ -256,25 +258,115 @@ export const getBatterTier = (battingSkill: number) => {
 };
 
 const T20_PROFILES = {
-    tier1: { NA: { avg: 40, sr: 135 }, N: { avg: 40, sr: 125 }, D: { avg: 30, sr: 110 }, A: { avg: 25, sr: 155 } },
-    tier2: { NA: { avg: 32, sr: 125 }, N: { avg: 32, sr: 115 }, D: { avg: 25, sr: 100 }, A: { avg: 22, sr: 140 } },
-    tier3: { NA: { avg: 25, sr: 115 }, N: { avg: 25, sr: 105 }, D: { avg: 20, sr: 95 }, A: { avg: 18, sr: 125 } },
-    tier4: { NA: { avg: 18, sr: 100 }, N: { avg: 18, sr: 90 }, D: { avg: 15, sr: 85 }, A: { avg: 15, sr: 110 } },
-    tier5: { NA: { avg: 12, sr: 85 }, N: { avg: 12, sr: 80 }, D: { avg: 10, sr: 70 }, A: { avg: 10, sr: 95 } },
+    tier1: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 28, sr: 155 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 40, sr: 135 }, 
+        [PlayerArchetype.BALANCED]: { avg: 35, sr: 140 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 22, sr: 120 },
+        N: { avg: 35, sr: 135 }, A: { avg: 28, sr: 155 }, D: { avg: 22, sr: 120 }, NA: { avg: 35, sr: 135 }
+    },
+    tier2: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 22, sr: 140 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 32, sr: 125 }, 
+        [PlayerArchetype.BALANCED]: { avg: 28, sr: 130 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 18, sr: 110 },
+        N: { avg: 28, sr: 125 }, A: { avg: 22, sr: 140 }, D: { avg: 18, sr: 110 }, NA: { avg: 28, sr: 125 }
+    },
+    tier3: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 18, sr: 125 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 25, sr: 115 }, 
+        [PlayerArchetype.BALANCED]: { avg: 22, sr: 120 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 15, sr: 100 },
+        N: { avg: 22, sr: 115 }, A: { avg: 18, sr: 125 }, D: { avg: 15, sr: 100 }, NA: { avg: 22, sr: 115 }
+    },
+    tier4: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 15, sr: 110 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 18, sr: 100 }, 
+        [PlayerArchetype.BALANCED]: { avg: 16, sr: 105 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 12, sr: 90 },
+        N: { avg: 16, sr: 100 }, A: { avg: 15, sr: 110 }, D: { avg: 12, sr: 90 }, NA: { avg: 16, sr: 100 }
+    },
+    tier5: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 10, sr: 95 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 12, sr: 85 }, 
+        [PlayerArchetype.BALANCED]: { avg: 11, sr: 90 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 8, sr: 80 },
+        N: { avg: 11, sr: 85 }, A: { avg: 10, sr: 95 }, D: { avg: 8, sr: 80 }, NA: { avg: 11, sr: 85 }
+    },
 };
 const ODI_PROFILES = {
-    tier1: { NA: { avg: 45, sr: 95 }, N: { avg: 45, sr: 90 }, D: { avg: 40, sr: 80 }, A: { avg: 35, sr: 105 } },
-    tier2: { NA: { avg: 38, sr: 90 }, N: { avg: 38, sr: 85 }, D: { avg: 32, sr: 75 }, A: { avg: 28, sr: 100 } },
-    tier3: { NA: { avg: 30, sr: 85 }, N: { avg: 30, sr: 80 }, D: { avg: 25, sr: 70 }, A: { avg: 22, sr: 90 } },
-    tier4: { NA: { avg: 22, sr: 75 }, N: { avg: 22, sr: 70 }, D: { avg: 18, sr: 65 }, A: { avg: 16, sr: 85 } },
-    tier5: { NA: { avg: 15, sr: 70 }, N: { avg: 15, sr: 65 }, D: { avg: 12, sr: 60 }, A: { avg: 12, sr: 75 } },
+    tier1: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 38, sr: 108 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 48, sr: 90 }, 
+        [PlayerArchetype.BALANCED]: { avg: 42, sr: 95 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 38, sr: 80 },
+        N: { avg: 42, sr: 95 }, A: { avg: 38, sr: 108 }, D: { avg: 38, sr: 80 }, NA: { avg: 42, sr: 95 }
+    },
+    tier2: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 30, sr: 100 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 38, sr: 85 }, 
+        [PlayerArchetype.BALANCED]: { avg: 34, sr: 90 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 30, sr: 75 },
+        N: { avg: 34, sr: 90 }, A: { avg: 30, sr: 100 }, D: { avg: 30, sr: 75 }, NA: { avg: 34, sr: 90 }
+    },
+    tier3: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 22, sr: 90 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 30, sr: 80 }, 
+        [PlayerArchetype.BALANCED]: { avg: 26, sr: 85 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 22, sr: 70 },
+        N: { avg: 26, sr: 85 }, A: { avg: 22, sr: 90 }, D: { avg: 22, sr: 70 }, NA: { avg: 26, sr: 85 }
+    },
+    tier4: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 16, sr: 85 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 22, sr: 70 }, 
+        [PlayerArchetype.BALANCED]: { avg: 18, sr: 75 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 16, sr: 65 },
+        N: { avg: 18, sr: 75 }, A: { avg: 16, sr: 85 }, D: { avg: 16, sr: 65 }, NA: { avg: 18, sr: 75 }
+    },
+    tier5: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 12, sr: 75 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 15, sr: 65 }, 
+        [PlayerArchetype.BALANCED]: { avg: 13, sr: 70 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 10, sr: 60 },
+        N: { avg: 13, sr: 70 }, A: { avg: 12, sr: 75 }, D: { avg: 10, sr: 60 }, NA: { avg: 13, sr: 70 }
+    },
 };
 const FC_PROFILES = {
-    tier1: { NA: { avg: 45, sr: 55 }, N: { avg: 45, sr: 50 }, D: { avg: 48, sr: 45 }, A: { avg: 40, sr: 65 } },
-    tier2: { NA: { avg: 38, sr: 50 }, N: { avg: 38, sr: 45 }, D: { avg: 40, sr: 40 }, A: { avg: 32, sr: 60 } },
-    tier3: { NA: { avg: 30, sr: 45 }, N: { avg: 30, sr: 40 }, D: { avg: 32, sr: 38 }, A: { avg: 25, sr: 55 } },
-    tier4: { NA: { avg: 22, sr: 40 }, N: { avg: 22, sr: 38 }, D: { avg: 25, sr: 35 }, A: { avg: 18, sr: 48 } },
-    tier5: { NA: { avg: 15, sr: 35 }, N: { avg: 15, sr: 32 }, D: { avg: 18, sr: 30 }, A: { avg: 12, sr: 40 } },
+    tier1: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 40, sr: 65 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 45, sr: 50 }, 
+        [PlayerArchetype.BALANCED]: { avg: 45, sr: 52 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 48, sr: 45 },
+        N: { avg: 45, sr: 52 }, A: { avg: 40, sr: 65 }, D: { avg: 48, sr: 45 }, NA: { avg: 45, sr: 52 }
+    },
+    tier2: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 32, sr: 60 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 38, sr: 45 }, 
+        [PlayerArchetype.BALANCED]: { avg: 38, sr: 48 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 40, sr: 40 },
+        N: { avg: 38, sr: 48 }, A: { avg: 32, sr: 60 }, D: { avg: 40, sr: 40 }, NA: { avg: 38, sr: 48 }
+    },
+    tier3: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 25, sr: 55 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 30, sr: 40 }, 
+        [PlayerArchetype.BALANCED]: { avg: 30, sr: 42 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 32, sr: 38 },
+        N: { avg: 30, sr: 42 }, A: { avg: 25, sr: 55 }, D: { avg: 32, sr: 38 }, NA: { avg: 30, sr: 42 }
+    },
+    tier4: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 18, sr: 48 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 22, sr: 38 }, 
+        [PlayerArchetype.BALANCED]: { avg: 20, sr: 40 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 25, sr: 35 },
+        N: { avg: 20, sr: 40 }, A: { avg: 18, sr: 48 }, D: { avg: 25, sr: 35 }, NA: { avg: 20, sr: 40 }
+    },
+    tier5: { 
+        [PlayerArchetype.AGGRESSIVE]: { avg: 12, sr: 40 }, 
+        [PlayerArchetype.ADAPTIVE]: { avg: 15, sr: 32 }, 
+        [PlayerArchetype.BALANCED]: { avg: 14, sr: 35 }, 
+        [PlayerArchetype.DEFENSIVE]: { avg: 18, sr: 30 },
+        N: { avg: 14, sr: 35 }, A: { avg: 12, sr: 40 }, D: { avg: 18, sr: 30 }, NA: { avg: 14, sr: 35 }
+    },
 };
 
 export const BATTING_PROFILES = {

@@ -1,0 +1,16 @@
+src/components/MatchView.tsx:import { motion, AnimatePresence } from 'framer-motion';
+src/components/MatchView.tsx:          <motion.div
+src/components/MatchView.tsx:              <motion.div 
+src/components/MatchView.tsx:              </motion.div>
+src/components/MatchView.tsx:          </motion.div>
+src/components/Market.tsx:import { motion, AnimatePresence } from 'framer-motion';
+src/components/Market.tsx:                <motion.button
+src/components/Market.tsx:                </motion.button>
+src/components/Market.tsx:          <motion.div 
+src/components/Market.tsx:          </motion.div>
+src/components/Squad.tsx:import { motion, Reorder } from 'framer-motion';
+src/App.tsx:import { motion, AnimatePresence } from 'framer-motion';
+src/App.tsx:    {active && <motion.div layoutId="active-pill" className="ml-auto"><ChevronRight size={16} /></motion.div>}
+src/App.tsx:              <motion.div
+src/App.tsx:          <motion.div
+src/App.tsx:          </motion.div>

@@ -117,7 +117,37 @@ const Dashboard = ({ team, onSimulate }: { team: Team, onSimulate: () => void })
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const myTeam = TEAMS[0];
+  const [teams, setTeams] = useState<Team[]>(TEAMS);
+  const myTeam = teams[0];
+
+  const handleSwap = (myPlayerId: string, otherPlayerId: string, otherTeamId: string) => {
+    setTeams(prevTeams => {
+      const newTeams = [...prevTeams];
+      const myTeamIdx = 0;
+      const otherTeamIdx = newTeams.findIndex(t => t.id === otherTeamId);
+
+      if (otherTeamIdx === -1) return prevTeams;
+
+      const myPlayerIdx = newTeams[myTeamIdx].squad.findIndex(p => p.id === myPlayerId);
+      const otherPlayerIdx = newTeams[otherTeamIdx].squad.findIndex(p => p.id === otherPlayerId);
+
+      if (myPlayerIdx === -1 || otherPlayerIdx === -1) return prevTeams;
+
+      const myPlayer = newTeams[myTeamIdx].squad[myPlayerIdx];
+      const otherPlayer = newTeams[otherTeamIdx].squad[otherPlayerIdx];
+
+      // Swap players
+      newTeams[myTeamIdx].squad[myPlayerIdx] = otherPlayer;
+      newTeams[otherTeamIdx].squad[otherPlayerIdx] = myPlayer;
+
+      // Apply budget reduction if great player (80+) is received
+      if (otherPlayer.rating >= 80) {
+        newTeams[myTeamIdx].nextYearBudgetReduction += 100000000; // 10cr = 100M (assuming 1cr = 10M)
+      }
+
+      return newTeams;
+    });
+  };
 
   return (
     <div className="flex min-h-screen bg-bg text-ink">
@@ -208,10 +238,10 @@ export default function App() {
           >
             {activeTab === 'dashboard' && <Dashboard team={myTeam} onSimulate={() => setActiveTab('simulation')} />}
             {activeTab === 'squad' && <Squad players={myTeam.squad} />}
-            {activeTab === 'fixtures' && <Fixtures matches={MATCHES} teams={TEAMS} />}
-            {activeTab === 'stats' && <Stats players={PLAYERS} />}
-            {activeTab === 'market' && <Market />}
-            {activeTab === 'simulation' && <MatchView battingTeam={myTeam} bowlingTeam={TEAMS[1]} onComplete={() => setActiveTab('dashboard')} />}
+            {activeTab === 'fixtures' && <Fixtures matches={MATCHES} teams={teams} />}
+            {activeTab === 'stats' && <Stats teams={teams} />}
+            {activeTab === 'market' && <Market myTeam={myTeam} otherTeams={teams.filter(t => t.id !== myTeam.id)} onSwap={handleSwap} />}
+            {activeTab === 'simulation' && <MatchView battingTeam={myTeam} bowlingTeam={teams[1]} onComplete={() => setActiveTab('dashboard')} />}
             {activeTab === 'settings' && (
               <div className="flex flex-col items-center justify-center h-96 text-ink/20">
                 <Activity size={64} className="mb-4 opacity-10" />

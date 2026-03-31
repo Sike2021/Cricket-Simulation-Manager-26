@@ -1,11 +1,27 @@
+export enum Format {
+    T20 = 'T20',
+    ODI = 'ODI',
+    FC = 'FC'
+}
+
+export enum PlayerArchetype {
+    AGGRESSIVE = 'Aggressive',
+    ADAPTIVE = 'Adaptive',
+    BALANCED = 'Balanced',
+    DEFENSIVE = 'Defensive'
+}
+
 export type PlayerRole = 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicketkeeper';
 
 export interface Player {
   id: string;
   name: string;
   role: PlayerRole;
+  archetype?: PlayerArchetype;
   batting: number;
   bowling: number;
+  rating: number;
+  age: number;
   fitness: number;
   form: number;
   value: number;
@@ -18,6 +34,16 @@ export interface Player {
   };
 }
 
+export interface BallResult {
+  over: number;
+  ball: number;
+  batsman: string;
+  bowler: string;
+  runs: number;
+  isWicket: boolean;
+  commentary: string;
+}
+
 export interface Team {
   id: string;
   name: string;
@@ -26,6 +52,7 @@ export interface Team {
   color: string;
   squad: Player[];
   budget: number;
+  nextYearBudgetReduction: number;
   points: number;
   played: number;
   won: number;

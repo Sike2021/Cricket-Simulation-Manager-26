@@ -13,6 +13,13 @@ export enum PlayerRole {
     FAST_BOWLER = 'BL',
 }
 
+export enum PlayerArchetype {
+    AGGRESSIVE = 'Aggressive',
+    ADAPTIVE = 'Adaptive',
+    BALANCED = 'Balanced',
+    DEFENSIVE = 'Defensive'
+}
+
 export type BattingStyle = 'A' | 'D' | 'N' | 'NA';
 export type Strategy = 'defensive' | 'balanced' | 'attacking';
 export type AppState = 'MAIN_MENU' | 'TEAM_SELECTION' | 'AUCTION' | 'CAREER_HUB';
@@ -33,7 +40,7 @@ export interface PlayerPerformanceSummary {
 }
 
 export interface Player {
-    id: string; name: string; nationality: string; role: PlayerRole; battingSkill: number; secondarySkill: number;
+    id: string; name: string; nationality: string; role: PlayerRole; archetype?: PlayerArchetype; battingSkill: number; secondarySkill: number;
     style: BattingStyle; isOpener: boolean; isForeign: boolean; teamName?: string;
     potential?: number; form?: number; fitness?: number;
     isEmerging?: boolean;
@@ -47,6 +54,7 @@ export interface Player {
 export interface Team {
     id: string; name: string; squad: Player[]; captains: { [key in Format]?: string };
     purse: number; // In PKR Crore (stored as number, e.g., 50.0)
+    nextYearBudgetReduction?: number; // Penalty for swapping great players
 }
 
 export interface TeamData {

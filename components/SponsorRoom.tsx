@@ -141,7 +141,7 @@ const SponsorRoom: React.FC<SponsorRoomProps> = ({ gameData, setGameData }) => {
                             )}
                             
                             <div className={`w-16 h-16 mb-2 ${sponsorship.logoColor || 'text-teal-500'}`} dangerouslySetInnerHTML={{__html: sponsorship.tournamentLogo || TOURNAMENT_LOGOS[0].svg}}></div>
-                            <h1 className={`text-xl text-center ${sponsorship.logoColor || 'text-teal-500'} ${sponsorship.sponsorName === "Sike's" ? 'font-extrabold tracking-tight font-display' : sponsorship.sponsorName === "Signify" ? 'font-sans tracking-widest uppercase font-bold' : sponsorship.sponsorName === "Malik" ? 'font-serif italic font-bold' : 'font-mono font-bold'}`}>
+                            <h1 className={`text-xl text-center ${sponsorship.logoColor || 'text-teal-500'} ${sponsorship.sponsorName === "Sike's" ? 'font-extrabold tracking-tight font-display' : sponsorship.sponsorName === "Apex" ? 'font-sans tracking-widest uppercase font-bold' : sponsorship.sponsorName === "Malik" ? 'font-serif italic font-bold' : 'font-mono font-bold'}`}>
                                 {sponsorship.sponsorName} <span className="text-slate-800 dark:text-white font-light italic">{sponsorship.tournamentName}</span>
                             </h1>
                         </div>

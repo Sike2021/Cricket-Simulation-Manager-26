@@ -154,7 +154,7 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
                 batterProfile = customProfile;
             } else {
                 const batterTier = getBatterTier(onStrikeBatterDetails.battingSkill * batterFatigue);
-                const batterStyle = onStrikeBatterDetails.style;
+                const batterStyle = onStrikeBatterDetails.archetype || onStrikeBatterDetails.style;
                 // @ts-ignore
                 batterProfile = BATTING_PROFILES[format][batterTier][batterStyle] || BATTING_PROFILES[format][batterTier]['N'];
             }
@@ -433,17 +433,18 @@ export const useSimulation = (gameData: GameData, setGameData: React.Dispatch<Re
     }, [simulateInning]);
 
     const runSimulationForCurrentFormat = useCallback((match: Match, gameData: GameData) => {
+        if (!gameData || !gameData.teams) throw new Error("Game data or teams not found");
         const teamAData = gameData.teams.find(t => t.name === match.teamA); 
         const teamBData = gameData.teams.find(t => t.name === match.teamB);
         if (!teamAData || !teamBData) throw new Error(`Team data not found for match: ${match.teamA} vs ${match.teamB}`);
 
         const getPlayingXI = (team: Team) => {
-            const customXI = gameData.playingXIs[team.id]?.[gameData.currentFormat];
+            const customXI = gameData.playingXIs?.[team.id]?.[gameData.currentFormat];
             if (customXI && customXI.length === 11) {
-                const xiPlayers = customXI.map(id => team.squad.find(p => p.id === id)).filter(Boolean) as Player[];
+                const xiPlayers = customXI.map(id => team.squad?.find(p => p.id === id)).filter(Boolean) as Player[];
                 if (xiPlayers.length === 11) return xiPlayers;
             }
-            return generateAutoXI(team.squad, gameData.currentFormat);
+            return generateAutoXI(team.squad || [], gameData.currentFormat);
         };
 
         const teamAPlayers = getPlayingXI(teamAData); 

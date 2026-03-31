@@ -199,29 +199,29 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                 </select>
             </div>
 
-            {/* SigNify Board Ratings */}
+            {/* Team Board Ratings */}
             {teamRatings && (
-                <div className="card-signify p-6 mb-6">
+                <div className="glass-card p-6 mb-6">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-black italic uppercase tracking-tighter text-xl text-white">SigNify Board Ratings</h3>
+                        <h3 className="font-black italic uppercase tracking-tighter text-xl text-white">Team Board Ratings</h3>
                         <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
                             Season {gameData.currentSeason}
                         </div>
                     </div>
                     <div className="grid grid-cols-4 gap-3">
-                        <div className="subcard-signify p-3 text-center">
+                        <div className="subcard-glass p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Strength</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.strength}</div>
                         </div>
-                        <div className="subcard-signify p-3 text-center">
+                        <div className="subcard-glass p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Bowling</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.bowling}</div>
                         </div>
-                        <div className="subcard-signify p-3 text-center">
+                        <div className="subcard-glass p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Batting</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.batting}</div>
                         </div>
-                        <div className="subcard-signify p-3 text-center">
+                        <div className="subcard-glass p-3 text-center">
                             <div className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-1">Stars</div>
                             <div className="text-2xl font-black font-mono text-white">{teamRatings.starPlayers}</div>
                         </div>

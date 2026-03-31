@@ -14,23 +14,23 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, handlePlayMatch, handleForwardDay }) => {
-    const currentSchedule = gameData.schedule[gameData.currentFormat];
-    const matchIndex = gameData.currentMatchIndex[gameData.currentFormat];
+    const currentSchedule = gameData.schedule?.[gameData.currentFormat] || [];
+    const matchIndex = gameData.currentMatchIndex?.[gameData.currentFormat] || 0;
     const sponsorship = gameData.sponsorships?.[gameData.currentFormat];
     const popularity = gameData.popularity || 0;
     const currentThresholds = SPONSOR_THRESHOLDS[gameData.currentFormat] || {};
 
-    if (matchIndex >= currentSchedule.length) {
+    if (!currentSchedule || matchIndex >= currentSchedule.length) {
         return (
             <div className="p-4 text-center h-full flex items-center justify-center">
-                <p>Tournament finished, calculating results...</p>
+                <p className="text-teal-500 font-black uppercase tracking-widest italic">Tournament finished, calculating results...</p>
             </div>
         );
     }
 
     let nextMatch = { ...currentSchedule[matchIndex] };
     if (nextMatch.group !== 'Round-Robin') {
-        const standings = gameData.standings[gameData.currentFormat];
+        const standings = gameData.standings?.[gameData.currentFormat] || [];
         const getTeamName = (pos: number) => standings.length >= pos ? standings[pos - 1]?.teamName : `TBD ${pos}`;
         const resolvePlaceholder = (placeholder: string) => {
             if (['1st', '2nd', '3rd', '4th'].includes(placeholder)) {
@@ -38,9 +38,9 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
             }
             if (placeholder.startsWith('SF')) {
                 const sfMatchNumber = placeholder.split(' ')[0];
-                const sfResult = gameData.matchResults[gameData.currentFormat].find(r => r && r.matchNumber === sfMatchNumber);
+                const sfResult = gameData.matchResults?.[gameData.currentFormat]?.find(r => r && r.matchNumber === sfMatchNumber);
                 if (sfResult?.winnerId) {
-                    return gameData.teams.find(t => t.id === sfResult.winnerId)?.name || 'TBD';
+                    return gameData.teams?.find(t => t.id === sfResult.winnerId)?.name || 'TBD';
                 }
                 return `Winner of ${sfMatchNumber}`;
             }
@@ -175,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = ({ gameData, userTeam, setScreen, ha
                     { screen: 'LINEUPS', icon: <Icons.Lineups />, label: 'Lineups' },
                     { screen: 'TRANSFERS', icon: <Icons.Transfers />, label: 'Transfers' },
                     { screen: 'PLAYER_DATABASE', icon: <Icons.Database />, label: 'Database' },
-                    { screen: 'NEWS', icon: <Icons.Podium />, label: 'News Feed' },
+                    { screen: 'NEWS', icon: <Icons.News />, label: 'News Feed' },
                 ].map((item) => (
                     <button 
                         key={item.screen}
