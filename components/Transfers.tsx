@@ -408,7 +408,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                         </div>
                                     </div>
                                     {(() => {
-                                        const stats = aggregateStats(selectedPlayer);
+                                        const stats = aggregateStats(selectedPlayer, Object.values(Format));
                                         return (
                                             <div className="grid grid-cols-4 gap-8">
                                                 <div className="space-y-1">
@@ -447,7 +447,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                             className="w-full bg-red-500/10 text-red-500 border-2 border-red-500/20 py-8 rounded-[32px] font-black italic text-3xl uppercase tracking-tighter hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-6 active:scale-[0.98]"
                                         >
                                             <UserMinus className="w-10 h-10" />
-                                            <span>Release Identity // {(((player.battingSkill + player.secondarySkill) / 10) * 0.8).toFixed(2)} CR</span>
+                                            <span>Release Identity // {(((selectedPlayer.battingSkill + selectedPlayer.secondarySkill) / 10) * 0.8).toFixed(2)} CR</span>
                                         </button>
                                     )}
                                 </div>
@@ -519,7 +519,7 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                             <div className="bg-white/5 p-6 rounded-3xl border border-white/5 mb-8">
                                 <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-4">Career_Stats</p>
                                 {(() => {
-                                    const stats = aggregateStats(selectedPlayer);
+                                    const stats = aggregateStats(selectedPlayer, Object.values(Format));
                                     return (
                                         <div className="grid grid-cols-3 gap-4">
                                             <div>

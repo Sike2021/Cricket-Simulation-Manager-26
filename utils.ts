@@ -190,8 +190,35 @@ export const generateAutoXI = (squad: Player[], format: Format) => {
     const remainingBest = sortedSquad.filter(p => !selectedIds.has(p.id));
     for (const p of remainingBest) {
         if (xi.length < 11) {
-            addPlayer(p);
+            if (!addPlayer(p)) {
+                // Force add if we really need players
+                xi.push(p);
+                selectedIds.add(p.id);
+            }
         } else break;
+    }
+
+    // 6. Absolute fallback: generate dummy players if squad is < 11
+    while (xi.length < 11) {
+        const dummy: Player = {
+            id: `dummy-${xi.length}`,
+            name: `Local Player ${xi.length + 1}`,
+            nationality: 'PAK',
+            role: PlayerRole.BATSMAN,
+            battingSkill: 30,
+            secondarySkill: 30,
+            style: 'N',
+            isForeign: false,
+            isEmerging: false,
+            isOpener: false,
+            stats: {
+                [Format.T20]: { matches: 0, runs: 0, highestScore: 0, average: 0, strikeRate: 0, ballsFaced: 0, dismissals: 0, hundreds: 0, fifties: 0, thirties: 0, fours: 0, sixes: 0, fastestFifty: 0, fastestHundred: 0, wickets: 0, economy: 0, bestBowling: '0/0', bestBowlingWickets: 0, bestBowlingRuns: 0, bowlingAverage: 0, ballsBowled: 0, runsConceded: 0, threeWicketHauls: 0, fiveWicketHauls: 0, catches: 0, runOuts: 0, manOfTheMatchAwards: 0 },
+                [Format.ODI]: { matches: 0, runs: 0, highestScore: 0, average: 0, strikeRate: 0, ballsFaced: 0, dismissals: 0, hundreds: 0, fifties: 0, thirties: 0, fours: 0, sixes: 0, fastestFifty: 0, fastestHundred: 0, wickets: 0, economy: 0, bestBowling: '0/0', bestBowlingWickets: 0, bestBowlingRuns: 0, bowlingAverage: 0, ballsBowled: 0, runsConceded: 0, threeWicketHauls: 0, fiveWicketHauls: 0, catches: 0, runOuts: 0, manOfTheMatchAwards: 0 },
+                [Format.SHIELD]: { matches: 0, runs: 0, highestScore: 0, average: 0, strikeRate: 0, ballsFaced: 0, dismissals: 0, hundreds: 0, fifties: 0, thirties: 0, fours: 0, sixes: 0, fastestFifty: 0, fastestHundred: 0, wickets: 0, economy: 0, bestBowling: '0/0', bestBowlingWickets: 0, bestBowlingRuns: 0, bowlingAverage: 0, ballsBowled: 0, runsConceded: 0, threeWicketHauls: 0, fiveWicketHauls: 0, catches: 0, runOuts: 0, manOfTheMatchAwards: 0 }
+            },
+            recentPerformances: []
+        };
+        xi.push(dummy);
     }
 
     // Sort XI for a realistic batting order: Openers -> Batters -> ARs -> Bowlers

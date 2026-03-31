@@ -30,7 +30,7 @@ export const getAITacticalAdvice = async (team: Team) => {
         }
       }
     });
-    return JSON.parse(response.text);
+    return JSON.parse(response.text || '{}');
   } catch (error) {
     console.error("AI Advice Error:", error);
     return {

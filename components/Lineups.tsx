@@ -63,11 +63,17 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
                 xiPlayers = foundPlayers;
              } else {
                 xiPlayers = generateAutoXI(teamData.squad, selectedFormat);
-                handleUpdatePlayingXI(teamData.id, selectedFormat, xiPlayers.map(p => p.id));
+                const newIds = xiPlayers.map(p => p.id);
+                if (newIds.join(',') !== xiIds.join(',')) {
+                    handleUpdatePlayingXI(teamData.id, selectedFormat, newIds);
+                }
              }
         } else {
             xiPlayers = generateAutoXI(teamData.squad, selectedFormat);
-            handleUpdatePlayingXI(teamData.id, selectedFormat, xiPlayers.map(p => p.id));
+            const newIds = xiPlayers.map(p => p.id);
+            if (newIds.join(',') !== xiIds.join(',')) {
+                handleUpdatePlayingXI(teamData.id, selectedFormat, newIds);
+            }
         }
         
         setPlayingXI(xiPlayers);

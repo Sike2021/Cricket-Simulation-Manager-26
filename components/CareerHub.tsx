@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Home, Trophy, BarChart3, Settings as SettingsIcon, Newspaper, Users, Database, LayoutGrid, ArrowRightLeft, Scale, Wallet, Gavel, Star } from 'lucide-react';
-import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle } from '../types';
+import { GameData, CareerScreen, MatchResult, Player, Format, PromotionRecord, Team, LiveMatchState, NewsArticle, Ground } from '../types';
 import { TEAMS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from '../data';
 import { Icons } from './Icons';
 import { getPlayerById, generateLeagueSchedule, negotiateSponsorships, generateMatchNews, generatePreMatchNews } from '../utils';
@@ -175,7 +175,20 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
         });
     };
 
-    const handleUpdateGround = (code: string, newPitch: string) => setGameData(prev => prev ? { ...prev, grounds: prev.grounds.map(g => g.code === code ? { ...g, pitch: newPitch } : g) } : null);
+    const handleUpdateGround = (code: string, updates: string | Partial<Ground>) => {
+        setGameData(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                grounds: prev.grounds.map(g => {
+                    if (g.code === code) {
+                        return typeof updates === 'string' ? { ...g, pitch: updates } : { ...g, ...updates };
+                    }
+                    return g;
+                })
+            };
+        });
+    };
     
     const handleUpdateScoreLimits = (groundCode: string, format: Format, field: any, value: any, inning: number) => {
         setGameData(prev => {

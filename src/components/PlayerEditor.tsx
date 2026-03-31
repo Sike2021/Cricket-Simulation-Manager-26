@@ -13,7 +13,7 @@ import {
   Zap,
   DollarSign
 } from 'lucide-react';
-import { Player, PlayerCustomization } from '../types';
+import { Player, PlayerCustomization } from '@/types';
 import { generatePlayerAvatar } from '../services/geminiService';
 import { getPlayerAvatar } from '../lib/avatar';
 
@@ -51,9 +51,9 @@ export const PlayerEditor: React.FC<PlayerEditorProps> = ({ player, teamBudget, 
 
   // Training state
   const [tempStats, setTempStats] = useState({
-    batting: player.batting,
-    bowling: player.bowling,
-    rating: player.rating
+    batting: player.battingSkill,
+    bowling: player.secondarySkill,
+    rating: Math.round((player.battingSkill + player.secondarySkill) / 2)
   });
   const [budgetDeduction, setBudgetDeduction] = useState(0);
 
@@ -120,9 +120,8 @@ export const PlayerEditor: React.FC<PlayerEditorProps> = ({ player, teamBudget, 
   const handleSave = () => {
     onSave({
       ...player,
-      batting: tempStats.batting,
-      bowling: tempStats.bowling,
-      rating: tempStats.rating,
+      battingSkill: tempStats.batting,
+      secondarySkill: tempStats.bowling,
       customization,
       avatarUrl,
     }, budgetDeduction);
@@ -411,7 +410,7 @@ export const PlayerEditor: React.FC<PlayerEditorProps> = ({ player, teamBudget, 
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-xs font-bold text-white/60">Rating Increase:</span>
-                    <span className="text-lg font-black italic text-[#00FFCC]">+{tempStats.rating - player.rating}</span>
+                    <span className="text-lg font-black italic text-[#00FFCC]">+{tempStats.rating - Math.round((player.battingSkill + player.secondarySkill) / 2)}</span>
                   </div>
                 </div>
               </div>
@@ -424,9 +423,9 @@ export const PlayerEditor: React.FC<PlayerEditorProps> = ({ player, teamBudget, 
               onClick={() => {
                 setCustomization(player.customization || customization);
                 setTempStats({
-                  batting: player.batting,
-                  bowling: player.bowling,
-                  rating: player.rating
+                  batting: player.battingSkill,
+                  bowling: player.secondarySkill,
+                  rating: Math.round((player.battingSkill + player.secondarySkill) / 2)
                 });
                 setBudgetDeduction(0);
               }}
