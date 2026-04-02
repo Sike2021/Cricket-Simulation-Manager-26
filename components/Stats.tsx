@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { GameData, Format, Player, PlayerStats } from '../types';
 import { aggregateStats } from '../utils';
 import { Icons } from './Icons';
+import { PlayerAvatar } from './PlayerAvatar';
 
 interface StatsProps {
     gameData: GameData;
@@ -46,7 +47,7 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
             } else if (selectedFormatOption === 'All_FC') {
                 stats = aggregateStats(p, [Format.SHIELD]);
             } else {
-                stats = p.stats[selectedFormatOption as Format];
+                stats = p.stats[selectedFormatOption as Format] || aggregateStats(p, []); // Fallback to empty stats
             }
 
             return { ...p, teamName: team?.name || 'Free Agent', displayStats: stats };
@@ -93,8 +94,8 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
             const bStat = b.displayStats;
             
             if (sortConfig.key === 'bestBowling') {
-                if (aStat.bestBowling === '-') return 1;
-                if (bStat.bestBowling === '-') return -1;
+                if (!aStat.bestBowling || aStat.bestBowling === '-') return 1;
+                if (!bStat.bestBowling || bStat.bestBowling === '-') return -1;
                 const [aWickets, aRuns] = aStat.bestBowling.split('/').map(Number);
                 const [bWickets, bRuns] = bStat.bestBowling.split('/').map(Number);
 
@@ -232,8 +233,13 @@ const Stats: React.FC<StatsProps> = ({ gameData, viewPlayerProfile }) => {
                         {sortedPlayers.slice(0, 50).map(p => (
                             <tr key={p.id} onClick={() => viewPlayerProfile(p, gameData.currentFormat)} className="group cursor-pointer hover:bg-teal-500/5 transition-colors">
                                 <td className="p-6">
-                                    <div className="font-black text-lg tracking-tighter uppercase italic group-hover:text-teal-600 transition-colors">{p.name}</div>
-                                    <div className="text-[8px] font-mono font-bold text-gray-400 uppercase tracking-widest">{p.teamName}</div>
+                                    <div className="flex items-center gap-4">
+                                        <PlayerAvatar player={p} size="sm" />
+                                        <div>
+                                            <div className="font-black text-lg tracking-tighter uppercase italic group-hover:text-teal-600 transition-colors">{p.name}</div>
+                                            <div className="text-[8px] font-mono font-bold text-gray-400 uppercase tracking-widest">{p.teamName}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 {statType === 'batting' ? <>
                                     <td className="p-6 text-center font-mono font-bold">{p.displayStats.matches}</td>

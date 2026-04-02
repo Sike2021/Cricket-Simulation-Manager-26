@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "Player": {
+      "title": "Player",
+      "description": "A cricket player profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "nationality": { "type": "string" },
+        "role": { "type": "string" },
+        "battingSkill": { "type": "number" },
+        "secondarySkill": { "type": "number" },
+        "style": { "type": "string" },
+        "isOpener": { "type": "boolean" },
+        "isForeign": { "type": "boolean" },
+        "teamName": { "type": "string" },
+        "age": { "type": "number" },
+        "fielding": { "type": "number" },
+        "accuracy": { "type": "number" },
+        "potential": { "type": "number" },
+        "form": { "type": "number" },
+        "fitness": { "type": "number" },
+        "avatarUrl": { "type": "string" },
+        "avatarSeed": { "type": "string" }
+      },
+      "required": ["id", "name", "nationality", "role", "battingSkill", "secondarySkill", "style", "isOpener", "isForeign"]
+    }
+  },
+  "firestore": {
+    "/players/{playerId}": {
+      "schema": { "$ref": "#/entities/Player" },
+      "description": "Collection of players"
+    }
+  }
+}

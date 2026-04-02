@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { GameData, Player, PlayerRole } from '../types';
 import { getRoleColor, getRoleFullName } from '../utils';
 import { Icons } from './Icons';
+import { PlayerAvatar } from './PlayerAvatar';
 
 interface PlayerDatabaseProps {
     gameData: GameData;
@@ -138,9 +139,7 @@ const PlayerDatabase: React.FC<PlayerDatabaseProps> = ({ gameData, onAddPlayer, 
                                     className="group bg-gray-50 dark:bg-white/5 border-2 border-transparent hover:border-teal-600 p-5 rounded-[32px] flex items-center justify-between transition-all cursor-pointer hover:shadow-2xl hover:shadow-teal-600/10"
                                 >
                                     <div className="flex items-center gap-6">
-                                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/10 flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform">
-                                            {player.role === PlayerRole.WICKET_KEEPER ? '🧤' : player.role === PlayerRole.BATSMAN ? '🏏' : '⚾'}
-                                        </div>
+                                        <PlayerAvatar player={player} size="md" className="group-hover:scale-110 transition-transform" />
                                         <div>
                                             <p className="text-lg font-black uppercase tracking-tighter leading-none mb-2 group-hover:text-teal-600 transition-colors">{player.name}</p>
                                             <div className="flex items-center gap-3">

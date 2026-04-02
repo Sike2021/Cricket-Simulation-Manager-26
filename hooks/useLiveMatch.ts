@@ -298,7 +298,7 @@ export const useLiveMatch = (
             let strategyRunMod = 1.0;
             let strategyWicketMod = 1.0;
 
-            if (strategies.batting === 'attacking') { strategyRunMod *= 1.4; strategyWicketMod *= 1.5; }
+            if (strategies.batting === 'attacking') { strategyRunMod *= 1.5; strategyWicketMod *= 1.2; }
             else if (strategies.batting === 'defensive') { strategyRunMod *= 0.7; strategyWicketMod *= 0.6; }
 
             if (strategies.bowling === 'attacking') { strategyWicketMod *= 1.2; strategyRunMod *= 1.3; } 
@@ -309,6 +309,20 @@ export const useLiveMatch = (
             const expectedRunsPerBall = (batterProfile.sr / 100) * (target !== null ? pitchMods.chasePenalty : 1) * strategyRunMod;
             const baseWicketProb = (batterProfile.avg > 0 ? expectedRunsPerBall / batterProfile.avg : 0.05) * strategyWicketMod;
             let wicketProbability = baseWicketProb * formatMods.wicketChance;
+            
+            const currentOvers = currentInning.bowling.reduce((a,b)=>a+b.ballsBowled,0) / 6;
+            const isT20 = gameData.currentFormat.includes('T20');
+            const isODI = gameData.currentFormat.includes('ODI');
+            const isPowerplay = isT20 && currentOvers < 6;
+            const isDeathOvers = isT20 && currentOvers >= 15;
+
+            // Reduce wicket probability if score is too low to prevent sub-100 scores
+            if (isT20 && currentInning.score < 100 && currentOvers > 12) {
+                wicketProbability *= 0.6;
+            } else if (isODI && currentInning.score < 150 && currentOvers > 35) {
+                wicketProbability *= 0.6;
+            }
+
             wicketProbability = Math.max(0.005, Math.min(0.5, wicketProbability));
 
             let runs = 0;
@@ -324,8 +338,23 @@ export const useLiveMatch = (
                 const rand = Math.random();
                 let p_dot=0.4, p_1=0.35, p_2=0.1, p_3=0.03, p_4=0.08, p_6=0.04;
                 
-                if (strategies.batting === 'attacking') { p_dot=0.3; p_4=0.15; p_6=0.1; }
-                if (strategies.batting === 'defensive') { p_dot=0.6; p_4=0.04; p_6=0.01; }
+                if (isT20) {
+                    p_dot = 0.35; p_1 = 0.35; p_2 = 0.08; p_3 = 0.02; p_4 = 0.12; p_6 = 0.08;
+                    if (isPowerplay) {
+                        p_dot = 0.40; p_1 = 0.25; p_4 = 0.20; p_6 = 0.10;
+                    } else if (isDeathOvers) {
+                        p_dot = 0.25; p_1 = 0.30; p_4 = 0.20; p_6 = 0.20;
+                    }
+                } else if (isODI) {
+                    p_dot = 0.45; p_1 = 0.40; p_2 = 0.05; p_3 = 0.02; p_4 = 0.06; p_6 = 0.02;
+                }
+
+                if (strategies.batting === 'attacking') { 
+                    p_dot *= 0.7; p_1 *= 0.9; p_4 *= 1.5; p_6 *= 1.8; 
+                }
+                if (strategies.batting === 'defensive') { 
+                    p_dot *= 1.3; p_4 *= 0.5; p_6 *= 0.2; 
+                }
 
                 const totalP = p_dot+p_1+p_2+p_3+p_4+p_6;
                 const normalizedRand = rand * totalP;

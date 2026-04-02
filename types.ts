@@ -51,7 +51,9 @@ export interface PlayerCustomization {
 
 export interface Player {
     id: string; name: string; nationality: string; role: PlayerRole; archetype?: PlayerArchetype; battingSkill: number; secondarySkill: number;
+    rating?: number;
     style: BattingStyle; isOpener: boolean; isForeign: boolean; teamName?: string;
+    age?: number; fielding?: number; accuracy?: number;
     potential?: number; form?: number; fitness?: number;
     isEmerging?: boolean;
     yearsInTeam?: number; // Track years in a team for emerging status
@@ -61,6 +63,7 @@ export interface Player {
     recentPerformances: PlayerPerformanceSummary[];
     customization?: PlayerCustomization;
     avatarUrl?: string;
+    avatarSeed?: string;
 }
 
 export interface Team {

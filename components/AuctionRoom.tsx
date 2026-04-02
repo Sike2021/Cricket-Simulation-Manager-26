@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Player, Team, GameData, PlayerRole, Format } from '../types';
 import { getRoleColor, getRoleFullName, aggregateStats } from '../utils';
 import { Icons } from './Icons';
+import { PlayerAvatar } from './PlayerAvatar';
 
 interface AuctionRoomProps {
     gameData: GameData;
@@ -164,7 +165,7 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
             setBiddingLog(prev => [`Unsold: ${currentPlayer.name}`, ...prev]);
         }
         
-        setTimeout(() => setCurrentPlayerIdx(prev => prev + 1), 200);
+        setCurrentPlayerIdx(prev => prev + 1);
     };
 
     const autoAuctionRemaining = () => {
@@ -395,7 +396,8 @@ const AuctionRoom: React.FC<AuctionRoomProps> = ({ gameData, onAuctionComplete }
                                         {getRoleFullName(currentPlayer.role)} {currentPlayer.isForeign ? '// INT' : '// DOM'}
                                     </div>
 
-                                    <div className="mt-4">
+                                    <div className="mt-4 flex items-center gap-6">
+                                        <PlayerAvatar player={currentPlayer} size="lg" />
                                         <h2 className="text-6xl font-black italic uppercase tracking-tighter leading-[0.85] mb-6">
                                             {currentPlayer.name}
                                         </h2>

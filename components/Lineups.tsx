@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GameData, Team, Format, Player, PlayerRole } from '../types';
 import { Icons } from './Icons';
 import { getRoleColor, generateAutoXI, calculateTeamRatings, getTeamHighlights } from '../utils';
+import { PlayerAvatar } from './PlayerAvatar';
 
 interface LineupsProps {
     gameData: GameData;
@@ -167,7 +168,8 @@ const Lineups: React.FC<LineupsProps> = ({ gameData, userTeam, handleUpdatePlayi
             {players.map(player => {
                 const dropStatus = getDropStatus(player);
                 return (
-                    <li key={player.id} className={`flex items-center p-2 rounded-md transition-colors ${playerToSwap?.id === player.id ? 'bg-teal-200 dark:bg-teal-800' : 'bg-gray-100 dark:bg-gray-900/50'} ${dropStatus ? 'border-l-4 border-red-500' : ''}`}>
+                    <li key={player.id} className={`flex items-center p-2 rounded-md transition-colors gap-2 ${playerToSwap?.id === player.id ? 'bg-teal-200 dark:bg-teal-800' : 'bg-gray-100 dark:bg-gray-900/50'} ${dropStatus ? 'border-l-4 border-red-500' : ''}`}>
+                        <PlayerAvatar player={player} size="xs" />
                         <span className={`font-bold w-8 text-sm ${getRoleColor(player.role)}`}>{player.role}</span>
                         <div className="flex-grow flex flex-col">
                             <span className="text-sm font-medium">{player.name} {player.isForeign ? '(F)' : ''} {player.isEmerging ? '(E)' : ''} {player.id === captainId ? '(C)' : ''}</span>

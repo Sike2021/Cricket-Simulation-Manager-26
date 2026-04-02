@@ -7,6 +7,7 @@ import { Icons } from './Icons';
 import { TV_CHANNELS, INITIAL_SPONSORSHIPS, TOURNAMENT_LOGOS } from '../data';
 import { getPlayerById } from '../utils';
 import { streamAssistantResponse } from '../geminiService';
+import { PlayerAvatar } from './PlayerAvatar';
 
 interface LiveMatchScreenProps {
     match: Match;
@@ -984,10 +985,15 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                     {/* Bowler Stats */}
                     <div className="flex-1 p-3 border-r border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
                         <p className="text-[8px] font-black text-blue-500 uppercase tracking-[0.3em] mb-1">Bowling</p>
-                        <div className="font-black text-white truncate text-sm italic">{bowler?.playerName}</div>
-                        <div className="text-white/40 font-black tracking-tighter mt-0.5">
-                            {bowler?.wickets}<span className="text-white/20 mx-0.5">-</span>{bowler?.runsConceded} 
-                            <span className="text-[9px] font-light ml-1 text-white/20">({bowler?.overs})</span>
+                        <div className="flex items-center gap-2">
+                            {bowler && <PlayerAvatar player={getPlayerById(bowler.playerId, gameData.allPlayers)!} size="xs" />}
+                            <div>
+                                <div className="font-black text-white truncate text-sm italic">{bowler?.playerName}</div>
+                                <div className="text-white/40 font-black tracking-tighter mt-0.5">
+                                    {bowler?.wickets}<span className="text-white/20 mx-0.5">-</span>{bowler?.runsConceded} 
+                                    <span className="text-[9px] font-light ml-1 text-white/20">({bowler?.overs})</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -998,18 +1004,28 @@ const LiveMatchScreen: React.FC<LiveMatchScreenProps> = ({ match, gameData, onMa
                                 <p className="text-[8px] font-black uppercase tracking-[0.3em] text-teal-500">Striker</p>
                                 <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse shadow-[0_0_5px_#14b8a6]" />
                             </div>
-                            <div className="font-black truncate text-sm italic transition-colors text-white">{striker?.playerName}</div>
-                            <div className="text-white/40 font-black tracking-tighter mt-0.5">
-                                {striker?.runs} <span className="text-[9px] font-light ml-1 text-white/20">({striker?.balls})</span>
+                            <div className="flex items-center gap-2">
+                                {striker && <PlayerAvatar player={getPlayerById(striker.playerId, gameData.allPlayers)!} size="xs" />}
+                                <div>
+                                    <div className="font-black truncate text-sm italic transition-colors text-white">{striker?.playerName}</div>
+                                    <div className="text-white/40 font-black tracking-tighter mt-0.5">
+                                        {striker?.runs} <span className="text-[9px] font-light ml-1 text-white/20">({striker?.balls})</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className={`flex-1 p-3 border-r border-white/5 transition-all duration-500`}>
                             <div className="flex justify-between items-center mb-1">
                                 <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">Non-Striker</p>
                             </div>
-                            <div className="font-black truncate text-sm italic transition-colors text-white/40">{nonStriker?.playerName}</div>
-                            <div className="text-white/40 font-black tracking-tighter mt-0.5">
-                                {nonStriker?.runs} <span className="text-[9px] font-light ml-1 text-white/20">({nonStriker?.balls})</span>
+                            <div className="flex items-center gap-2">
+                                {nonStriker && <PlayerAvatar player={getPlayerById(nonStriker.playerId, gameData.allPlayers)!} size="xs" />}
+                                <div>
+                                    <div className="font-black truncate text-sm italic transition-colors text-white/40">{nonStriker?.playerName}</div>
+                                    <div className="text-white/40 font-black tracking-tighter mt-0.5">
+                                        {nonStriker?.runs} <span className="text-[9px] font-light ml-1 text-white/20">({nonStriker?.balls})</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

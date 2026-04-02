@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: players
+    // Document ID: {playerId}
+    // Fields:
+    //   - id: string (required)
+    //   - name: string (required)
+    //   - nationality: string (required)
+    //   - role: string (required)
+    //   - battingSkill: number (required)
+    //   - secondarySkill: number (required)
+    //   - style: string (required)
+    //   - isOpener: boolean (required)
+    //   - isForeign: boolean (required)
+    //   - teamName: string (optional)
+    //   - age: number (optional)
+    //   - fielding: number (optional)
+    //   - accuracy: number (optional)
+    //   - potential: number (optional)
+    //   - form: number (optional)
+    //   - fitness: number (optional)
+    //   - avatarUrl: string (optional)
+    //   - avatarSeed: string (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function isValidPlayer(data) {
+      return data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.nationality is string && data.nationality.size() > 0 && data.nationality.size() < 100 &&
+             data.role is string && data.role in ['BATSMAN', 'BOWLER', 'ALL_ROUNDER', 'WICKET_KEEPER'] &&
+             data.battingSkill is number && data.battingSkill >= 1 && data.battingSkill <= 99 &&
+             data.secondarySkill is number && data.secondarySkill >= 1 && data.secondarySkill <= 99 &&
+             data.style is string && data.style in ['N', 'A', 'D', 'L', 'R'] &&
+             data.isOpener is bool &&
+             data.isForeign is bool &&
+             (!('teamName' in data) || (data.teamName is string && data.teamName.size() < 100)) &&
+             (!('age' in data) || (data.age is number && data.age >= 15 && data.age <= 60)) &&
+             (!('fielding' in data) || (data.fielding is number && data.fielding >= 1 && data.fielding <= 99)) &&
+             (!('accuracy' in data) || (data.accuracy is number && data.accuracy >= 1 && data.accuracy <= 99)) &&
+             (!('potential' in data) || (data.potential is number && data.potential >= 1 && data.potential <= 99)) &&
+             (!('form' in data) || (data.form is number && data.form >= 1 && data.form <= 99)) &&
+             (!('fitness' in data) || (data.fitness is number && data.fitness >= 1 && data.fitness <= 99)) &&
+             (!('avatarUrl' in data) || isValidUrl(data.avatarUrl)) &&
+             (!('avatarSeed' in data) || (data.avatarSeed is string && data.avatarSeed.size() < 50));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /players/{playerId} {
+      allow read: if true; // Allow public read for game data
+      allow create: if isAuthenticated() && isValidPlayer(request.resource.data);
+      allow update: if isAuthenticated() && isValidPlayer(request.resource.data);
+      allow delete: if isAuthenticated();
+    }
+  }
+}

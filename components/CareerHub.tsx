@@ -7,6 +7,8 @@ import { TEAMS, INITIAL_SPONSORSHIPS, INITIAL_NEWS } from '../data';
 import { Icons } from './Icons';
 import { getPlayerById, generateLeagueSchedule, negotiateSponsorships, generateMatchNews, generatePreMatchNews } from '../utils';
 import { useSimulation } from '../hooks/useSimulation';
+import { db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 // Components
 import Dashboard from './Dashboard';
@@ -156,7 +158,7 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
         }
     }, [gameData?.currentMatchIndex, gameData?.currentFormat, gameData?.currentSeason, gameData?.awardsHistory?.length, gameData?.teams, gameData?.allPlayers, gameData?.matchResults, gameData?.schedule, setGameData]);
 
-    const handleUpdatePlayer = (updatedPlayer: Player) => {
+    const handleUpdatePlayer = async (updatedPlayer: Player) => {
         setGameData(prevData => {
             if (!prevData) return null;
             const newAllPlayers = prevData.allPlayers.map(p => p.id === updatedPlayer.id ? updatedPlayer : p);
@@ -166,13 +168,25 @@ const CareerHub: React.FC<CareerHubProps> = ({ gameData, setGameData, onResetGam
             }));
             return { ...prevData, allPlayers: newAllPlayers, teams: newTeams };
         });
+
+        try {
+            await setDoc(doc(db, 'players', updatedPlayer.id), updatedPlayer);
+        } catch (error) {
+            console.error("Error saving player to Firestore:", error);
+        }
     };
 
-    const handleCreatePlayer = (newPlayer: Player) => {
+    const handleCreatePlayer = async (newPlayer: Player) => {
         setGameData(prevData => {
             if (!prevData) return null;
             return { ...prevData, allPlayers: [...prevData.allPlayers, newPlayer] };
         });
+
+        try {
+            await setDoc(doc(db, 'players', newPlayer.id), newPlayer);
+        } catch (error) {
+            console.error("Error creating player in Firestore:", error);
+        }
     };
 
     const handleUpdateGround = (code: string, updates: string | Partial<Ground>) => {

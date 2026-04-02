@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRightLeft, Search, Filter, TrendingUp, UserPlus, UserMinus, Shield, Zap, Target, Wallet, Info, ChevronRight, Gavel, X } from 'lucide-react';
 import { GameData, Player, Team, PlayerRole, Format } from '../types';
 import { getRoleColor, getRoleFullName, getPlayerById, aggregateStats } from '../utils';
+import { PlayerAvatar } from './PlayerAvatar';
 
 interface TransfersProps {
     gameData: GameData;
@@ -180,14 +181,15 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                     <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">Select_One</span>
                                 </div>
                                 <div className="grid grid-cols-1 gap-4">
-                                    {userTeam?.squad.map(p => (
+                                    {userTeam?.squad?.map(p => (
                                         <button
                                             key={p.id}
                                             onClick={() => setSelectedMyPlayerForSwap(p)}
-                                            className={`p-6 rounded-[24px] border-2 transition-all text-left flex justify-between items-center ${selectedMyPlayerForSwap?.id === p.id ? 'bg-teal-500 text-black border-white shadow-[0_0_30px_rgba(20,184,166,0.3)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                                            className={`p-4 rounded-[24px] border-2 transition-all text-left flex justify-between items-center gap-4 ${selectedMyPlayerForSwap?.id === p.id ? 'bg-teal-500 text-black border-white shadow-[0_0_30px_rgba(20,184,166,0.3)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
                                         >
-                                            <div>
-                                                <p className="text-lg font-black italic uppercase tracking-tighter">{p.name}</p>
+                                            <PlayerAvatar player={p} size="sm" />
+                                            <div className="flex-1">
+                                                <p className="text-lg font-black italic uppercase tracking-tighter truncate">{p.name}</p>
                                                 <p className={`text-[9px] font-black uppercase tracking-widest ${selectedMyPlayerForSwap?.id === p.id ? 'text-black/60' : 'text-teal-500'}`}>{p.role}</p>
                                             </div>
                                             <div className="text-3xl font-black italic font-mono">{Math.max(p.battingSkill, p.secondarySkill)}</div>
@@ -216,14 +218,15 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                                     <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">Select_One</span>
                                 </div>
                                 <div className="grid grid-cols-1 gap-4">
-                                    {gameData.teams.find(t => t.id === selectedOtherTeamId)?.squad.map(p => (
+                                    {gameData.teams.find(t => t.id === selectedOtherTeamId)?.squad?.map(p => (
                                         <button
                                             key={p.id}
                                             onClick={() => setSelectedOtherPlayerForSwap(p)}
-                                            className={`p-6 rounded-[24px] border-2 transition-all text-left flex justify-between items-center ${selectedOtherPlayerForSwap?.id === p.id ? 'bg-teal-500 text-black border-white shadow-[0_0_30px_rgba(20,184,166,0.3)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                                            className={`p-4 rounded-[24px] border-2 transition-all text-left flex justify-between items-center gap-4 ${selectedOtherPlayerForSwap?.id === p.id ? 'bg-teal-500 text-black border-white shadow-[0_0_30px_rgba(20,184,166,0.3)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
                                         >
-                                            <div>
-                                                <p className="text-lg font-black italic uppercase tracking-tighter">{p.name}</p>
+                                            <PlayerAvatar player={p} size="sm" />
+                                            <div className="flex-1">
+                                                <p className="text-lg font-black italic uppercase tracking-tighter truncate">{p.name}</p>
                                                 <p className={`text-[9px] font-black uppercase tracking-widest ${selectedOtherPlayerForSwap?.id === p.id ? 'text-black/60' : 'text-teal-500'}`}>{p.role}</p>
                                             </div>
                                             <div className="text-3xl font-black italic font-mono">{Math.max(p.battingSkill, p.secondarySkill)}</div>
@@ -233,36 +236,104 @@ const Transfers: React.FC<TransfersProps> = ({ gameData, userTeam, setGameData, 
                             </div>
                         </div>
 
-                        {/* Swap Confirmation Bar */}
+                        {/* Swap Confirmation Face-to-Face View */}
                         {selectedMyPlayerForSwap && selectedOtherPlayerForSwap && (
                             <motion.div 
-                                initial={{ y: 100 }}
-                                animate={{ y: 0 }}
-                                className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-4xl bg-white text-black p-8 rounded-[40px] shadow-[0_50px_100px_rgba(0,0,0,0.5)] border-4 border-teal-500 z-50"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="fixed inset-0 z-50 bg-[#050808]/95 backdrop-blur-xl flex flex-col items-center justify-center p-8"
                             >
-                                <div className="flex items-center justify-between gap-12">
-                                    <div className="flex-1 text-right">
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Giving_Away</p>
-                                        <p className="text-3xl font-black italic uppercase tracking-tighter">{selectedMyPlayerForSwap.name}</p>
+                                <div className="w-full max-w-6xl flex items-stretch justify-center gap-8 relative">
+                                    {/* Left Player Card */}
+                                    <div className="flex-1 bg-white/5 border border-white/10 rounded-[40px] p-8 flex flex-col items-center text-center relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-teal-500/20 to-transparent" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-teal-500 mb-6 relative z-10">Your Player</p>
+                                        <PlayerAvatar player={selectedMyPlayerForSwap} size="lg" />
+                                        <h2 className="text-4xl font-black italic uppercase tracking-tighter mt-6 mb-2 relative z-10">{selectedMyPlayerForSwap.name}</h2>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-8 relative z-10">{selectedMyPlayerForSwap.role}</p>
                                     </div>
-                                    <div className="w-16 h-16 rounded-full bg-teal-500 flex items-center justify-center">
-                                        <ArrowRightLeft className="w-8 h-8 text-black" />
+
+                                    {/* Center VS & Stats Comparison */}
+                                    <div className="w-80 flex flex-col items-center justify-center z-10">
+                                        <div className="w-24 h-24 rounded-full bg-teal-500 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(20,184,166,0.4)]">
+                                            <span className="text-4xl font-black italic text-black">VS</span>
+                                        </div>
+                                        
+                                        <div className="w-full space-y-6">
+                                            {/* Batting Stat */}
+                                            <div>
+                                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+                                                    <span className="text-teal-400">{selectedMyPlayerForSwap.battingSkill}</span>
+                                                    <span className="text-white/40">Batting</span>
+                                                    <span className="text-white">{selectedOtherPlayerForSwap.battingSkill}</span>
+                                                </div>
+                                                <div className="flex h-2 bg-white/10 rounded-full overflow-hidden">
+                                                    <div className="bg-teal-500 h-full" style={{ width: `${(selectedMyPlayerForSwap.battingSkill / (selectedMyPlayerForSwap.battingSkill + selectedOtherPlayerForSwap.battingSkill || 1)) * 100}%` }} />
+                                                    <div className="bg-white h-full" style={{ width: `${(selectedOtherPlayerForSwap.battingSkill / (selectedMyPlayerForSwap.battingSkill + selectedOtherPlayerForSwap.battingSkill || 1)) * 100}%` }} />
+                                                </div>
+                                            </div>
+
+                                            {/* Bowling Stat */}
+                                            <div>
+                                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+                                                    <span className="text-teal-400">{selectedMyPlayerForSwap.secondarySkill}</span>
+                                                    <span className="text-white/40">Bowling</span>
+                                                    <span className="text-white">{selectedOtherPlayerForSwap.secondarySkill}</span>
+                                                </div>
+                                                <div className="flex h-2 bg-white/10 rounded-full overflow-hidden">
+                                                    <div className="bg-teal-500 h-full" style={{ width: `${(selectedMyPlayerForSwap.secondarySkill / (selectedMyPlayerForSwap.secondarySkill + selectedOtherPlayerForSwap.secondarySkill || 1)) * 100}%` }} />
+                                                    <div className="bg-white h-full" style={{ width: `${(selectedOtherPlayerForSwap.secondarySkill / (selectedMyPlayerForSwap.secondarySkill + selectedOtherPlayerForSwap.secondarySkill || 1)) * 100}%` }} />
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Fielding Stat */}
+                                            <div>
+                                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+                                                    <span className="text-teal-400">{selectedMyPlayerForSwap.fielding || 50}</span>
+                                                    <span className="text-white/40">Fielding</span>
+                                                    <span className="text-white">{selectedOtherPlayerForSwap.fielding || 50}</span>
+                                                </div>
+                                                <div className="flex h-2 bg-white/10 rounded-full overflow-hidden">
+                                                    <div className="bg-teal-500 h-full" style={{ width: `${((selectedMyPlayerForSwap.fielding || 50) / ((selectedMyPlayerForSwap.fielding || 50) + (selectedOtherPlayerForSwap.fielding || 50) || 1)) * 100}%` }} />
+                                                    <div className="bg-white h-full" style={{ width: `${((selectedOtherPlayerForSwap.fielding || 50) / ((selectedMyPlayerForSwap.fielding || 50) + (selectedOtherPlayerForSwap.fielding || 50) || 1)) * 100}%` }} />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Receiving</p>
-                                        <p className="text-3xl font-black italic uppercase tracking-tighter">{selectedOtherPlayerForSwap.name}</p>
-                                        {(selectedOtherPlayerForSwap.battingSkill >= 80 || selectedOtherPlayerForSwap.secondarySkill >= 80) && (
-                                            <p className="text-[9px] font-black text-red-600 uppercase tracking-widest mt-1 flex items-center gap-1">
-                                                <TrendingUp size={10} /> -10Cr Next Season Penalty
-                                            </p>
-                                        )}
+
+                                    {/* Right Player Card */}
+                                    <div className="flex-1 bg-white/5 border border-white/10 rounded-[40px] p-8 flex flex-col items-center text-center relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white/10 to-transparent" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-6 relative z-10">Target Player</p>
+                                        <PlayerAvatar player={selectedOtherPlayerForSwap} size="lg" />
+                                        <h2 className="text-4xl font-black italic uppercase tracking-tighter mt-6 mb-2 relative z-10">{selectedOtherPlayerForSwap.name}</h2>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-8 relative z-10">{selectedOtherPlayerForSwap.role}</p>
                                     </div>
-                                    <button 
-                                        onClick={handleSwap}
-                                        className="bg-black text-white px-12 py-6 rounded-[24px] font-black italic text-xl uppercase tracking-tighter hover:bg-teal-500 hover:text-black transition-all"
-                                    >
-                                        Confirm_Swap
-                                    </button>
+                                </div>
+
+                                <div className="mt-12 flex flex-col items-center gap-4">
+                                    {(selectedOtherPlayerForSwap.battingSkill >= 80 || selectedOtherPlayerForSwap.secondarySkill >= 80) && (
+                                        <p className="text-xs font-black text-red-500 uppercase tracking-widest flex items-center gap-2 bg-red-500/10 px-6 py-3 rounded-full">
+                                            <TrendingUp size={14} /> -10Cr Next Season Penalty
+                                        </p>
+                                    )}
+                                    <div className="flex gap-4">
+                                        <button 
+                                            onClick={() => {
+                                                setSelectedMyPlayerForSwap(null);
+                                                setSelectedOtherPlayerForSwap(null);
+                                            }}
+                                            className="px-8 py-4 rounded-full border-2 border-white/20 text-white font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            onClick={handleSwap}
+                                            className="bg-teal-500 text-black px-12 py-4 rounded-full font-black italic text-xl uppercase tracking-tighter hover:bg-white transition-all shadow-[0_0_30px_rgba(20,184,166,0.3)]"
+                                        >
+                                            Confirm Swap
+                                        </button>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
